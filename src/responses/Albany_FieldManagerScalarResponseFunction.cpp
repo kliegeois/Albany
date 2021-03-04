@@ -659,4 +659,10 @@ evaluate_HessVecProd_pp(
     evaluate<PHAL::AlbanyTraits::HessianVec>(workset);
   }
 }
+
+void
+FieldManagerScalarResponseFunction::
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+  // KL: To be implemented.
+}
 } // namespace Albany

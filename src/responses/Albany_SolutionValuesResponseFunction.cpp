@@ -355,4 +355,10 @@ void SolutionValuesResponseFunction::updateCASManager()
   }
 }
 
+void
+SolutionValuesResponseFunction::
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+  // KL: To be implemented.
+}
+
 } // namespace Albany

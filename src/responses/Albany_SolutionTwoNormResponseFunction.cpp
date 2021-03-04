@@ -223,3 +223,9 @@ evaluate_HessVecProd_pp(
     Hv_dp->assign(0.0);
   }
 }
+
+void
+Albany::SolutionTwoNormResponseFunction::
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+  // KL: To be implemented.
+}

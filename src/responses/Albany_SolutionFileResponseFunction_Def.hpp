@@ -357,4 +357,10 @@ MatrixMarketFile (const char *filename, const Teuchos::RCP<Thyra_MultiVector>& m
   return 0;
 }
 
+template<class Norm>
+void SolutionFileResponseFunction<Norm>::
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+  // KL: To be implemented.
+}
+
 } // namespace Albany

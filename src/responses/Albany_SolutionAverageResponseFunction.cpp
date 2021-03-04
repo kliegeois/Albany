@@ -216,4 +216,10 @@ evaluateResponseImpl (
   g.assign(mean);
 }
 
+void
+SolutionAverageResponseFunction::
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+  // KL: To be implemented.
+}
+
 } // namespace Albany

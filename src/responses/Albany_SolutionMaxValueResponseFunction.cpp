@@ -245,4 +245,10 @@ computeMaxValue(const Teuchos::RCP<const Thyra_Vector>& x, ST& global_max)
   Teuchos::reduceAll(*comm_, Teuchos::REDUCE_MAX, 1, &my_max, &global_max);
 }
 
+void
+SolutionMaxValueResponseFunction::
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+  // KL: To be implemented.
+}
+
 } // namespace Albany

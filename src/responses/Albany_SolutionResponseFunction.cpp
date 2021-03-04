@@ -249,4 +249,10 @@ cullSolution(const Teuchos::RCP<const Thyra_MultiVector>& x,
   cull_op->apply(Thyra::EOpTransp::NOTRANS,*x,x_culled.ptr(),1.0,0.0);
 }
 
+void
+SolutionResponseFunction::
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+  // KL: To be implemented.
+}
+
 } // namespace Albany

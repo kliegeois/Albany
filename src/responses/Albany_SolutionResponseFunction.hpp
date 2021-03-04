@@ -136,6 +136,8 @@ public:
     const Teuchos::RCP<Thyra_MultiVector>& Hv_dp) override;
   //@}
 
+  void printResponse(Teuchos::RCP<Teuchos::FancyOStream> out);
+
 protected:
   
   void cullSolution(const Teuchos::RCP<const Thyra_MultiVector>& x, 

@@ -128,6 +128,8 @@ public:
     const std::string& dist_param_direction_name,
     const Teuchos::RCP<Thyra_MultiVector>& Hv_dp);
 
+  void printResponse(Teuchos::RCP<Teuchos::FancyOStream> out);
+
 private:
 
   int MatrixMarketFile (const char *filename, const Teuchos::RCP<Thyra_MultiVector>& mv);

@@ -245,4 +245,10 @@ computeMinValue(const Teuchos::RCP<const Thyra_Vector>& x, ST& global_min)
   Teuchos::reduceAll(*comm_, Teuchos::REDUCE_MIN, 1, &my_min, &global_min);
 }
 
+void
+SolutionMinValueResponseFunction::
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+  // KL: To be implemented.
+}
+
 } // namespace Albany

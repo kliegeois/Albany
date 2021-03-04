@@ -79,6 +79,9 @@ namespace Albany {
 		  const Teuchos::RCP<Thyra_MultiVector>& dg_dxdotdot,
 		  const Teuchos::RCP<Thyra_MultiVector>& dg_dp);
 
+    virtual void
+    printResponse(Teuchos::RCP<Teuchos::FancyOStream> out);
+
   private:
 
     //! Evaluate Multi Vector distributed derivative dg_dp
@@ -143,6 +146,9 @@ namespace Albany {
     
     //! Private to prohibit copying
     CumulativeScalarResponseFunction& operator=(const CumulativeScalarResponseFunction&);
+
+    Teuchos::RCP<Thyra_Vector> g_;
+    Teuchos::RCP<Thyra_MultiVector> g_all_;
 
   protected:
 
