@@ -127,6 +127,7 @@ private:
   Teuchos::RCP<Thyra_Vector>      one;
   Teuchos::RCP<Thyra_MultiVector> ones;
 
+  Teuchos::RCP<Thyra_Vector> g_;
 };
 
 } // namespace Albany

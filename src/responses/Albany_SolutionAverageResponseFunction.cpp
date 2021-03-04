@@ -8,6 +8,7 @@
 #include "Albany_SolutionAverageResponseFunction.hpp"
 
 #include "Albany_ThyraUtils.hpp"
+#include "Thyra_VectorStdOps.hpp"
 
 namespace Albany
 {
@@ -28,6 +29,11 @@ evaluateResponse(const double /*current_time*/,
 		const Teuchos::RCP<Thyra_Vector>& g)
 {
   evaluateResponseImpl(*x,*g);
+
+  if (g_.is_null())
+    g_ = Thyra::createMember(g->space());
+
+  g_->assign(*g);
 }
 
 void SolutionAverageResponseFunction::

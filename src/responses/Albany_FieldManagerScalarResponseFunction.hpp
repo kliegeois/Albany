@@ -198,6 +198,8 @@ private:
   int element_block_index;
 
   bool performedPostRegSetup;
+
+  Teuchos::RCP<Thyra_Vector> g_;
 };
 
 } // namespace Albany

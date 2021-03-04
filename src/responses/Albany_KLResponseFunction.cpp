@@ -145,7 +145,7 @@ evaluateDerivative(const double current_time,
 void
 KLResponseFunction::
 printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
-  // KL: To be implemented.
+  response->printResponse(out);
 }
 
 } // namespace Albany

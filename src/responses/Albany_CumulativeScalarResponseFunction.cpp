@@ -76,9 +76,6 @@ evaluateResponse(const double current_time,
 {
   g->assign(0);
 
-  if (g_all_.is_null())
-    g_all_ = Thyra::createMembers(responses[0]->responseVectorSpace(), responses.size());
-
   if (g_.is_null())
     g_ = Thyra::createMember(responses[0]->responseVectorSpace());
 
@@ -88,9 +85,6 @@ evaluateResponse(const double current_time,
   
     // Evaluate response function
     responses[i]->evaluateResponse(current_time, x, xdot, xdotdot, p, g_i);
-
-    // Store the response in the i th column of g_all_
-    g_all_->col(i)->assign(*g_i);
 
     // Add result into cumulative result
     g->update(1.0,*g_i);
@@ -424,23 +418,20 @@ void
 Albany::CumulativeScalarResponseFunction::
 printResponse(Teuchos::RCP<Teuchos::FancyOStream> out)
 {
-  if (g_all_.is_null() || g_.is_null())
+  if (g_.is_null()) {
     *out << " the response has not been evaluated yet!";
-  else {
-    std::size_t precision = 8;
-    std::size_t value_width = precision + 4;
-    for(Thyra::Ordinal k=0; k<g_->space()->dim(); ++k) {
-      *out << std::setw(value_width) << Thyra::get_ele(*g_,k) << " sum of [";
-      for (unsigned int i=0; i<responses.size(); i++) {
-        *out << std::setw(value_width) << Thyra::get_ele(*(g_all_->col(i)),k);
-        if (i<(responses.size()-1))
-          *out << ", ";
-        else
-          *out << "]";
-      }
-      if (k<(g_->space()->dim()-1))
-        *out << ";";
-      *out << " ";
-    }
+    return;
+  }
+
+  std::size_t precision = 8;
+  std::size_t value_width = precision + 4;
+  
+  *out << std::setw(value_width) << Thyra::get_ele(*g_,0) << " sum of [";
+  for (unsigned int i=0; i<responses.size(); i++) {
+    responses[i]->printResponse(out);
+    if (i<(responses.size()-1))
+      *out << ", ";
+    else
+      *out << "]";
   }
 }

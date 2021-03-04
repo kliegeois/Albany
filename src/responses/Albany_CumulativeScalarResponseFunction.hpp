@@ -148,7 +148,6 @@ namespace Albany {
     CumulativeScalarResponseFunction& operator=(const CumulativeScalarResponseFunction&);
 
     Teuchos::RCP<Thyra_Vector> g_;
-    Teuchos::RCP<Thyra_MultiVector> g_all_;
 
   protected:
 
