@@ -668,7 +668,8 @@ evaluate_HessVecProd_pp(
 
 void
 FieldManagerScalarResponseFunction::
-printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out)
+{
   if (g_.is_null()) {
     *out << " the response has not been evaluated yet!";
     return;

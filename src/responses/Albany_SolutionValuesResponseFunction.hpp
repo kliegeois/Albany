@@ -142,6 +142,8 @@ private:
   Teuchos::RCP<SolutionPrinter> sol_printer_;
 
   void updateCASManager();
+
+  Teuchos::RCP<Thyra_Vector> g_;
 };
 
 } // namespace Albany

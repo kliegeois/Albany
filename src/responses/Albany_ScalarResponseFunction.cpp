@@ -49,8 +49,8 @@ void ScalarResponseFunction::evaluateDerivative(
 
 void
 ScalarResponseFunction::
-printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
-  // KL: To be implemented.
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out)
+{
 }
 
 } // namespace Albany

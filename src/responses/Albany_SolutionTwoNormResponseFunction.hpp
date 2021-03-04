@@ -138,6 +138,7 @@ namespace Albany {
     
     SolutionTwoNormResponseFunction& operator=(const SolutionTwoNormResponseFunction&);
 
+    Teuchos::RCP<Thyra_Vector> g_;
   };
 
 } // namespace Albany

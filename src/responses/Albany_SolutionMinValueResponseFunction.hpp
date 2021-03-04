@@ -136,6 +136,8 @@ protected:
 
   //! Flag for interleaved verus blocked unknown ordering
   DiscType interleavedOrdering;
+
+  Teuchos::RCP<Thyra_Vector> g_;
 };
 
 } // namespace Albany

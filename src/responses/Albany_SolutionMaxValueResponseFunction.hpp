@@ -137,6 +137,8 @@ protected:
 
   //! Compute max value
   void computeMaxValue(const Teuchos::RCP<const Thyra_Vector>& x, ST& val);
+
+  Teuchos::RCP<Thyra_Vector> g_;
 };
 
 } // namespace Albany

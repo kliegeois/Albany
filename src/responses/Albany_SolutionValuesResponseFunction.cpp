@@ -19,6 +19,7 @@
 #include "Albany_ThyraUtils.hpp"
 #include "Albany_CombineAndScatterManager.hpp"
 #include "Albany_GlobalLocalIndexer.hpp"
+#include "Thyra_VectorStdOps.hpp"
 
 namespace Albany
 {
@@ -161,6 +162,11 @@ evaluateResponse(const double /*current_time*/,
   if (Teuchos::nonnull(sol_printer_)) {
     sol_printer_->print(g, cullingStrategy_->selectedGIDs(app_->getVectorSpace()));
   }
+
+  if (g_.is_null())
+    g_ = Thyra::createMember(g->space());
+
+  g_->assign(*g);
 }
 
 void SolutionValuesResponseFunction::
@@ -357,8 +363,22 @@ void SolutionValuesResponseFunction::updateCASManager()
 
 void
 SolutionValuesResponseFunction::
-printResponse(Teuchos::RCP<Teuchos::FancyOStream> out){
-  // KL: To be implemented.
+printResponse(Teuchos::RCP<Teuchos::FancyOStream> out)
+{
+  if (g_.is_null()) {
+    *out << " the response has not been evaluated yet!";
+    return;
+  }
+
+  std::size_t precision = 8;
+  std::size_t value_width = precision + 4;
+  int gsize = g_->space()->dim();
+
+  for (int j = 0; j < gsize; j++) {
+    *out << std::setw(value_width) << Thyra::get_ele(*g_,j);
+    if (j < gsize-1)
+      *out << ", ";
+  }
 }
 
 } // namespace Albany

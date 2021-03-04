@@ -141,6 +141,8 @@ private:
   Teuchos::RCP<Thyra_Vector> diff;
 
   bool solutionLoaded;
+
+  Teuchos::RCP<Thyra_Vector> g_;
 };
 
 struct NormTwo {

@@ -156,6 +156,8 @@ protected:
 
   //! Factory for the culling operator
   Teuchos::RCP<ThyraCrsMatrixFactory> cull_op_factory;
+
+  Teuchos::RCP<Thyra_Vector> g_;
 };
 
 } // namespace Albany
