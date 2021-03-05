@@ -1457,31 +1457,6 @@ evalModelImpl(const Thyra_InArgs&  inArgs,
     }
   }
 
-/*
-  if(analysisParams.isSublist("Optimization Status")) {
-    auto& opt_paramList = analysisParams.sublist("Optimization Status");
-    static int iteration = -1;
-    static bool print = false;
-    if(analysisParams.isSublist("ROL")) {
-      int iter = opt_paramList.get("Optimizer Iteration Number", -1);
-      int write_interval = analysisParams.get("Write Interval",1);
-      if((iter >= 0) && (iter != iteration) && (iteration%write_interval == 0))
-      {
-        Teuchos::TimeMonitor timer(*Teuchos::TimeMonitor::getNewTimer("Albany: Output to File"));
-        const Teuchos::RCP<const Thyra_Vector> x = inArgs.get_x();
-        print = true;
-        iteration = iter;
-      }
-    }
-
-    if (print && response_available) {
-       ;//observer.observeSolution(iteration, *x, Teuchos::null, Teuchos::null, Teuchos::null);
-       ;//observer.observeResponse(iteration);
-       print = false;
-    }
-  }
-*/
-
 #ifdef WRITE_TO_MATRIX_MARKET
   Albany::writeMatrixMarket(x, "sol", mm_counter_sol);
   ++mm_counter_sol;
