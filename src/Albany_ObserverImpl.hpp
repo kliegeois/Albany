@@ -35,6 +35,8 @@ public:
 
   void parameterChanged(
       const std::string& param);
+
+  void parametersChanged();
   
   void observeResponse(int iter);
 };

@@ -988,14 +988,6 @@ evalModelImpl(const Thyra_InArgs&  inArgs,
   auto& analysisParams = appParams->sublist("Piro").sublist("Analysis");
   if(analysisParams.isSublist("Optimization Status")) {
     auto& opt_paramList = analysisParams.sublist("Optimization Status");
-    if(opt_paramList.isParameter("Optimization Variables Changed") && opt_paramList.get<bool>("Optimization Variables Changed")) {
-      if(opt_paramList.isParameter("Parameter Names")) {
-        const auto& param_names = *opt_paramList.get<Teuchos::RCP<std::vector<std::string>>>("Parameter Names");
-        for (size_t k=0; k < param_names.size(); ++k)
-          observer.parameterChanged(param_names[k]);
-      }
-      opt_paramList.set("Optimization Variables Changed", false);
-    }
     transposeJacobian = opt_paramList.get("Compute Transposed Jacobian", false);
   }
 
@@ -1465,6 +1457,7 @@ evalModelImpl(const Thyra_InArgs&  inArgs,
     }
   }
 
+/*
   if(analysisParams.isSublist("Optimization Status")) {
     auto& opt_paramList = analysisParams.sublist("Optimization Status");
     static int iteration = -1;
@@ -1482,11 +1475,12 @@ evalModelImpl(const Thyra_InArgs&  inArgs,
     }
 
     if (print && response_available) {
-       observer.observeSolution(iteration, *x, Teuchos::null, Teuchos::null, Teuchos::null);
-       observer.observeResponse(iteration);
+       ;//observer.observeSolution(iteration, *x, Teuchos::null, Teuchos::null, Teuchos::null);
+       ;//observer.observeResponse(iteration);
        print = false;
     }
   }
+*/
 
 #ifdef WRITE_TO_MATRIX_MARKET
   Albany::writeMatrixMarket(x, "sol", mm_counter_sol);
