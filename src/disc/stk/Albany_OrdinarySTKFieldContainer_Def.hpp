@@ -44,7 +44,6 @@ OrdinarySTKFieldContainer<Interleaved>::OrdinarySTKFieldContainer(
     const Teuchos::RCP<Teuchos::ParameterList>&               params_,
     const Teuchos::RCP<stk::mesh::MetaData>&                  metaData_,
     const Teuchos::RCP<stk::mesh::BulkData>&                  bulkData_,
-    const int                                                 neq_,
     const AbstractFieldContainer::FieldContainerRequirements& req,
     const int                                                 numDim_,
     const Teuchos::RCP<StateInfoStruct>&                      sis,
@@ -53,7 +52,6 @@ OrdinarySTKFieldContainer<Interleaved>::OrdinarySTKFieldContainer(
           params_,
           metaData_,
           bulkData_,
-          neq_,
           numDim_)
 {
   typedef typename AbstractSTKFieldContainer::VectorFieldType       VFT;
@@ -112,57 +110,6 @@ OrdinarySTKFieldContainer<Interleaved>::OrdinarySTKFieldContainer(
   solution_field_dtk.resize(num_time_deriv + 1);
   solution_field_dxdp.resize(num_params_);
 
-  for (int num_vecs = 0; num_vecs <= num_time_deriv; num_vecs++) {
-    solution_field[num_vecs] = &metaData_->declare_field<VFT>(
-        stk::topology::NODE_RANK,
-        params_->get<std::string>(
-            sol_tag_name[num_vecs], sol_id_name[num_vecs]));
-    stk::mesh::put_field_on_mesh(
-        *solution_field[num_vecs], metaData_->universal_part(), neq_, nullptr);
-
-#if defined(ALBANY_DTK)
-    if (output_dtk_field == true) {
-      solution_field_dtk[num_vecs] = &metaData_->declare_field<VFT>(
-          stk::topology::NODE_RANK,
-          params_->get<std::string>(
-              sol_dtk_tag_name[num_vecs], sol_dtk_id_name[num_vecs]));
-      stk::mesh::put_field_on_mesh(
-          *solution_field_dtk[num_vecs],
-          metaData_->universal_part(),
-          neq_,
-          nullptr);
-    }
-#endif
-
-#ifdef ALBANY_SEACAS
-    stk::io::set_field_role(*solution_field[num_vecs], Ioss::Field::TRANSIENT);
-#if defined(ALBANY_DTK)
-    if (output_dtk_field == true)
-      stk::io::set_field_role(
-          *solution_field_dtk[num_vecs], Ioss::Field::TRANSIENT);
-#endif
-#endif
-  }
-
-  //Forward transient sensitivities dx/dp
-  for (int np = 0; np < num_params_; np++) {
-    if (output_dxdp_field == true) {
-      solution_field_dxdp[np] = &metaData_->declare_field<VFT>(
-          stk::topology::NODE_RANK,
-          params_->get<std::string>(
-              sol_dxdp_tag_name_vec[np], sol_dxdp_id_name_vec[np]));
-      stk::mesh::put_field_on_mesh(
-          *solution_field_dxdp[np],
-          metaData_->universal_part(),
-          neq_,
-          nullptr);
-    }
-#ifdef ALBANY_SEACAS
-    if (output_dxdp_field == true)
-      stk::io::set_field_role(
-          *solution_field_dxdp[np], Ioss::Field::TRANSIENT);
-#endif
-  }
   // If the problem requests that the initial guess at the solution equals the
   // input node coordinates, set that here
   /*
@@ -213,51 +160,6 @@ OrdinarySTKFieldContainer<Interleaved>::fillVector(
       nodalDofManager);
 }
 
-template <DiscType Interleaved>
-void
-OrdinarySTKFieldContainer<Interleaved>::fillSolnVector(
-    Thyra_Vector&                                solution,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  fillVectorImpl(
-      solution, solution_field[0]->name(), sel, node_vs, nodalDofManager);
-}
-
-template <DiscType Interleaved>
-void
-OrdinarySTKFieldContainer<Interleaved>::fillSolnMultiVector(
-    Thyra_MultiVector&                           solution,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  typedef typename AbstractSTKFieldContainer::VectorFieldType VFT;
-
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  for (int icomp = 0; icomp < solution.domain()->dim(); ++icomp) {
-    fillVectorImpl(
-        *solution.col(icomp),
-        solution_field[icomp]->name(),
-        sel,
-        node_vs,
-        nodalDofManager);
-  }
-}
 
 template <DiscType Interleaved>
 void
@@ -276,197 +178,6 @@ OrdinarySTKFieldContainer<Interleaved>::saveVector(
       nodalDofManager);
 }
 
-template <DiscType Interleaved>
-void
-OrdinarySTKFieldContainer<Interleaved>::saveSolnVector(
-    const Thyra_Vector&                          solution,
-    const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // IKT, FIXME? throw exception if num_time_deriv == 0 and we are calling this
-  // function?
-
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  saveVectorImpl(
-      solution, solution_field[0]->name(), sel, node_vs, nodalDofManager);
-
-  if (soln_dxdp != Teuchos::null) {
-    if (soln_dxdp->domain()->dim() != num_params) {
-      TEUCHOS_TEST_FOR_EXCEPTION(
-          true,
-          std::runtime_error,
-          "Error in saveSolnVector! Number of vectors in soln_dxdp (" << soln_dxdp->domain()->dim()
-	  << ") != num_params (" << num_params << ").\n");
-    }
-    for (int np = 0; np < num_params; np++) {
-      saveVectorImpl(
-        *soln_dxdp->col(np), solution_field_dxdp[np]->name(), sel, node_vs, nodalDofManager);
-    }
-  }
-
-}
-
-template <DiscType Interleaved>
-void
-OrdinarySTKFieldContainer<Interleaved>::saveSolnVector(
-    const Thyra_Vector&                          solution,
-    const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
-    const Thyra_Vector&                          solution_dot,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // IKT, FIXME? throw exception if num_time_deriv == 0 and we are calling this
-  // function?
-
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  saveVectorImpl(
-      solution, solution_field[0]->name(), sel, node_vs, nodalDofManager);
-  saveVectorImpl(
-      solution_dot, solution_field[1]->name(), sel, node_vs, nodalDofManager);
-
-  if (soln_dxdp != Teuchos::null) {
-    if (soln_dxdp->domain()->dim() != num_params) {
-      TEUCHOS_TEST_FOR_EXCEPTION(
-          true,
-          std::runtime_error,
-          "Error in saveSolnVector! Number of vectors in soln_dxdp (" << soln_dxdp->domain()->dim()
-	  << ") != num_params (" << num_params << ").\n");
-    }
-    for (int np = 0; np < num_params; np++) {
-      saveVectorImpl(
-        *soln_dxdp->col(np), solution_field_dxdp[np]->name(), sel, node_vs, nodalDofManager);
-    }
-  }
-}
-
-template <DiscType Interleaved>
-void
-OrdinarySTKFieldContainer<Interleaved>::saveSolnVector(
-    const Thyra_Vector&                          solution,
-    const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
-    const Thyra_Vector&                          solution_dot,
-    const Thyra_Vector&                          solution_dotdot,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // IKT, FIXME? throw exception if num_time_deriv < 2 and we are calling this
-  // function?
-
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  saveVectorImpl(
-      solution, solution_field[0]->name(), sel, node_vs, nodalDofManager);
-  saveVectorImpl(
-      solution_dot, solution_field[1]->name(), sel, node_vs, nodalDofManager);
-  saveVectorImpl(
-      solution_dotdot,
-      solution_field[2]->name(),
-      sel,
-      node_vs,
-      nodalDofManager);
-
-  if (soln_dxdp != Teuchos::null) {
-    if (soln_dxdp->domain()->dim() != num_params) {
-      TEUCHOS_TEST_FOR_EXCEPTION(
-          true,
-          std::runtime_error,
-          "Error in saveSolnVector! Number of vectors in soln_dxdp (" << soln_dxdp->domain()->dim()
-	  << ") != num_params (" << num_params << ").\n");
-    }
-    for (int np = 0; np < num_params; np++) {
-      saveVectorImpl(
-        *soln_dxdp->col(np), solution_field_dxdp[np]->name(), sel, node_vs, nodalDofManager);
-    }
-  }
-}
-
-template <DiscType Interleaved>
-void
-OrdinarySTKFieldContainer<Interleaved>::saveSolnMultiVector(
-    const Thyra_MultiVector&                     solution,
-    const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  for (int icomp = 0; icomp < solution.domain()->dim(); ++icomp) {
-    saveVectorImpl(
-        *solution.col(icomp),
-        solution_field[icomp]->name(),
-        sel,
-        node_vs,
-        nodalDofManager);
-  }
-
-  if (soln_dxdp != Teuchos::null) {
-    if (soln_dxdp->domain()->dim() != num_params) {
-      TEUCHOS_TEST_FOR_EXCEPTION(
-          true,
-          std::runtime_error,
-          "Error in saveSolnVector! Number of vectors in soln_dxdp (" << soln_dxdp->domain()->dim()
-	  << ") != num_params (" << num_params << ").\n");
-    }
-    for (int np = 0; np < num_params; np++) {
-      saveVectorImpl(
-        *soln_dxdp->col(np), solution_field_dxdp[np]->name(), sel, node_vs, nodalDofManager);
-    }
-  }
-}
-
-template <DiscType Interleaved>
-void
-OrdinarySTKFieldContainer<Interleaved>::saveResVector(
-    const Thyra_Vector&                          res,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  saveVectorImpl(res, residual_field->name(), sel, node_vs, nodalDofManager);
-}
-
-template <DiscType Interleaved>
-void
-OrdinarySTKFieldContainer<Interleaved>::transferSolutionToCoords()
-{
-  using VFT    = typename AbstractSTKFieldContainer::VectorFieldType;
-  using Helper = STKFieldContainerHelper<VFT>;
-  Helper::copySTKField(*solution_field[0], *this->coordinates_field);
-}
 
 template <DiscType Interleaved>
 void

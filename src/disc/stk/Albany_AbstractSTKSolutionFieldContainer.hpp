@@ -4,34 +4,18 @@
 //    in the file "license.txt" in the top-level Albany directory  //
 //*****************************************************************//
 
-#ifndef ALBANY_ABSTRACT_STK_FIELD_CONTAINER_HPP
-#define ALBANY_ABSTRACT_STK_FIELD_CONTAINER_HPP
+#ifndef ALBANY_ABSTRACT_STK_SOLUTION_FIELD_CONTAINER_HPP
+#define ALBANY_ABSTRACT_STK_SOLUTION_FIELD_CONTAINER_HPP
 
-#include "Albany_config.h"
-
-#include "Teuchos_ParameterList.hpp"
-#include "Teuchos_RCP.hpp"
-
-// This include is added in Tpetra branch to get all the necessary
-// Tpetra includes (e.g., Tpetra_Vector.hpp, Tpetra_Map.hpp, etc.)
-#include "Albany_DataTypes.hpp"
-
-#include "Albany_AbstractFieldContainer.hpp"
-#include "Albany_NodalDOFManager.hpp"
-#include "Albany_StateInfoStruct.hpp"
-#include "Albany_Utils.hpp"
-
-#include <stk_mesh/base/CoordinateSystems.hpp>
-#include <stk_mesh/base/Field.hpp>
-#include <stk_mesh/base/FieldTraits.hpp>
+#include "Albany_AbstractSTKFieldContainer.hpp"
 
 namespace Albany {
 
 /*!
- * \brief Abstract interface for an STK field container
+ * \brief Abstract interface for an STK solution field container
  *
  */
-class AbstractSTKFieldContainer : public AbstractFieldContainer
+class AbstractSTKSolutionFieldContainer : public AbstractFieldContainer
 {
  public:
   // Tensor per Node/Cell  - (Node, Dim, Dim) or (Cell,Dim,Dim)
@@ -74,120 +58,123 @@ class AbstractSTKFieldContainer : public AbstractFieldContainer
   typedef std::map<std::string, std::vector<int>> MeshVectorIntegerState;
 
 
-  AbstractSTKFieldContainer() : proc_rank_field(nullptr){};
+  AbstractSTKSolutionFieldContainer() : proc_rank_field(nullptr){};
 
 
   //! Destructor
-  virtual ~AbstractSTKFieldContainer(){};
-
-  virtual void
-  addStateStructs(const Teuchos::RCP<Albany::StateInfoStruct>& sis) = 0;
+  virtual ~AbstractSTKSolutionFieldContainer(){};
 
   // Coordinates field ALWAYS in 3D
   const VectorFieldType*
   getCoordinatesField3d() const
   {
-    return coordinates_field3d;
+    return stkFieldContainer->getCoordinatesField3d();
   }
   VectorFieldType*
   getCoordinatesField3d()
   {
-    return coordinates_field3d;
+    return stkFieldContainer->getCoordinatesField3d();
   }
 
   const VectorFieldType*
   getCoordinatesField() const
   {
-    return coordinates_field;
+    return stkFieldContainer->getCoordinatesField();
   }
   VectorFieldType*
   getCoordinatesField()
   {
-    return coordinates_field;
+    return stkFieldContainer->getCoordinatesField();
   }
 
   IntScalarFieldType*
   getProcRankField()
   {
-    return proc_rank_field;
+    return stkFieldContainer->getProcRankField();
   }
 
   ScalarValueState&
   getScalarValueStates()
   {
-    return scalarValue_states;
+    return stkFieldContainer->getScalarValueStates();
   }
   MeshScalarState&
   getMeshScalarStates()
   {
-    return mesh_scalar_states;
+    return stkFieldContainer->getMeshScalarStates();
   }
   MeshVectorState&
   getMeshVectorStates()
   {
-    return mesh_vector_states;
+    return stkFieldContainer->getMeshVectorStates();
   }
   MeshScalarIntegerState&
   getMeshScalarIntegerStates()
   {
-    return mesh_scalar_integer_states;
+    return stkFieldContainer->getMeshScalarIntegerStates();
   }
   MeshScalarInteger64State&
   getMeshScalarInteger64States()
   {
-    return mesh_scalar_integer_64_states;
+    return stkFieldContainer->getMeshScalarInteger64States();
   }
   MeshVectorIntegerState&
   getMeshVectorIntegerStates()
   {
-    return mesh_vector_integer_states;
+    return stkFieldContainer->getMeshVectorIntegerStates();
   }
   ScalarState&
   getCellScalarStates()
   {
-    return cell_scalar_states;
+    return stkFieldContainer->getCellScalarStates();
   }
   VectorState&
   getCellVectorStates()
   {
-    return cell_vector_states;
+    return stkFieldContainer->getCellVectorStates();
   }
   TensorState&
   getCellTensorStates()
   {
-    return cell_tensor_states;
+    return stkFieldContainer->getCellTensorStates();
   }
   QPScalarState&
   getQPScalarStates()
   {
-    return qpscalar_states;
+    return stkFieldContainer->getQPScalarStates();
   }
   QPVectorState&
   getQPVectorStates()
   {
-    return qpvector_states;
+    return stkFieldContainer->getQPVectorStates();
   }
   QPTensorState&
   getQPTensorStates()
   {
-    return qptensor_states;
+    return stkFieldContainer->getQPTensorStates();
   }
   const StateInfoStruct&
   getNodalSIS() const
   {
-    return nodal_sis;
+    return stkFieldContainer->getNodalSIS();
   }
   const StateInfoStruct&
   getNodalParameterSIS() const
   {
-    return nodal_parameter_sis;
+    return stkFieldContainer->getNodalParameterSIS();
   }
 
   std::map<std::string, double>&
   getTime()
   {
-    return time;
+    return stkFieldContainer->getTime();
   }
+
+  virtual void
+  fillSolnVector(
+      Thyra_Vector&                                soln,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
 
   virtual void
   fillVector(
@@ -196,6 +183,13 @@ class AbstractSTKFieldContainer : public AbstractFieldContainer
       stk::mesh::Selector&                         field_selection,
       const Teuchos::RCP<const Thyra_VectorSpace>& field_node_vs,
       const NodalDOFManager&                       nodalDofManager) = 0;
+
+  virtual void
+  fillSolnMultiVector(
+      Thyra_MultiVector&                           soln,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+
   virtual void
   saveVector(
       const Thyra_Vector&                          field_vector,
@@ -203,6 +197,43 @@ class AbstractSTKFieldContainer : public AbstractFieldContainer
       stk::mesh::Selector&                         field_selection,
       const Teuchos::RCP<const Thyra_VectorSpace>& field_node_vs,
       const NodalDOFManager&                       nodalDofManager) = 0;
+
+  virtual void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      const Thyra_Vector&                          soln_dot,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      const Thyra_Vector&                          soln_dot,
+      const Thyra_Vector&                          soln_dotdot,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
+  saveResVector(
+      const Thyra_Vector&                          res,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
+  saveSolnMultiVector(
+      const Thyra_MultiVector&                     soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+
+  virtual void
+  transferSolutionToCoords() = 0;
+
 
  protected:
   // Note: for 3d meshes, coordinates_field3d==coordinates_field (they point to
@@ -230,8 +261,10 @@ class AbstractSTKFieldContainer : public AbstractFieldContainer
   StateInfoStruct nodal_parameter_sis;
 
   std::map<std::string, double> time;
+
+  Teuchos::RCP<AbstractSTKFieldContainer> stkFieldContainer;
 };
 
 }  // namespace Albany
 
-#endif  // ALBANY_ABSTRACT_STK_FIELD_CONTAINER_HPP
+#endif  // ALBANY_ABSTRACT_STK_SOLUTION_FIELD_CONTAINER_HPP

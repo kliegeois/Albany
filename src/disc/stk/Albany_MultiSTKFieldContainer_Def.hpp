@@ -37,23 +37,20 @@ MultiSTKFieldContainer<Interleaved>::MultiSTKFieldContainer(
     const Teuchos::RCP<Teuchos::ParameterList>& params_,
     const Teuchos::RCP<stk::mesh::MetaData>&    metaData_,
     const Teuchos::RCP<stk::mesh::BulkData>&    bulkData_,
-    const int                                   neq_,
     const int                                          numDim_,
     const Teuchos::RCP<StateInfoStruct>&               sis,
     const Teuchos::Array<Teuchos::Array<std::string>>& solution_vector,
-    const int                                          num_params)
+    const int                                          num_params_)
     : GenericSTKFieldContainer<Interleaved>(
           params_,
           metaData_,
           bulkData_,
-          neq_,
           numDim_)
 {
   typedef typename AbstractSTKFieldContainer::VectorFieldType       VFT;
   typedef typename AbstractSTKFieldContainer::ScalarFieldType       SFT;
 
-  sol_vector_name.resize(solution_vector.size());
-  sol_index.resize(solution_vector.size());
+  num_params = num_params_;
 
   // Check the input
 
@@ -64,95 +61,6 @@ MultiSTKFieldContainer<Interleaved>::MultiSTKFieldContainer(
         "\n*** ERROR ***\n"
         "Number of derivatives for each variable is different.\n"
         "Check definition of solution vector and its derivatives.\n");
-  }
-
-  for (int vec_num = 0; vec_num < solution_vector.size(); vec_num++) {
-    if (solution_vector[vec_num].size() ==
-        0) {  // Do the default solution vector
-
-      std::string name = params_->get<std::string>(
-          sol_tag_name[vec_num], sol_id_name[vec_num]);
-      VFT* solution =
-          &metaData_->declare_field<VFT>(stk::topology::NODE_RANK, name);
-      stk::mesh::put_field_on_mesh(
-          *solution, metaData_->universal_part(), neq_, nullptr);
-#ifdef ALBANY_SEACAS
-      stk::io::set_field_role(*solution, Ioss::Field::TRANSIENT);
-#endif
-
-      sol_vector_name[vec_num].push_back(name);
-      sol_index[vec_num].push_back(this->neq);
-    } else if (solution_vector[vec_num].size() == 1) {  // User is just renaming
-                                                        // the entire solution
-                                                        // vector
-
-      VFT* solution = &metaData_->declare_field<VFT>(
-          stk::topology::NODE_RANK, solution_vector[vec_num][0]);
-      stk::mesh::put_field_on_mesh(
-          *solution, metaData_->universal_part(), neq_, nullptr);
-#ifdef ALBANY_SEACAS
-      stk::io::set_field_role(*solution, Ioss::Field::TRANSIENT);
-#endif
-
-      sol_vector_name[vec_num].push_back(solution_vector[vec_num][0]);
-      sol_index[vec_num].push_back(neq_);
-
-    } else {  // user is breaking up the solution into multiple fields
-
-      // make sure the number of entries is even
-
-      TEUCHOS_TEST_FOR_EXCEPTION(
-          (solution_vector[vec_num].size() % 2),
-          std::logic_error,
-          "Error in input file: specification of solution vector layout is "
-          "incorrect."
-              << std::endl);
-
-      int len, accum = 0;
-
-      for (int i = 0; i < solution_vector[vec_num].size(); i += 2) {
-        if (solution_vector[vec_num][i + 1] == "V") {
-          len = numDim_;  // vector
-          accum += len;
-          VFT* solution = &metaData_->declare_field<VFT>(
-              stk::topology::NODE_RANK, solution_vector[vec_num][i]);
-          stk::mesh::put_field_on_mesh(
-              *solution, metaData_->universal_part(), len, nullptr);
-#ifdef ALBANY_SEACAS
-          stk::io::set_field_role(*solution, Ioss::Field::TRANSIENT);
-#endif
-          sol_vector_name[vec_num].push_back(solution_vector[vec_num][i]);
-          sol_index[vec_num].push_back(len);
-
-        } else if (solution_vector[vec_num][i + 1] == "S") {
-          len = 1;  // scalar
-          accum += len;
-          SFT* solution = &metaData_->declare_field<SFT>(
-              stk::topology::NODE_RANK, solution_vector[vec_num][i]);
-          stk::mesh::put_field_on_mesh(
-              *solution, metaData_->universal_part(), nullptr);
-#ifdef ALBANY_SEACAS
-          stk::io::set_field_role(*solution, Ioss::Field::TRANSIENT);
-#endif
-          sol_vector_name[vec_num].push_back(solution_vector[vec_num][i]);
-          sol_index[vec_num].push_back(len);
-
-        } else {
-          TEUCHOS_TEST_FOR_EXCEPTION(
-              true,
-              std::logic_error,
-              "Error in input file: specification of solution vector layout is "
-              "incorrect."
-                  << std::endl);
-        }
-      }
-      TEUCHOS_TEST_FOR_EXCEPTION(
-          accum != neq_,
-          std::logic_error,
-          "Error in input file: specification of solution vector layout is "
-          "incorrect."
-              << std::endl);
-    }
   }
 
   // Do the coordinates
@@ -224,58 +132,6 @@ MultiSTKFieldContainer<Interleaved>::fillVector(
 
 template <DiscType Interleaved>
 void
-MultiSTKFieldContainer<Interleaved>::fillSolnVector(
-    Thyra_Vector&                                solution,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  int offset = 0;
-  for (int k = 0; k < sol_index[0].size(); k++) {
-    fillVectorImpl(
-        solution, sol_vector_name[0][k], sel, node_vs, nodalDofManager, offset);
-    offset += sol_index[0][k];
-  }
-}
-
-template <DiscType Interleaved>
-void
-MultiSTKFieldContainer<Interleaved>::fillSolnMultiVector(
-    Thyra_MultiVector&                           solution,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  using VFT = typename AbstractSTKFieldContainer::VectorFieldType;
-  using SFT = typename AbstractSTKFieldContainer::ScalarFieldType;
-
-  // Build a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  for (int icomp = 0; icomp < solution.domain()->dim(); ++icomp) {
-    int offset = 0;
-
-    for (int k = 0; k < sol_index[icomp].size(); k++) {
-      fillVectorImpl(
-          *solution.col(icomp),
-          sol_vector_name[icomp][k],
-          sel,
-          node_vs,
-          nodalDofManager,
-          offset);
-      offset += sol_index[icomp][k];
-    }
-  }
-}
-
-template <DiscType Interleaved>
-void
 MultiSTKFieldContainer<Interleaved>::saveVector(
     const Thyra_Vector&                          field_vector,
     const std::string&                           field_name,
@@ -292,138 +148,6 @@ MultiSTKFieldContainer<Interleaved>::saveVector(
       0);
 }
 
-template <DiscType Interleaved>
-void
-MultiSTKFieldContainer<Interleaved>::saveSolnVector(
-    const Thyra_Vector&                          solution,
-    const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  int offset = 0;
-  for (int k = 0; k < sol_index[0].size(); ++k) {
-    // Recycle saveVectorImpl method
-    saveVectorImpl(
-        solution, sol_vector_name[0][k], sel, node_vs, nodalDofManager, offset);
-    offset += sol_index[0][k];
-  }
-}
-
-template <DiscType Interleaved>
-void
-MultiSTKFieldContainer<Interleaved>::saveSolnVector(
-    const Thyra_Vector& solution,
-    const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
-    const Thyra_Vector& /* solution_dot */,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // TODO: why can't we save also solution_dot?
-  Teuchos::RCP<Teuchos::FancyOStream> out =
-      Teuchos::VerboseObjectBase::getDefaultOStream();
-  *out << "IKT WARNING: calling MultiSTKFieldContainer::saveSolnVectorT with "
-          "soln_dotT, but "
-       << "this function has not been extended to write soln_dotT properly to "
-          "the Exodus file.  Exodus "
-       << "file will contain only soln, not soln_dot.\n";
-
-  saveSolnVector(solution, soln_dxdp, sel, node_vs);
-}
-
-template <DiscType Interleaved>
-void
-MultiSTKFieldContainer<Interleaved>::saveSolnVector(
-    const Thyra_Vector& solution,
-    const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
-    const Thyra_Vector& /* solution_dot */,
-    const Thyra_Vector& /* solution_dotdot */,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // TODO: why can't we save also solution_dot?
-  Teuchos::RCP<Teuchos::FancyOStream> out =
-      Teuchos::VerboseObjectBase::getDefaultOStream();
-  *out << "IKT WARNING: calling MultiSTKFieldContainer::saveSolnVectorT with "
-          "soln_dotT and "
-       << "soln_dotdotT, but this function has not been extended to write "
-          "soln_dotT "
-       << "and soln_dotdotT properly to the Exodus file.  Exodus "
-       << "file will contain only soln, not soln_dot and soln_dotdot.\n";
-
-  saveSolnVector(solution, soln_dxdp, sel, node_vs);
-}
-
-template <DiscType Interleaved>
-void
-MultiSTKFieldContainer<Interleaved>::saveSolnMultiVector(
-    const Thyra_MultiVector&                     solution,
-    const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  for (int icomp = 0; icomp < solution.domain()->dim(); ++icomp) {
-    int offset = 0;
-    for (int k = 0; k < sol_index[icomp].size(); k++) {
-      saveVectorImpl(
-          *solution.col(icomp),
-          sol_vector_name[icomp][k],
-          sel,
-          node_vs,
-          nodalDofManager,
-          offset);
-      offset += sol_index[icomp][k];
-    }
-  }
-}
-
-template <DiscType Interleaved>
-void
-MultiSTKFieldContainer<Interleaved>::saveResVector(
-    const Thyra_Vector&                          res,
-    stk::mesh::Selector&                         sel,
-    const Teuchos::RCP<const Thyra_VectorSpace>& node_vs)
-{
-  // Setup a dof manger on the fly (it's cheap anyways).
-  // We don't care about global dofs (hence, the -1), since it's used only
-  // to retrieve the local entry id in the thyra vector.
-  // The number of equations is given by sol_index
-  const LO        numLocalNodes = getSpmdVectorSpace(node_vs)->localSubDim();
-  NodalDOFManager nodalDofManager;
-  nodalDofManager.setup(this->neq, numLocalNodes, -1, Interleaved);
-
-  int offset = 0;
-  for (int k = 0; k < res_index.size(); k++) {
-    saveVectorImpl(
-        res, res_vector_name[k], sel, node_vs, nodalDofManager, offset);
-    offset += res_index[k];
-  }
-}
-
-template <DiscType Interleaved>
-void
-MultiSTKFieldContainer<Interleaved>::transferSolutionToCoords()
-{
-  const bool MultiSTKFieldContainer_transferSolutionToCoords_not_implemented =
-      true;
-  TEUCHOS_TEST_FOR_EXCEPT(
-      MultiSTKFieldContainer_transferSolutionToCoords_not_implemented);
-}
 
 template <DiscType Interleaved>
 void
