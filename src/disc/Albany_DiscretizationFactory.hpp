@@ -78,12 +78,16 @@ class DiscretizationFactory {
 
     Teuchos::RCP<Albany::AbstractDiscretization> createDiscretizationFromInternalMeshStruct(
       const int neq,
-      const Teuchos::RCP<Albany::RigidBodyModes>& rigidBodyModes);
+      const Teuchos::RCP<Albany::RigidBodyModes>& rigidBodyModes,
+      const AbstractFieldContainer::FieldContainerRequirements& req,
+      const Teuchos::RCP<Albany::StateInfoStruct>& sis);
 
     Teuchos::RCP<Albany::AbstractDiscretization> createDiscretizationFromInternalMeshStruct(
       const int neq,
       const std::map<int,std::vector<std::string> >& sideSetEquations,
-      const Teuchos::RCP<Albany::RigidBodyModes>& rigidBodyModes);
+      const Teuchos::RCP<Albany::RigidBodyModes>& rigidBodyModes,
+      const AbstractFieldContainer::FieldContainerRequirements& req,
+      const Teuchos::RCP<Albany::StateInfoStruct>& sis);
     
     /* This function overwrite previous discretization parameter list */
     void

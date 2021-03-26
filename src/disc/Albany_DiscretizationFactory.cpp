@@ -164,7 +164,7 @@ DiscretizationFactory::createDiscretization(
     setupInternalMeshStruct(sis, side_set_sis, req, 
                             side_set_req);
     Teuchos::RCP<AbstractDiscretization> result =
-            createDiscretizationFromInternalMeshStruct(neq, sideSetEquations, rigidBodyModes);
+            createDiscretizationFromInternalMeshStruct(neq, sideSetEquations, rigidBodyModes, req, sis);
 
     return result;
 }
@@ -198,15 +198,19 @@ DiscretizationFactory::setupInternalMeshStruct(
 Teuchos::RCP<AbstractDiscretization>
 DiscretizationFactory::createDiscretizationFromInternalMeshStruct(
         const int neq,
-        const Teuchos::RCP<RigidBodyModes>& rigidBodyModes) {
-    return createDiscretizationFromInternalMeshStruct(neq, empty_side_set_equations, rigidBodyModes);
+        const Teuchos::RCP<RigidBodyModes>& rigidBodyModes,
+        const AbstractFieldContainer::FieldContainerRequirements& req,
+        const Teuchos::RCP<StateInfoStruct>& sis) {
+    return createDiscretizationFromInternalMeshStruct(neq, empty_side_set_equations, rigidBodyModes, req, sis);
 }
 
 Teuchos::RCP<AbstractDiscretization>
 DiscretizationFactory::createDiscretizationFromInternalMeshStruct(
         const int neq,
         const std::map<int, std::vector<std::string> >& sideSetEquations,
-        const Teuchos::RCP<RigidBodyModes>& rigidBodyModes) {
+        const Teuchos::RCP<RigidBodyModes>& rigidBodyModes,
+        const AbstractFieldContainer::FieldContainerRequirements& req,
+        const Teuchos::RCP<StateInfoStruct>& sis) {
 
     if (!piroParams.is_null() && !rigidBodyModes.is_null())
 
@@ -219,11 +223,13 @@ DiscretizationFactory::createDiscretizationFromInternalMeshStruct(
       auto ms = Teuchos::rcp_dynamic_cast<AbstractSTKMeshStruct>(meshStruct);
       if(ms->interleavedOrdering == DiscType::BlockedDisc){ // Use Panzer to do a blocked discretization
         auto disc = Teuchos::rcp(new BlockedSTKDiscretization(discParams, ms, commT, rigidBodyModes, sideSetEquations));
+        disc->setFieldData(req, sis);
         disc->updateMesh();
         return disc;
       } else
       {
         auto disc = Teuchos::rcp(new STKDiscretization(discParams, neq, ms, commT, rigidBodyModes, sideSetEquations));
+        disc->setFieldData(req, sis);
         disc->updateMesh();
         return disc;
       }

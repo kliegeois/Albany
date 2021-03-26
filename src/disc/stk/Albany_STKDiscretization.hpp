@@ -428,6 +428,10 @@ class STKDiscretization : public AbstractDiscretization
       const std::string&  field_name,
       const bool          overlapped = false);
 
+  void setFieldData(
+      const AbstractFieldContainer::FieldContainerRequirements& req,
+      const Teuchos::RCP<StateInfoStruct>& sis);
+
   // --- Methods to write solution in the output file --- //
 
   void
@@ -710,6 +714,8 @@ class STKDiscretization : public AbstractDiscretization
     }
     return false;
   }
+
+  Teuchos::RCP<AbstractSTKFieldContainer> solutionFieldContainer;
 };
 
 }  // namespace Albany

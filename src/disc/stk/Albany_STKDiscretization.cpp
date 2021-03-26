@@ -49,6 +49,9 @@ extern "C" {
 #include <math.h>
 #include <PHAL_Dimension.hpp>
 
+#include "Albany_MultiSTKFieldContainer.hpp"
+#include "Albany_OrdinarySTKFieldContainer.hpp"
+
 // Uncomment the following line if you want debug output to be printed to screen
 // #define OUTPUT_TO_SCREEN
 
@@ -664,10 +667,7 @@ STKDiscretization::writeSolutionToFile(
 {
 #ifdef ALBANY_SEACAS
   if (stkMeshStruct->exoOutput && stkMeshStruct->transferSolutionToCoords) {
-    Teuchos::RCP<AbstractSTKFieldContainer> container =
-        stkMeshStruct->getFieldContainer();
-
-    container->transferSolutionToCoords();
+    solutionFieldContainer->transferSolutionToCoords();
 
     if (!mesh_data.is_null()) {
       // Mesh coordinates have changed. Rewrite output file by deleting the mesh
@@ -732,10 +732,7 @@ STKDiscretization::writeSolutionMVToFile(
 #ifdef ALBANY_SEACAS
 
   if (stkMeshStruct->exoOutput && stkMeshStruct->transferSolutionToCoords) {
-    Teuchos::RCP<AbstractSTKFieldContainer> container =
-        stkMeshStruct->getFieldContainer();
-
-    container->transferSolutionToCoords();
+    solutionFieldContainer->transferSolutionToCoords();
 
     if (!mesh_data.is_null()) {
       // Mesh coordinates have changed. Rewrite output file by deleting the mesh
@@ -887,9 +884,6 @@ STKDiscretization::getSolutionMV(bool overlapped) const
 void
 STKDiscretization::getField(Thyra_Vector& result, const std::string& name) const
 {
-  Teuchos::RCP<AbstractSTKFieldContainer> container =
-      stkMeshStruct->getFieldContainer();
-
   // Iterate over the on-processor nodes by getting node buckets and iterating
   // over each bucket.
   const std::string& part =
@@ -904,7 +898,7 @@ STKDiscretization::getField(Thyra_Vector& result, const std::string& name) const
 
   const DOFsStruct& dofsStruct = nodalDOFsStructContainer.getDOFsStruct(name);
 
-  container->fillVector(
+  solutionFieldContainer->fillVector(
       result, name, selector, dofsStruct.node_vs, dofsStruct.dofManager);
 }
 
@@ -914,14 +908,11 @@ STKDiscretization::getSolutionField(Thyra_Vector& result, const bool overlapped)
 {
   TEUCHOS_TEST_FOR_EXCEPTION(overlapped, std::logic_error, "Not implemented.");
 
-  Teuchos::RCP<AbstractSTKFieldContainer> container =
-      stkMeshStruct->getFieldContainer();
-
   // Iterate over the on-processor nodes by getting node buckets and iterating
   // over each bucket.
   stk::mesh::Selector locally_owned = metaData.locally_owned_part();
 
-  container->fillSolnVector(result, locally_owned, m_node_vs);
+  solutionFieldContainer->fillSolnVector(result, locally_owned, m_node_vs);
 }
 
 void
@@ -931,14 +922,11 @@ STKDiscretization::getSolutionMV(
 {
   TEUCHOS_TEST_FOR_EXCEPTION(overlapped, std::logic_error, "Not implemented.");
 
-  Teuchos::RCP<AbstractSTKFieldContainer> container =
-      stkMeshStruct->getFieldContainer();
-
   // Iterate over the on-processor nodes by getting node buckets and iterating
   // over each bucket.
   stk::mesh::Selector locally_owned = metaData.locally_owned_part();
 
-  container->fillSolnMultiVector(result, locally_owned, m_node_vs);
+  solutionFieldContainer->fillSolnMultiVector(result, locally_owned, m_node_vs);
 }
 
 /*****************************************************************/
@@ -951,9 +939,6 @@ STKDiscretization::setField(
     const std::string&  name,
     bool                overlapped)
 {
-  Teuchos::RCP<AbstractSTKFieldContainer> container =
-      stkMeshStruct->getFieldContainer();
-
   const std::string& part =
       nodalDOFsStructContainer.fieldToMap.find(name)->second->first.first;
 
@@ -975,14 +960,14 @@ STKDiscretization::setField(
   const DOFsStruct& dofsStruct = nodalDOFsStructContainer.getDOFsStruct(name);
 
   if (overlapped) {
-    container->saveVector(
+    solutionFieldContainer->saveVector(
         result,
         name,
         selector,
         dofsStruct.overlap_node_vs,
         dofsStruct.overlap_dofManager);
   } else {
-    container->saveVector(
+    solutionFieldContainer->saveVector(
         result, name, selector, dofsStruct.node_vs, dofsStruct.dofManager);
   }
 }
@@ -993,15 +978,12 @@ STKDiscretization::setSolutionField(
     const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
     const bool          overlapped)
 {
-  Teuchos::RCP<AbstractSTKFieldContainer> container =
-      stkMeshStruct->getFieldContainer();
-
   // Select the proper mesh part and node vector space
   stk::mesh::Selector part = metaData.locally_owned_part();
   if (overlapped) { part |= metaData.globally_shared_part(); }
   auto node_vs = overlapped ? m_overlap_node_vs : m_node_vs;
 
-  container->saveSolnVector(soln, soln_dxdp, part, node_vs);
+  solutionFieldContainer->saveSolnVector(soln, soln_dxdp, part, node_vs);
 }
 
 void
@@ -1011,15 +993,12 @@ STKDiscretization::setSolutionField(
     const Thyra_Vector& soln_dot,
     const bool          overlapped)
 {
-  Teuchos::RCP<AbstractSTKFieldContainer> container =
-      stkMeshStruct->getFieldContainer();
-
   // Select the proper mesh part and node vector space
   stk::mesh::Selector part = metaData.locally_owned_part();
   if (overlapped) { part |= metaData.globally_shared_part(); }
   auto node_vs = overlapped ? m_overlap_node_vs : m_node_vs;
 
-  container->saveSolnVector(soln, soln_dxdp, soln_dot, part, node_vs);
+  solutionFieldContainer->saveSolnVector(soln, soln_dxdp, soln_dot, part, node_vs);
 }
 
 void
@@ -1030,15 +1009,12 @@ STKDiscretization::setSolutionField(
     const Thyra_Vector& soln_dotdot,
     const bool          overlapped)
 {
-  Teuchos::RCP<AbstractSTKFieldContainer> container =
-      stkMeshStruct->getFieldContainer();
-
   // Select the proper mesh part and node vector space
   stk::mesh::Selector part = metaData.locally_owned_part();
   if (overlapped) { part |= metaData.globally_shared_part(); }
   auto node_vs = overlapped ? m_overlap_node_vs : m_node_vs;
 
-  container->saveSolnVector(soln, soln_dxdp, soln_dot, soln_dotdot, part, node_vs);
+  solutionFieldContainer->saveSolnVector(soln, soln_dxdp, soln_dot, soln_dotdot, part, node_vs);
 }
 
 void
@@ -1047,15 +1023,12 @@ STKDiscretization::setSolutionFieldMV(
     const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
     const bool               overlapped)
 {
-  Teuchos::RCP<AbstractSTKFieldContainer> container =
-      stkMeshStruct->getFieldContainer();
-
   // Select the proper mesh part and node vector space
   stk::mesh::Selector part = metaData.locally_owned_part();
   if (overlapped) { part |= metaData.globally_shared_part(); }
   auto node_vs = overlapped ? m_overlap_node_vs : m_node_vs;
 
-  container->saveSolnMultiVector(soln, soln_dxdp, part, node_vs);
+  solutionFieldContainer->saveSolnMultiVector(soln, soln_dxdp, part, node_vs);
 }
 
 void STKDiscretization::computeVectorSpaces()
@@ -2536,6 +2509,100 @@ STKDiscretization::updateMesh()
     }
 
     buildSideSetProjectors();
+  }
+}
+
+void
+STKDiscretization::setFieldData(
+  const AbstractFieldContainer::FieldContainerRequirements& req,
+  const Teuchos::RCP<StateInfoStruct>& sis)
+{
+  Teuchos::RCP<AbstractSTKFieldContainer> fieldContainer = stkMeshStruct->getFieldContainer();
+
+  Teuchos::RCP<MultiSTKFieldContainer<DiscType::Interleaved>> mISTKFieldContainer =
+    Teuchos::rcp_dynamic_cast<MultiSTKFieldContainer<DiscType::Interleaved>>(fieldContainer,false);
+  Teuchos::RCP<MultiSTKFieldContainer<DiscType::BlockedMono>> mBSTKFieldContainer =
+    Teuchos::rcp_dynamic_cast<MultiSTKFieldContainer<DiscType::BlockedMono>>(fieldContainer,false);
+
+  Teuchos::RCP<OrdinarySTKFieldContainer<DiscType::Interleaved>> oISTKFieldContainer =
+    Teuchos::rcp_dynamic_cast<OrdinarySTKFieldContainer<DiscType::Interleaved>>(fieldContainer,false);
+  Teuchos::RCP<OrdinarySTKFieldContainer<DiscType::BlockedMono>> oBSTKFieldContainer =
+    Teuchos::rcp_dynamic_cast<OrdinarySTKFieldContainer<DiscType::BlockedMono>>(fieldContainer,false);
+
+  Teuchos::RCP<GenericSTKFieldContainer<DiscType::Interleaved>> gISTKFieldContainer =
+    Teuchos::rcp_dynamic_cast<GenericSTKFieldContainer<DiscType::Interleaved>>(fieldContainer,false);
+  Teuchos::RCP<GenericSTKFieldContainer<DiscType::BlockedMono>> gBSTKFieldContainer =
+    Teuchos::rcp_dynamic_cast<GenericSTKFieldContainer<DiscType::BlockedMono>>(fieldContainer,false);
+
+  int num_time_deriv, numDim, num_params;
+  Teuchos::RCP<Teuchos::ParameterList> params;
+
+  Teuchos::RCP<stk::mesh::MetaData> metaData;
+  Teuchos::RCP<stk::mesh::BulkData> bulkData;
+
+  if(Teuchos::nonnull(gISTKFieldContainer))
+  {
+    params = gISTKFieldContainer->getParams();
+    metaData = gISTKFieldContainer->getMetaData();
+    bulkData = gISTKFieldContainer->getBulkData();
+    numDim = gISTKFieldContainer->getNumDim();
+    num_params = gISTKFieldContainer->getNumParams();
+  }
+  if(Teuchos::nonnull(gBSTKFieldContainer))
+  {
+    params = gBSTKFieldContainer->getParams();
+    metaData = gBSTKFieldContainer->getMetaData();
+    bulkData = gBSTKFieldContainer->getBulkData();
+    numDim = gBSTKFieldContainer->getNumDim();
+    num_params = gBSTKFieldContainer->getNumParams();
+  }
+
+  metaData->enable_late_fields();
+  num_time_deriv = params->get<int>("Number Of Time Derivatives");
+
+  Teuchos::Array<std::string> default_solution_vector; // Empty
+  Teuchos::Array<Teuchos::Array<std::string> > solution_vector;
+  solution_vector.resize(num_time_deriv + 1);
+  bool user_specified_solution_components = false;
+  solution_vector[0] =
+    params->get<Teuchos::Array<std::string> >("Solution Vector Components", default_solution_vector);
+
+  if(solution_vector[0].length() > 0)
+     user_specified_solution_components = true;
+
+  if(num_time_deriv >= 1){
+    solution_vector[1] =
+      params->get<Teuchos::Array<std::string> >("SolutionDot Vector Components", default_solution_vector);
+    if(solution_vector[1].length() > 0)
+       user_specified_solution_components = true;
+  }
+
+  if(num_time_deriv >= 2){
+    solution_vector[2] =
+      params->get<Teuchos::Array<std::string> >("SolutionDotDot Vector Components", default_solution_vector);
+    if(solution_vector[2].length() > 0)
+       user_specified_solution_components = true;
+  }
+
+  if(Teuchos::nonnull(mISTKFieldContainer))
+  {
+    solutionFieldContainer = Teuchos::rcp(new MultiSTKFieldContainer<DiscType::Interleaved>(
+      params, metaData, bulkData, neq, numDim, sis, solution_vector, num_params));
+  }
+  if(Teuchos::nonnull(mBSTKFieldContainer))
+  {
+    solutionFieldContainer = Teuchos::rcp(new MultiSTKFieldContainer<DiscType::BlockedMono>(
+      params, metaData, bulkData, neq, numDim, sis, solution_vector, num_params));
+  }
+  if(Teuchos::nonnull(oISTKFieldContainer))
+  {
+    solutionFieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::Interleaved>(
+      params, metaData, bulkData, neq, req, numDim, sis, num_params));
+  }
+  if(Teuchos::nonnull(oBSTKFieldContainer))
+  {
+    solutionFieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::BlockedMono>(
+      params, metaData, bulkData, neq, req, numDim, sis, num_params));
   }
 }
 
