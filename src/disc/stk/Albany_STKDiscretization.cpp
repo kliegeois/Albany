@@ -684,7 +684,7 @@ STKDiscretization::writeSolutionToFile(
     mesh_data->begin_output_step(outputFileIdx, time_label);
     int out_step = mesh_data->write_defined_output_fields(outputFileIdx);
     // Writing mesh global variables
-    auto fc = stkMeshStruct->getFieldContainer();
+    auto fc = solutionFieldContainer;
     for (auto& it : fc->getMeshVectorStates()) {
       mesh_data->write_global(outputFileIdx, it.first, it.second);
     }
@@ -749,7 +749,7 @@ STKDiscretization::writeSolutionMVToFile(
     mesh_data->begin_output_step(outputFileIdx, time_label);
     int out_step = mesh_data->write_defined_output_fields(outputFileIdx);
     // Writing mesh global variables
-    auto fc = stkMeshStruct->getFieldContainer();
+    auto fc = solutionFieldContainer;
     for (auto& it : fc->getMeshVectorStates()) {
       mesh_data->write_global(outputFileIdx, it.first, it.second);
     }
@@ -1403,7 +1403,7 @@ STKDiscretization::computeWorksetInfo()
   nodesOnElemStateVec.resize(numBuckets);
   stateArrays.elemStateArrays.resize(numBuckets);
   const StateInfoStruct& nodal_states =
-      stkMeshStruct->getFieldContainer()->getNodalSIS();
+      solutionFieldContainer->getNodalSIS();
 
   // Clear map if remeshing
   if (!elemGIDws.empty()) { elemGIDws.clear(); }
@@ -1652,7 +1652,7 @@ STKDiscretization::computeWorksetInfo()
   // Pull out pointers to shards::Arrays for every bucket, for every state
   // Code is data-type dependent
 
-  AbstractSTKFieldContainer& container = *stkMeshStruct->getFieldContainer();
+  AbstractSTKFieldContainer& container = *solutionFieldContainer;
 
   ScalarValueState& scalarValue_states = container.getScalarValueStates();
   ScalarState&      cell_scalar_states = container.getCellScalarStates();
@@ -2303,7 +2303,7 @@ STKDiscretization::setupExodusOutput()
      *   mesh_data->add_global(outputFileIdx, it.first, mvs, INT_Type);
      * }
      */
-    auto fc = stkMeshStruct->getFieldContainer();
+    auto fc = solutionFieldContainer;
     for (auto& it : fc->getMeshVectorStates()) {
       const auto DV_Type = stk::util::ParameterType::DOUBLEVECTOR;
       boost::any mvs     = it.second;
@@ -2446,7 +2446,7 @@ void
 STKDiscretization::updateMesh()
 {
   const StateInfoStruct& nodal_param_states =
-      stkMeshStruct->getFieldContainer()->getNodalParameterSIS();
+      solutionFieldContainer->getNodalParameterSIS();
   nodalDOFsStructContainer.addEmptyDOFsStruct(solution_dof_name(), "", neq);
   nodalDOFsStructContainer.addEmptyDOFsStruct(nodes_dof_name(), "", 1);
   for (size_t is = 0; is < nodal_param_states.size(); is++) {

@@ -301,7 +301,7 @@ class STKDiscretization : public AbstractDiscretization
   const StateInfoStruct&
   getNodalParameterSIS() const
   {
-    return stkMeshStruct->getFieldContainer()->getNodalParameterSIS();
+    return solutionFieldContainer->getNodalParameterSIS();
   }
 
   //! Retrieve Vector (length num worksets) of element block names
