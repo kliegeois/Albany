@@ -44,7 +44,9 @@ OrdinarySTKFieldContainer<Interleaved>::OrdinarySTKFieldContainer(
     const Teuchos::RCP<Teuchos::ParameterList>&               params_,
     const Teuchos::RCP<stk::mesh::MetaData>&                  metaData_,
     const Teuchos::RCP<stk::mesh::BulkData>&                  bulkData_,
+    const AbstractFieldContainer::FieldContainerRequirements& req,
     const int                                                 numDim_,
+    const Teuchos::RCP<StateInfoStruct>&                      sis,
     const int                                                 num_params_)
     : GenericSTKFieldContainer<Interleaved>(
           params_,
@@ -84,6 +86,8 @@ OrdinarySTKFieldContainer<Interleaved>::OrdinarySTKFieldContainer(
     }
 #endif
   }
+
+  this->addStateStructs(sis);
 
   initializeProcRankField();
 
@@ -190,7 +194,9 @@ OrdinarySTKFieldContainer<Interleaved>::OrdinarySTKFieldContainer(
 #endif
   }
 
-  this->addStateStructs(sis);
+  //this->addStateStructs(sis);
+
+  //initializeProcRankField();
 
 }
 
@@ -198,12 +204,13 @@ template <DiscType Interleaved>
 void
 OrdinarySTKFieldContainer<Interleaved>::initializeProcRankField()
 {
+  /*
   TEUCHOS_TEST_FOR_EXCEPTION(
     (this->solutionFieldContainer),
     std::logic_error,
     "Error OrdinarySTKFieldContainer<Interleaved>::initializeProcRankField called from a solution field container."
     << std::endl);
-
+*/
   using ISFT = AbstractSTKFieldContainer::IntScalarFieldType;
   using SFT  = AbstractSTKFieldContainer::ScalarFieldType;
 

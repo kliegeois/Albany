@@ -38,6 +38,7 @@ MultiSTKFieldContainer<Interleaved>::MultiSTKFieldContainer(
     const Teuchos::RCP<stk::mesh::MetaData>&    metaData_,
     const Teuchos::RCP<stk::mesh::BulkData>&    bulkData_,
     const int                                   numDim_,
+    const Teuchos::RCP<StateInfoStruct>&               sis,
     const int                                   num_params_)
     : GenericSTKFieldContainer<Interleaved>(
           params_,
@@ -72,6 +73,8 @@ MultiSTKFieldContainer<Interleaved>::MultiSTKFieldContainer(
     }
 #endif
   }
+
+  this->addStateStructs(sis);
 
   initializeProcRankField();
 }
@@ -224,7 +227,7 @@ MultiSTKFieldContainer<Interleaved>::MultiSTKFieldContainer(
 #endif
   }
 
-  this->addStateStructs(sis);
+  //this->addStateStructs(sis);
 
   //initializeProcRankField();
 
@@ -234,12 +237,13 @@ template <DiscType Interleaved>
 void
 MultiSTKFieldContainer<Interleaved>::initializeProcRankField()
 {
+  /*
   TEUCHOS_TEST_FOR_EXCEPTION(
     (this->solutionFieldContainer),
     std::logic_error,
     "Error MultiSTKFieldContainer<Interleaved>::initializeProcRankField called from a solution field container."
     << std::endl);
-
+*/
   using ISFT = AbstractSTKFieldContainer::IntScalarFieldType;
   using SFT  = AbstractSTKFieldContainer::ScalarFieldType;
 

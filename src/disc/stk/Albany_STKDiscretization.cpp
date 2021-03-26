@@ -2498,6 +2498,7 @@ STKDiscretization::updateMesh()
     for (auto it : stkMeshStruct->sideSetMeshStructs) {
       Teuchos::RCP<STKDiscretization> side_disc =
           Teuchos::rcp(new STKDiscretization(discParams, neq, it.second, comm));
+      side_disc->setFieldData(req, sis);
       side_disc->updateMesh();
       sideSetDiscretizations.insert(std::make_pair(it.first, side_disc));
       sideSetDiscretizationsSTK.insert(std::make_pair(it.first, side_disc));
@@ -2514,9 +2515,11 @@ STKDiscretization::updateMesh()
 
 void
 STKDiscretization::setFieldData(
-  const AbstractFieldContainer::FieldContainerRequirements& req,
-  const Teuchos::RCP<StateInfoStruct>& sis)
+  const AbstractFieldContainer::FieldContainerRequirements& req_,
+  const Teuchos::RCP<StateInfoStruct>& sis_)
 {
+  req = req_;
+  sis = sis_;
   Teuchos::RCP<AbstractSTKFieldContainer> fieldContainer = stkMeshStruct->getFieldContainer();
 
   Teuchos::RCP<MultiSTKFieldContainer<DiscType::Interleaved>> mISTKFieldContainer =
@@ -2597,12 +2600,12 @@ STKDiscretization::setFieldData(
   if(Teuchos::nonnull(oISTKFieldContainer))
   {
     solutionFieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::Interleaved>(
-      params, metaData, bulkData, neq, req, numDim, sis, num_params));
+      params, metaData, bulkData, neq, req_, numDim, sis, num_params));
   }
   if(Teuchos::nonnull(oBSTKFieldContainer))
   {
     solutionFieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::BlockedMono>(
-      params, metaData, bulkData, neq, req, numDim, sis, num_params));
+      params, metaData, bulkData, neq, req_, numDim, sis, num_params));
   }
 }
 

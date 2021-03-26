@@ -137,10 +137,10 @@ void GenericSTKMeshStruct::SetupFieldData(
 
       if(interleavedOrdering == DiscType::Interleaved)
         this->fieldContainer = Teuchos::rcp(new MultiSTKFieldContainer<DiscType::Interleaved>(params,
-            metaData, bulkData, numDim, num_params));
+            metaData, bulkData, numDim, sis, num_params));
       else
         this->fieldContainer = Teuchos::rcp(new MultiSTKFieldContainer<DiscType::BlockedMono>(params,
-            metaData, bulkData, numDim, num_params));
+            metaData, bulkData, numDim, sis, num_params));
 
   }
 
@@ -148,10 +148,10 @@ void GenericSTKMeshStruct::SetupFieldData(
 
       if(interleavedOrdering == DiscType::Interleaved)
         this->fieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::Interleaved>(params,
-            metaData, bulkData, numDim, num_params));
+            metaData, bulkData, req, numDim, sis, num_params));
       else
         this->fieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::BlockedMono>(params,
-            metaData, bulkData, numDim, num_params));
+            metaData, bulkData, req, numDim, sis, num_params));
 
   }
 

@@ -716,6 +716,8 @@ class STKDiscretization : public AbstractDiscretization
   }
 
   Teuchos::RCP<AbstractSTKFieldContainer> solutionFieldContainer;
+  AbstractFieldContainer::FieldContainerRequirements req;
+  Teuchos::RCP<StateInfoStruct> sis;
 };
 
 }  // namespace Albany
