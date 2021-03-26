@@ -528,9 +528,6 @@ Albany::IossSTKMeshStruct::setFieldAndBulkData (
     side_maps_present = bool_to_int == 1 ? true : false;
   }
 
-  // Loading required input fields from file
-  this->loadRequiredInputFields (req,commT);
-
   // Rebalance the mesh before starting the simulation if indicated
   rebalanceInitialMeshT(commT);
 

@@ -428,9 +428,6 @@ void Albany::AsciiSTKMesh2D::setFieldAndBulkData(
   rebalanceInitialMeshT(commT);
 #endif
 
-  // Loading required input fields from file
-  this->loadRequiredInputFields (req,commT);
-
   // Finally, perform the setup of the (possible) side set meshes (including extraction if of type SideSetSTKMeshStruct)
   this->finalizeSideSetMeshStructs(commT, side_set_req, side_set_sis, worksetSize);
 

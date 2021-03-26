@@ -99,6 +99,9 @@ struct AbstractMeshStruct {
     virtual Teuchos::ArrayRCP<Teuchos::RCP<Albany::MeshSpecsStruct> >& getMeshSpecs() = 0;
     virtual const Teuchos::ArrayRCP<Teuchos::RCP<Albany::MeshSpecsStruct> >& getMeshSpecs() const = 0;
 
+    virtual void loadRequiredInputFields (const AbstractFieldContainer::FieldContainerRequirements& req,
+                                          const Teuchos::RCP<const Teuchos_Comm>& commT) = 0;
+
     virtual msType meshSpecsType() = 0;
 
     Teuchos::RCP<LayeredMeshNumbering<GO> > layered_mesh_numbering;

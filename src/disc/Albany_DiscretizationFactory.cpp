@@ -166,6 +166,7 @@ DiscretizationFactory::createDiscretization(
     Teuchos::RCP<AbstractDiscretization> result =
             createDiscretizationFromInternalMeshStruct(neq, sideSetEquations, rigidBodyModes, req, sis);
 
+    meshStruct->loadRequiredInputFields(req,commT);
     return result;
 }
 

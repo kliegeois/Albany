@@ -37,6 +37,11 @@ public:
                                        std::map<GO,std::vector<int>>& sideNodeMap);
 
   int getNumParams() const {return num_params; }
+
+  //! Loads from file input required fields not found in the mesh
+  void loadRequiredInputFields (const AbstractFieldContainer::FieldContainerRequirements& req,
+                                const Teuchos::RCP<const Teuchos_Comm>& commT);
+
 protected:
   GenericSTKMeshStruct(
                 const Teuchos::RCP<Teuchos::ParameterList>& params,
@@ -82,10 +87,6 @@ protected:
         const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req,
         const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
         int worksetSize);
-
-  //! Loads from file input required fields not found in the mesh
-  void loadRequiredInputFields (const AbstractFieldContainer::FieldContainerRequirements& req,
-                                const Teuchos::RCP<const Teuchos_Comm>& commT);
 
   // Routines to load, fill, or compute a field
   void loadField (const std::string& field_name,

@@ -204,9 +204,6 @@ void SideSetSTKMeshStruct::setFieldAndBulkData (
     }
   }
 
-  // Loading the fields from file
-  this->loadRequiredInputFields (req,commT);
-
   // Insertion of entities end
   bulkData->modification_end();
 }
