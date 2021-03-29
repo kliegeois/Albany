@@ -194,7 +194,7 @@ OrdinarySTKFieldContainer<Interleaved>::OrdinarySTKFieldContainer(
 #endif
   }
 
-  //this->addStateStructs(sis);
+  this->addStateStructs(sis);
 
   //initializeProcRankField();
 

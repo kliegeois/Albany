@@ -227,7 +227,7 @@ MultiSTKFieldContainer<Interleaved>::MultiSTKFieldContainer(
 #endif
   }
 
-  //this->addStateStructs(sis);
+  this->addStateStructs(sis);
 
   //initializeProcRankField();
 
