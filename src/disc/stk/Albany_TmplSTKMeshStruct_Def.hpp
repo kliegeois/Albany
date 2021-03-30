@@ -410,7 +410,7 @@ Albany::TmplSTKMeshStruct<Dim, traits>::TmplSTKMeshStruct(
 
 template<unsigned Dim, class traits>
 void
-Albany::TmplSTKMeshStruct<Dim, traits>::setFieldAndBulkData(
+Albany::TmplSTKMeshStruct<Dim, traits>::setFieldAndBulkData_1(
                   const Teuchos::RCP<const Teuchos_Comm>& commT,
                   const Teuchos::RCP<Teuchos::ParameterList>& params,
                   const AbstractFieldContainer::FieldContainerRequirements& req,
@@ -453,7 +453,19 @@ Albany::TmplSTKMeshStruct<Dim, traits>::setFieldAndBulkData(
   }
 
   SetupFieldData(commT, req, sis, worksetSize);
+}
 
+template<unsigned Dim, class traits>
+void
+Albany::TmplSTKMeshStruct<Dim, traits>::setFieldAndBulkData_2(
+                  const Teuchos::RCP<const Teuchos_Comm>& commT,
+                  const Teuchos::RCP<Teuchos::ParameterList>& params,
+                  const AbstractFieldContainer::FieldContainerRequirements& req,
+                  const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+                  const unsigned int worksetSize,
+                  const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
+                  const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req)
+{
   metaData->commit();
 
   // STK
@@ -666,7 +678,7 @@ Albany::TmplSTKMeshStruct<0>::buildMesh(const Teuchos::RCP<const Teuchos_Comm>& 
 
 template<>
 void
-Albany::TmplSTKMeshStruct<0, Albany::albany_stk_mesh_traits<0> >::setFieldAndBulkData(
+Albany::TmplSTKMeshStruct<0, Albany::albany_stk_mesh_traits<0> >::setFieldAndBulkData_1(
                   const Teuchos::RCP<const Teuchos_Comm>& commT,
                   const Teuchos::RCP<Teuchos::ParameterList>& params,
                   const AbstractFieldContainer::FieldContainerRequirements& req,
@@ -676,7 +688,19 @@ Albany::TmplSTKMeshStruct<0, Albany::albany_stk_mesh_traits<0> >::setFieldAndBul
                   const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& /*side_set_req*/)
 {
   SetupFieldData(commT, req, sis, worksetSize);
+}
 
+template<>
+void
+Albany::TmplSTKMeshStruct<0, Albany::albany_stk_mesh_traits<0> >::setFieldAndBulkData_2(
+                  const Teuchos::RCP<const Teuchos_Comm>& commT,
+                  const Teuchos::RCP<Teuchos::ParameterList>& params,
+                  const AbstractFieldContainer::FieldContainerRequirements& req,
+                  const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+                  const unsigned int worksetSize,
+                  const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& /*side_set_sis*/,
+                  const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& /*side_set_req*/)
+{
   metaData->commit();
 
   // STK

@@ -91,7 +91,17 @@ class TmplSTKMeshStruct : public GenericSTKMeshStruct {
   ~TmplSTKMeshStruct() {};
 
   //! Sets mesh generation parameters
-  void setFieldAndBulkData(
+  void setFieldAndBulkData_1(
+                const Teuchos::RCP<const Teuchos_Comm>& commT,
+                const Teuchos::RCP<Teuchos::ParameterList>& params,
+                const AbstractFieldContainer::FieldContainerRequirements& req,
+                const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+                const unsigned int worksetSize,
+                const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis = {},
+                const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req = {}); // empty map as default
+
+  //! Sets mesh generation parameters
+  void setFieldAndBulkData_2(
                 const Teuchos::RCP<const Teuchos_Comm>& commT,
                 const Teuchos::RCP<Teuchos::ParameterList>& params,
                 const AbstractFieldContainer::FieldContainerRequirements& req,
@@ -181,7 +191,16 @@ template<> void TmplSTKMeshStruct<1>::buildMesh(const Teuchos::RCP<const Teuchos
 template<> void TmplSTKMeshStruct<2>::buildMesh(const Teuchos::RCP<const Teuchos_Comm>& commT);
 template<> void TmplSTKMeshStruct<3>::buildMesh(const Teuchos::RCP<const Teuchos_Comm>& commT);
 
-template<> void TmplSTKMeshStruct<0, albany_stk_mesh_traits<0> >::setFieldAndBulkData(
+template<> void TmplSTKMeshStruct<0, albany_stk_mesh_traits<0> >::setFieldAndBulkData_1(
+                const Teuchos::RCP<const Teuchos_Comm>& commT,
+                const Teuchos::RCP<Teuchos::ParameterList>& params,
+                const AbstractFieldContainer::FieldContainerRequirements& req,
+                const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+                const unsigned int worksetSize,
+                const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
+                const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req);
+
+template<> void TmplSTKMeshStruct<0, albany_stk_mesh_traits<0> >::setFieldAndBulkData_2(
                 const Teuchos::RCP<const Teuchos_Comm>& commT,
                 const Teuchos::RCP<Teuchos::ParameterList>& params,
                 const AbstractFieldContainer::FieldContainerRequirements& req,

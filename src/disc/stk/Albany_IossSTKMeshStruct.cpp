@@ -288,7 +288,7 @@ Albany::IossSTKMeshStruct::~IossSTKMeshStruct()
 }
 
 void
-Albany::IossSTKMeshStruct::setFieldAndBulkData (
+Albany::IossSTKMeshStruct::setFieldAndBulkData_1 (
           const Teuchos::RCP<const Teuchos_Comm>& commT,
           const Teuchos::RCP<Teuchos::ParameterList>& params,
           const AbstractFieldContainer::FieldContainerRequirements& req,
@@ -303,8 +303,19 @@ Albany::IossSTKMeshStruct::setFieldAndBulkData (
 
   *out << "IOSS-STK: number of node sets = " << nsPartVec.size() << std::endl;
   *out << "IOSS-STK: number of side sets = " << ssPartVec.size() << std::endl;
+}
 
-  mesh_data->add_all_mesh_fields_as_input_fields();
+void
+Albany::IossSTKMeshStruct::setFieldAndBulkData_2 (
+          const Teuchos::RCP<const Teuchos_Comm>& commT,
+          const Teuchos::RCP<Teuchos::ParameterList>& params,
+          const AbstractFieldContainer::FieldContainerRequirements& req,
+          const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+          const unsigned int worksetSize,
+          const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
+          const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req)
+{
+  mesh_data->add_all_mesh_fields_as_input_fields(); // KL: this adds "solution field"
   std::vector<stk::io::MeshField> missing;
 
   metaData->commit();

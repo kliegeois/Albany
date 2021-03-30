@@ -599,7 +599,8 @@ void GenericSTKMeshStruct::finalizeSideSetMeshStructs (
         auto& sis = (it_sis==side_set_sis.end() ? dummy_sis : it_sis->second);
 
         params_ss = Teuchos::rcp(new Teuchos::ParameterList(ssd_list.sublist(it.first)));
-        it.second->setFieldAndBulkData(comm,params_ss,req,sis,worksetSize);  // Cell equations are also defined on the side, but not viceversa
+        it.second->setFieldAndBulkData_1(comm,params_ss,req,sis,worksetSize);  // Cell equations are also defined on the side, but not viceversa
+        it.second->setFieldAndBulkData_2(comm,params_ss,req,sis,worksetSize);  // Cell equations are also defined on the side, but not viceversa
       }
     }
   }

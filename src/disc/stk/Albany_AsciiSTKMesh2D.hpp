@@ -60,7 +60,16 @@ namespace Albany {
 
     ~AsciiSTKMesh2D();
 
-    void setFieldAndBulkData(
+    void setFieldAndBulkData_1(
+                  const Teuchos::RCP<const Teuchos_Comm>& commT,
+                  const Teuchos::RCP<Teuchos::ParameterList>& params,
+                  const AbstractFieldContainer::FieldContainerRequirements& req,
+                  const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+                  const unsigned int worksetSize,
+                  const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis = {},
+                  const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req = {});
+
+    void setFieldAndBulkData_2(
                   const Teuchos::RCP<const Teuchos_Comm>& commT,
                   const Teuchos::RCP<Teuchos::ParameterList>& params,
                   const AbstractFieldContainer::FieldContainerRequirements& req,

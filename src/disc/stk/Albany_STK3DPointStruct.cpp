@@ -49,7 +49,7 @@ Albany::STK3DPointStruct::STK3DPointStruct(const Teuchos::RCP<Teuchos::Parameter
 Albany::STK3DPointStruct::~STK3DPointStruct() {};
 
 void
-Albany::STK3DPointStruct::setFieldAndBulkData(
+Albany::STK3DPointStruct::setFieldAndBulkData_1(
                   const Teuchos::RCP<const Teuchos_Comm>& commT,
                   const Teuchos::RCP<Teuchos::ParameterList>& params,
                   const AbstractFieldContainer::FieldContainerRequirements& req,
@@ -58,8 +58,21 @@ Albany::STK3DPointStruct::setFieldAndBulkData(
                   const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
                   const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req)
 {
-  std::cout << "---3DPoint::setFieldAndBulkData---" << std::endl;
+  std::cout << "---3DPoint::setFieldAndBulkData_1---" << std::endl;
   SetupFieldData(commT, req, sis, worksetSize);
+}
+
+void
+Albany::STK3DPointStruct::setFieldAndBulkData_2(
+                  const Teuchos::RCP<const Teuchos_Comm>& commT,
+                  const Teuchos::RCP<Teuchos::ParameterList>& params,
+                  const AbstractFieldContainer::FieldContainerRequirements& req,
+                  const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+                  const unsigned int worksetSize,
+                  const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
+                  const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req)
+{
+  std::cout << "---3DPoint::setFieldAndBulkData_2---" << std::endl;
   metaData->commit();
   bulkData->modification_begin(); // Begin modifying the mesh
   //TmplSTKMeshStruct<0, albany_stk_mesh_traits<0> >::buildMesh(commT);

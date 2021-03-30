@@ -293,7 +293,7 @@ Albany::AsciiSTKMesh2D::AsciiSTKMesh2D (const Teuchos::RCP<Teuchos::ParameterLis
 
 Albany::AsciiSTKMesh2D::~AsciiSTKMesh2D() {}
 
-void Albany::AsciiSTKMesh2D::setFieldAndBulkData(
+void Albany::AsciiSTKMesh2D::setFieldAndBulkData_1(
     const Teuchos::RCP<const Teuchos_Comm>& commT,
     const Teuchos::RCP<Teuchos::ParameterList>& /*params_*/,
     const AbstractFieldContainer::FieldContainerRequirements& req,
@@ -303,7 +303,18 @@ void Albany::AsciiSTKMesh2D::setFieldAndBulkData(
     const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req)
 {
   this->SetupFieldData(commT, req, sis, worksetSize);
+}
 
+
+void Albany::AsciiSTKMesh2D::setFieldAndBulkData_2(
+    const Teuchos::RCP<const Teuchos_Comm>& commT,
+    const Teuchos::RCP<Teuchos::ParameterList>& /*params_*/,
+    const AbstractFieldContainer::FieldContainerRequirements& req,
+    const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+    const unsigned int worksetSize,
+    const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
+    const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req)
+{
   metaData->commit();
 
   bulkData->modification_begin(); // Begin modifying the mesh

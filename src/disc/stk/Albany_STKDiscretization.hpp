@@ -399,12 +399,12 @@ class STKDiscretization : public AbstractDiscretization
   const stk::mesh::MetaData&
   getSTKMetaData() const
   {
-    return metaData;
+    return *metaData;
   }
   const stk::mesh::BulkData&
   getSTKBulkData() const
   {
-    return bulkData;
+    return *bulkData;
   }
 
   // Used very often, so make it a function
@@ -599,8 +599,8 @@ class STKDiscretization : public AbstractDiscretization
   Teuchos::RCP<Teuchos::FancyOStream> out;
 
   //! Stk Mesh Objects
-  stk::mesh::MetaData& metaData;
-  stk::mesh::BulkData& bulkData;
+  Teuchos::RCP<stk::mesh::MetaData> metaData;
+  Teuchos::RCP<stk::mesh::BulkData> bulkData;
 
   //! Teuchos communicator
   Teuchos::RCP<const Teuchos_Comm> comm;
@@ -718,6 +718,8 @@ class STKDiscretization : public AbstractDiscretization
   Teuchos::RCP<AbstractSTKFieldContainer> solutionFieldContainer;
   AbstractFieldContainer::FieldContainerRequirements req;
   Teuchos::RCP<StateInfoStruct> sis;
+
+  Teuchos::Array<Teuchos::RCP<STKDiscretization>> side_discs;
 };
 
 }  // namespace Albany

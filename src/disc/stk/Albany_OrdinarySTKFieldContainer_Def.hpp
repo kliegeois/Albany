@@ -148,7 +148,7 @@ OrdinarySTKFieldContainer<Interleaved>::OrdinarySTKFieldContainer(
         params_->get<std::string>(
             sol_tag_name[num_vecs], sol_id_name[num_vecs]));
     stk::mesh::put_field_on_mesh(
-        *solution_field[num_vecs], metaData_->universal_part(), neq_, nullptr);
+        *solution_field[num_vecs], metaData_->universal_part(), neq_, nullptr); // KL: this
 
 #if defined(ALBANY_DTK)
     if (output_dtk_field == true) {
