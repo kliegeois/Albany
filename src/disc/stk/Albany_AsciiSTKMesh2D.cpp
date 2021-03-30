@@ -303,6 +303,7 @@ void Albany::AsciiSTKMesh2D::setFieldAndBulkData_1(
     const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req)
 {
   this->SetupFieldData(commT, req, sis, worksetSize);
+  this->finalizeSideSetMeshStructs_1(commT, side_set_req, side_set_sis, worksetSize);
 }
 
 
@@ -440,7 +441,7 @@ void Albany::AsciiSTKMesh2D::setFieldAndBulkData_2(
 #endif
 
   // Finally, perform the setup of the (possible) side set meshes (including extraction if of type SideSetSTKMeshStruct)
-  this->finalizeSideSetMeshStructs(commT, side_set_req, side_set_sis, worksetSize);
+  this->finalizeSideSetMeshStructs_2(commT, side_set_req, side_set_sis, worksetSize);
 
   fieldAndBulkDataSet = true;
 }

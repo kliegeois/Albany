@@ -239,6 +239,8 @@ void Albany::ExtrudedSTKMeshStruct::setFieldAndBulkData_1(
 
   // Setting up the field container
   this->SetupFieldData(comm, req, sis, worksetSize);
+
+  this->finalizeSideSetMeshStructs_1(comm, side_set_req, side_set_sis, worksetSize);
 }
 
 void Albany::ExtrudedSTKMeshStruct::setFieldAndBulkData_2(
@@ -733,7 +735,7 @@ void Albany::ExtrudedSTKMeshStruct::setFieldAndBulkData_2(
   this->checkNodeSetsFromSideSetsIntegrity ();
 
   // We can finally extract the side set meshes and set the fields and bulk data in all of them
-  this->finalizeSideSetMeshStructs(comm, side_set_req, side_set_sis, worksetSize);
+  this->finalizeSideSetMeshStructs_2(comm, side_set_req, side_set_sis, worksetSize);
 
   if (params->get("Export 2D Data",false))
   {

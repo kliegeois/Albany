@@ -533,19 +533,35 @@ namespace Albany
     }
 
     void
-    setFieldData(
+    setFieldData_1(
         const AbstractFieldContainer::FieldContainerRequirements &req,
         const Teuchos::RCP<StateInfoStruct> &sis)
     {
-      this->setFieldData(0, req, sis);
+      this->setFieldData_1(0, req, sis);
     }
     void
-    setFieldData(
+    setFieldData_1(
         const size_t i_block,
         const AbstractFieldContainer::FieldContainerRequirements &req,
         const Teuchos::RCP<StateInfoStruct> &sis)
     {
-      m_blocks[i_block]->setFieldData(req, sis);
+      m_blocks[i_block]->setFieldData_1(req, sis);
+    }
+
+    void
+    setFieldData_2(
+        const AbstractFieldContainer::FieldContainerRequirements &req,
+        const Teuchos::RCP<StateInfoStruct> &sis)
+    {
+      this->setFieldData_2(0, req, sis);
+    }
+    void
+    setFieldData_2(
+        const size_t i_block,
+        const AbstractFieldContainer::FieldContainerRequirements &req,
+        const Teuchos::RCP<StateInfoStruct> &sis)
+    {
+      m_blocks[i_block]->setFieldData_2(req, sis);
     }
 
     void

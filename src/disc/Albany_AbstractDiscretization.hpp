@@ -230,7 +230,12 @@ class AbstractDiscretization
       bool                overlapped) = 0;
 
   virtual void
-  setFieldData(
+  setFieldData_1(
+      const AbstractFieldContainer::FieldContainerRequirements& req,
+      const Teuchos::RCP<StateInfoStruct>& sis) = 0;
+
+  virtual void
+  setFieldData_2(
       const AbstractFieldContainer::FieldContainerRequirements& req,
       const Teuchos::RCP<StateInfoStruct>& sis) = 0;
 

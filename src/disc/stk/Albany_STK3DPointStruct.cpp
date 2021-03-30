@@ -60,6 +60,7 @@ Albany::STK3DPointStruct::setFieldAndBulkData_1(
 {
   std::cout << "---3DPoint::setFieldAndBulkData_1---" << std::endl;
   SetupFieldData(commT, req, sis, worksetSize);
+  this->finalizeSideSetMeshStructs_1(commT, side_set_req, side_set_sis, worksetSize);
 }
 
 void
@@ -90,7 +91,7 @@ Albany::STK3DPointStruct::setFieldAndBulkData_2(
   bulkData->modification_end();
 
   fieldAndBulkDataSet = true;
-  this->finalizeSideSetMeshStructs(commT, side_set_req, side_set_sis, worksetSize);
+  this->finalizeSideSetMeshStructs_2(commT, side_set_req, side_set_sis, worksetSize);
 }
 
 void

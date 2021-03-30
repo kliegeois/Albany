@@ -169,7 +169,8 @@ DiscretizationFactory::createDiscretization(
     setupInternalMeshStruct_1(sis, side_set_sis, req, 
                             side_set_req);
 
-    setFieldData(result, sis, req);
+    setFieldData_1(result, sis, req);
+    setFieldData_2(result, sis, req);
 
     setupInternalMeshStruct_2(sis, side_set_sis, req, 
                             side_set_req);
@@ -266,7 +267,7 @@ DiscretizationFactory::createDiscretizationFromInternalMeshStruct(
 }
 
 void
-DiscretizationFactory::setFieldData(Teuchos::RCP<AbstractDiscretization> disc,
+DiscretizationFactory::setFieldData_1(Teuchos::RCP<AbstractDiscretization> disc,
                                     const Teuchos::RCP<Albany::StateInfoStruct>& sis,
                                     const AbstractFieldContainer::FieldContainerRequirements& req) {
 
@@ -276,11 +277,33 @@ DiscretizationFactory::setFieldData(Teuchos::RCP<AbstractDiscretization> disc,
       auto ms = Teuchos::rcp_dynamic_cast<AbstractSTKMeshStruct>(meshStruct);
       if(ms->interleavedOrdering == DiscType::BlockedDisc){ // Use Panzer to do a blocked discretization
         auto stk_disc = Teuchos::rcp_dynamic_cast<BlockedSTKDiscretization>(disc);
-        stk_disc->setFieldData(req, sis);
+        stk_disc->setFieldData_1(req, sis);
       } else
       {
         auto stk_disc = Teuchos::rcp_dynamic_cast<STKDiscretization>(disc);
-        stk_disc->setFieldData(req, sis);
+        stk_disc->setFieldData_1(req, sis);
+      }
+      break;
+    }
+  }
+}
+
+void
+DiscretizationFactory::setFieldData_2(Teuchos::RCP<AbstractDiscretization> disc,
+                                    const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+                                    const AbstractFieldContainer::FieldContainerRequirements& req) {
+
+  switch (meshStruct->meshSpecsType()) {
+    case AbstractMeshStruct::STK_MS:
+    {
+      auto ms = Teuchos::rcp_dynamic_cast<AbstractSTKMeshStruct>(meshStruct);
+      if(ms->interleavedOrdering == DiscType::BlockedDisc){ // Use Panzer to do a blocked discretization
+        auto stk_disc = Teuchos::rcp_dynamic_cast<BlockedSTKDiscretization>(disc);
+        stk_disc->setFieldData_2(req, sis);
+      } else
+      {
+        auto stk_disc = Teuchos::rcp_dynamic_cast<STKDiscretization>(disc);
+        stk_disc->setFieldData_2(req, sis);
       }
       break;
     }

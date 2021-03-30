@@ -480,7 +480,8 @@ void MpasSTKMeshStruct::constructMesh(
 
   bulkData->change_entity_owner(node_to_proc);
 
-  this->finalizeSideSetMeshStructs(comm, {}, stateMgr.getSideSetStateInfoStruct(), worksetSize);
+  this->finalizeSideSetMeshStructs_1(comm, {}, stateMgr.getSideSetStateInfoStruct(), worksetSize);
+  this->finalizeSideSetMeshStructs_2(comm, {}, stateMgr.getSideSetStateInfoStruct(), worksetSize);
 }
 
 Teuchos::RCP<const Teuchos::ParameterList>

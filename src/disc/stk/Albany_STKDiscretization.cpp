@@ -2516,7 +2516,6 @@ STKDiscretization::updateMesh()
   int i_side_disc = 0;
   if (stkMeshStruct->sideSetMeshStructs.size() > 0) {
     for (auto it : stkMeshStruct->sideSetMeshStructs) {
-      //side_disc->setFieldData(req, sis); // KL: To do earlier
       side_discs[i_side_disc]->updateMesh();
       sideSetDiscretizations.insert(std::make_pair(it.first, side_discs[i_side_disc]));
       sideSetDiscretizationsSTK.insert(std::make_pair(it.first, side_discs[i_side_disc]));
@@ -2533,7 +2532,7 @@ STKDiscretization::updateMesh()
 }
 
 void
-STKDiscretization::setFieldData(
+STKDiscretization::setFieldData_1(
   const AbstractFieldContainer::FieldContainerRequirements& req_,
   const Teuchos::RCP<StateInfoStruct>& sis_)
 {
@@ -2579,6 +2578,7 @@ STKDiscretization::setFieldData(
     num_params = gBSTKFieldContainer->getNumParams();
   }
 
+  //metaData->enable_late_fields();
   num_time_deriv = params->get<int>("Number Of Time Derivatives");
 
   Teuchos::Array<std::string> default_solution_vector; // Empty
@@ -2625,11 +2625,18 @@ STKDiscretization::setFieldData(
     solutionFieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::BlockedMono>(
       params, metaData, bulkData, neq, req_, numDim, sis, num_params));
   }
+}
 
+
+void
+STKDiscretization::setFieldData_2(
+  const AbstractFieldContainer::FieldContainerRequirements& req_,
+  const Teuchos::RCP<StateInfoStruct>& sis_)
+{
   int i_side_disc = 0;
   if (stkMeshStruct->sideSetMeshStructs.size() > 0) {
     for (auto it : stkMeshStruct->sideSetMeshStructs) {
-      side_discs[i_side_disc]->setFieldData(req, sis);
+      side_discs[i_side_disc]->setFieldData_1(req, sis);
       ++i_side_disc;
     }
   }

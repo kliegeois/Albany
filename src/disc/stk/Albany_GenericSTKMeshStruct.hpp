@@ -82,7 +82,13 @@ protected:
   void initializeSideSetMeshStructs (const Teuchos::RCP<const Teuchos_Comm>& commT);
 
   //! Completes the creation of the side set mesh structs (if of type SideSetSTKMeshStruct)
-  void finalizeSideSetMeshStructs(
+  void finalizeSideSetMeshStructs_1(
+        const Teuchos::RCP<const Teuchos_Comm>& commT,
+        const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req,
+        const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
+        int worksetSize);
+
+  void finalizeSideSetMeshStructs_2(
         const Teuchos::RCP<const Teuchos_Comm>& commT,
         const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req,
         const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,

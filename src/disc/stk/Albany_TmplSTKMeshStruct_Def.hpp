@@ -453,6 +453,7 @@ Albany::TmplSTKMeshStruct<Dim, traits>::setFieldAndBulkData_1(
   }
 
   SetupFieldData(commT, req, sis, worksetSize);
+  this->finalizeSideSetMeshStructs_1(commT, side_set_req, side_set_sis, worksetSize);
 }
 
 template<unsigned Dim, class traits>
@@ -485,7 +486,7 @@ Albany::TmplSTKMeshStruct<Dim, traits>::setFieldAndBulkData_2(
   fieldAndBulkDataSet = true;
 
   // Finally, setup the side set meshes (if any)
-  this->finalizeSideSetMeshStructs(commT, side_set_req, side_set_sis, worksetSize);
+  this->finalizeSideSetMeshStructs_2(commT, side_set_req, side_set_sis, worksetSize);
 }
 
 template <unsigned Dim, class traits>

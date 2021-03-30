@@ -118,7 +118,12 @@ class DiscretizationFactory {
     const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements> empty_side_set_req;
 
     void
-    setFieldData(Teuchos::RCP<AbstractDiscretization> disc,
+    setFieldData_1(Teuchos::RCP<AbstractDiscretization> disc,
+                                        const Teuchos::RCP<Albany::StateInfoStruct>& sis,
+                                        const AbstractFieldContainer::FieldContainerRequirements& req);
+
+    void
+    setFieldData_2(Teuchos::RCP<AbstractDiscretization> disc,
                                         const Teuchos::RCP<Albany::StateInfoStruct>& sis,
                                         const AbstractFieldContainer::FieldContainerRequirements& req);
 

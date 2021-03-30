@@ -428,7 +428,11 @@ class STKDiscretization : public AbstractDiscretization
       const std::string&  field_name,
       const bool          overlapped = false);
 
-  void setFieldData(
+  void setFieldData_1(
+      const AbstractFieldContainer::FieldContainerRequirements& req,
+      const Teuchos::RCP<StateInfoStruct>& sis);
+
+  void setFieldData_2(
       const AbstractFieldContainer::FieldContainerRequirements& req,
       const Teuchos::RCP<StateInfoStruct>& sis);
 
