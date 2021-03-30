@@ -299,7 +299,8 @@ Albany::IossSTKMeshStruct::setFieldAndBulkData_1 (
 {
   this->SetupFieldData(commT, req, sis, worksetSize);
 
-  mesh_data->set_bulk_data(*bulkData);
+  if(mesh_data->is_bulk_data_null())
+    mesh_data->set_bulk_data(*bulkData);
 
   *out << "IOSS-STK: number of node sets = " << nsPartVec.size() << std::endl;
   *out << "IOSS-STK: number of side sets = " << ssPartVec.size() << std::endl;

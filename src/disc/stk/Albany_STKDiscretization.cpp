@@ -77,6 +77,8 @@ STKDiscretization::STKDiscretization(
 {
   // nothing to do
 
+  bulkData = Teuchos::null;
+
   int n_side_discs = 0;
   if (stkMeshStruct->sideSetMeshStructs.size() > 0) {
     for (auto it : stkMeshStruct->sideSetMeshStructs) {
@@ -2462,7 +2464,8 @@ STKDiscretization::buildSideSetProjectors()
 void
 STKDiscretization::updateMesh()
 {
-  bulkData = stkMeshStruct->bulkData;
+  if(bulkData == Teuchos::null)
+    bulkData = stkMeshStruct->bulkData;
 
   const StateInfoStruct& nodal_param_states =
       solutionFieldContainer->getNodalParameterSIS();
@@ -2558,22 +2561,15 @@ STKDiscretization::setFieldData_1(
   int num_time_deriv, numDim, num_params;
   Teuchos::RCP<Teuchos::ParameterList> params;
 
-  Teuchos::RCP<stk::mesh::MetaData> metaData;
-  Teuchos::RCP<stk::mesh::BulkData> bulkData;
-
   if(Teuchos::nonnull(gISTKFieldContainer))
   {
     params = gISTKFieldContainer->getParams();
-    metaData = gISTKFieldContainer->getMetaData();
-    bulkData = gISTKFieldContainer->getBulkData();
     numDim = gISTKFieldContainer->getNumDim();
     num_params = gISTKFieldContainer->getNumParams();
   }
   if(Teuchos::nonnull(gBSTKFieldContainer))
   {
     params = gBSTKFieldContainer->getParams();
-    metaData = gBSTKFieldContainer->getMetaData();
-    bulkData = gBSTKFieldContainer->getBulkData();
     numDim = gBSTKFieldContainer->getNumDim();
     num_params = gBSTKFieldContainer->getNumParams();
   }
