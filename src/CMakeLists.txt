@@ -313,9 +313,6 @@ list(APPEND SOURCES
   disc/stk/Albany_STK3DPointStruct.cpp
   disc/stk/Albany_TmplSTKMeshStruct.cpp
   disc/stk/STKConnManager.cpp
-  disc/stk/Albany_GenericSTKSolutionFieldContainer.cpp
-  disc/stk/Albany_MultiSTKSolutionFieldContainer.cpp
-  disc/stk/Albany_OrdinarySTKSolutionFieldContainer.cpp
 )
 list (APPEND HEADERS
   disc/stk/Albany_AbstractSTKFieldContainer.hpp
@@ -344,13 +341,6 @@ list (APPEND HEADERS
   disc/stk/Albany_TmplSTKMeshStruct.hpp
   disc/stk/Albany_TmplSTKMeshStruct_Def.hpp
   disc/stk/STKConnManager.hpp
-  disc/stk/Albany_AbstractSTKSolutionFieldContainer.hpp
-  disc/stk/Albany_GenericSTKSolutionFieldContainer.hpp
-  disc/stk/Albany_GenericSTKSolutionFieldContainer_Def.hpp
-  disc/stk/Albany_MultiSTKSolutionFieldContainer.hpp
-  disc/stk/Albany_MultiSTKSolutionFieldContainer_Def.hpp
-  disc/stk/Albany_OrdinarySTKSolutionFieldContainer.hpp
-  disc/stk/Albany_OrdinarySTKSolutionFieldContainer_Def.hpp
 )
 
 if (ALBANY_STK_REBALANCE)

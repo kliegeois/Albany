@@ -51,8 +51,6 @@ extern "C" {
 
 #include "Albany_MultiSTKFieldContainer.hpp"
 #include "Albany_OrdinarySTKFieldContainer.hpp"
-#include "Albany_MultiSTKSolutionFieldContainer.hpp"
-#include "Albany_OrdinarySTKSolutionFieldContainer.hpp"
 
 // Uncomment the following line if you want debug output to be printed to screen
 // #define OUTPUT_TO_SCREEN

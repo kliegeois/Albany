@@ -30,7 +30,7 @@
 #include <stk_io/StkMeshIoBroker.hpp>
 #endif
 
-#include "Albany_AbstractSTKSolutionFieldContainer.hpp"
+#include "Albany_AbstractSTKFieldContainer.hpp"
 
 namespace Albany {
 
