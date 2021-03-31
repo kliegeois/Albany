@@ -65,24 +65,24 @@ class DiscretizationFactory {
                          const Teuchos::RCP<Albany::RigidBodyModes>& rigidBodyModes = Teuchos::null);
 
     void
-    setupInternalMeshStruct_1(
+    setMeshStructFieldData(
       const Teuchos::RCP<Albany::StateInfoStruct>& sis,
       const AbstractFieldContainer::FieldContainerRequirements& req); 
 
    void
-    setupInternalMeshStruct_1(
+    setMeshStructFieldData(
       const Teuchos::RCP<Albany::StateInfoStruct>& sis,
       const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
       const AbstractFieldContainer::FieldContainerRequirements& req,
       const std::map<std::string,AbstractFieldContainer::FieldContainerRequirements>& side_set_req);
 
     void
-    setupInternalMeshStruct_2(
+    setMeshStructBulkData(
       const Teuchos::RCP<Albany::StateInfoStruct>& sis,
       const AbstractFieldContainer::FieldContainerRequirements& req); 
 
    void
-    setupInternalMeshStruct_2(
+    setMeshStructBulkData(
       const Teuchos::RCP<Albany::StateInfoStruct>& sis,
       const std::map<std::string,Teuchos::RCP<Albany::StateInfoStruct> >& side_set_sis,
       const AbstractFieldContainer::FieldContainerRequirements& req,

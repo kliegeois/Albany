@@ -164,10 +164,10 @@ DiscretizationFactory::createDiscretization(
     Teuchos::RCP<AbstractDiscretization> result =
             createDiscretizationFromInternalMeshStruct(neq, sideSetEquations, rigidBodyModes);
 
-    setupInternalMeshStruct_1(sis, side_set_sis, req, 
+    setMeshStructFieldData(sis, side_set_sis, req, 
                             side_set_req);
     setFieldData(result, sis, req);
-    setupInternalMeshStruct_2(sis, side_set_sis, req, 
+    setMeshStructBulkData(sis, side_set_sis, req, 
                             side_set_req);
     completeDiscSetup(result);
 
@@ -181,15 +181,15 @@ DiscretizationFactory::createMeshSpecs(Teuchos::RCP<AbstractMeshStruct> mesh) {
 }
 
 void
-DiscretizationFactory::setupInternalMeshStruct_1(
+DiscretizationFactory::setMeshStructFieldData(
         const Teuchos::RCP<StateInfoStruct>& sis,
         const AbstractFieldContainer::FieldContainerRequirements& req) {
-    setupInternalMeshStruct_1(sis, empty_side_set_sis, req, 
+    setMeshStructFieldData(sis, empty_side_set_sis, req, 
                             empty_side_set_req);
 }
 
 void
-DiscretizationFactory::setupInternalMeshStruct_1(
+DiscretizationFactory::setMeshStructFieldData(
         const Teuchos::RCP<StateInfoStruct>& sis,
         const std::map<std::string, Teuchos::RCP<StateInfoStruct> >& side_set_sis,
         const AbstractFieldContainer::FieldContainerRequirements& req,
@@ -201,15 +201,15 @@ DiscretizationFactory::setupInternalMeshStruct_1(
 }
 
 void
-DiscretizationFactory::setupInternalMeshStruct_2(
+DiscretizationFactory::setMeshStructBulkData(
         const Teuchos::RCP<StateInfoStruct>& sis,
         const AbstractFieldContainer::FieldContainerRequirements& req) {
-    setupInternalMeshStruct_2(sis, empty_side_set_sis, req, 
+    setMeshStructBulkData(sis, empty_side_set_sis, req, 
                             empty_side_set_req);
 }
 
 void
-DiscretizationFactory::setupInternalMeshStruct_2(
+DiscretizationFactory::setMeshStructBulkData(
         const Teuchos::RCP<StateInfoStruct>& sis,
         const std::map<std::string, Teuchos::RCP<StateInfoStruct> >& side_set_sis,
         const AbstractFieldContainer::FieldContainerRequirements& req,
