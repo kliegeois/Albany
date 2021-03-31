@@ -74,7 +74,7 @@ class AbstractSTKFieldContainer : public AbstractFieldContainer
   typedef std::map<std::string, std::vector<int>> MeshVectorIntegerState;
 
 
-  AbstractSTKFieldContainer() : proc_rank_field(nullptr){};
+  AbstractSTKFieldContainer(bool solutionFieldContainer_) : proc_rank_field(nullptr), solutionFieldContainer(solutionFieldContainer_) {};
 
 
   //! Destructor
@@ -190,6 +190,11 @@ class AbstractSTKFieldContainer : public AbstractFieldContainer
   }
 
   virtual void
+  fillSolnVector(
+      Thyra_Vector&                                soln,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
   fillVector(
       Thyra_Vector&                                field_vector,
       const std::string&                           field_name,
@@ -197,12 +202,52 @@ class AbstractSTKFieldContainer : public AbstractFieldContainer
       const Teuchos::RCP<const Thyra_VectorSpace>& field_node_vs,
       const NodalDOFManager&                       nodalDofManager) = 0;
   virtual void
+  fillSolnMultiVector(
+      Thyra_MultiVector&                           soln,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
   saveVector(
       const Thyra_Vector&                          field_vector,
       const std::string&                           field_name,
       stk::mesh::Selector&                         field_selection,
       const Teuchos::RCP<const Thyra_VectorSpace>& field_node_vs,
       const NodalDOFManager&                       nodalDofManager) = 0;
+  virtual void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      const Thyra_Vector&                          soln_dot,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      const Thyra_Vector&                          soln_dot,
+      const Thyra_Vector&                          soln_dotdot,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
+  saveResVector(
+      const Thyra_Vector&                          res,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+  virtual void
+  saveSolnMultiVector(
+      const Thyra_MultiVector&                     soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs) = 0;
+
+  virtual void
+  transferSolutionToCoords() = 0;
 
  protected:
   // Note: for 3d meshes, coordinates_field3d==coordinates_field (they point to
@@ -230,6 +275,8 @@ class AbstractSTKFieldContainer : public AbstractFieldContainer
   StateInfoStruct nodal_parameter_sis;
 
   std::map<std::string, double> time;
+
+  const bool solutionFieldContainer;
 };
 
 }  // namespace Albany

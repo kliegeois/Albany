@@ -2545,11 +2545,13 @@ STKDiscretization::setFieldData(
   {
     params = gISTKFieldContainer->getParams();
     numDim = gISTKFieldContainer->getNumDim();
+    num_params = gISTKFieldContainer->getNumParams();
   }
   if(Teuchos::nonnull(gBSTKFieldContainer))
   {
     params = gBSTKFieldContainer->getParams();
     numDim = gBSTKFieldContainer->getNumDim();
+    num_params = gBSTKFieldContainer->getNumParams();
   }
 
   num_time_deriv = params->get<int>("Number Of Time Derivatives");
@@ -2581,27 +2583,23 @@ STKDiscretization::setFieldData(
 
   if(Teuchos::nonnull(mISTKFieldContainer))
   {
-    num_params = mISTKFieldContainer->getNumParams();
-    solutionFieldContainer = Teuchos::rcp(new MultiSTKSolutionFieldContainer<DiscType::Interleaved>(
-      params, numDim, neq, mISTKFieldContainer, solution_vector, num_params));
+    solutionFieldContainer = Teuchos::rcp(new MultiSTKFieldContainer<DiscType::Interleaved>(
+      params, stkMeshStruct->metaData, stkMeshStruct->bulkData, neq, numDim, sis, solution_vector, num_params));
   }
   if(Teuchos::nonnull(mBSTKFieldContainer))
   {
-    num_params = mBSTKFieldContainer->getNumParams();
-    solutionFieldContainer = Teuchos::rcp(new MultiSTKSolutionFieldContainer<DiscType::BlockedMono>(
-      params, numDim, neq, mBSTKFieldContainer, solution_vector, num_params));
+    solutionFieldContainer = Teuchos::rcp(new MultiSTKFieldContainer<DiscType::BlockedMono>(
+      params, stkMeshStruct->metaData, stkMeshStruct->bulkData, neq, numDim, sis, solution_vector, num_params));
   }
   if(Teuchos::nonnull(oISTKFieldContainer))
   {
-    num_params = oISTKFieldContainer->getNumParams();
-    solutionFieldContainer = Teuchos::rcp(new OrdinarySTKSolutionFieldContainer<DiscType::Interleaved>(
-      params, numDim, neq, oISTKFieldContainer, solution_vector, num_params));
+    solutionFieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::Interleaved>(
+      params, stkMeshStruct->metaData, stkMeshStruct->bulkData, neq, req, numDim, sis, num_params));
   }
   if(Teuchos::nonnull(oBSTKFieldContainer))
   {
-    num_params = oBSTKFieldContainer->getNumParams();
-    solutionFieldContainer = Teuchos::rcp(new OrdinarySTKSolutionFieldContainer<DiscType::BlockedMono>(
-      params, numDim, neq, oBSTKFieldContainer, solution_vector, num_params));
+    solutionFieldContainer = Teuchos::rcp(new OrdinarySTKFieldContainer<DiscType::BlockedMono>(
+      params, stkMeshStruct->metaData, stkMeshStruct->bulkData, neq, req, numDim, sis, num_params));
   }
 }
 

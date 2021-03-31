@@ -131,16 +131,16 @@ void GenericSTKMeshStruct::SetupFieldData(
   Teuchos::Array<std::string> residual_vector =
     params->get<Teuchos::Array<std::string> >("Residual Vector Components", default_residual_vector);
 
-  int neq = 0; // KL: to do
+  int neq = 1; // KL: to do
   // Build the usual Albany fields unless the user explicitly specifies the residual or solution vector layout
   if(user_specified_solution_components && (residual_vector.length() > 0)){
 
       if(interleavedOrdering == DiscType::Interleaved)
         this->fieldContainer = Teuchos::rcp(new MultiSTKFieldContainer<DiscType::Interleaved>(params,
-            metaData, bulkData, numDim, sis, solution_vector, num_params));
+            metaData, bulkData, numDim, sis, num_params));
       else
         this->fieldContainer = Teuchos::rcp(new MultiSTKFieldContainer<DiscType::BlockedMono>(params,
-            metaData, bulkData, numDim, sis, solution_vector, num_params));
+            metaData, bulkData, numDim, sis, num_params));
 
   }
 

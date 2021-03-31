@@ -21,12 +21,26 @@ class MultiSTKFieldContainer : public GenericSTKFieldContainer<Interleaved>
       const Teuchos::RCP<stk::mesh::MetaData>&                  metaData_,
       const Teuchos::RCP<stk::mesh::BulkData>&                  bulkData_,
       const int                                                 numDim_,
+      const Teuchos::RCP<StateInfoStruct>&                      sis,
+      const int                                                 num_params);
+ 
+  MultiSTKFieldContainer(
+      const Teuchos::RCP<Teuchos::ParameterList>&               params_,
+      const Teuchos::RCP<stk::mesh::MetaData>&                  metaData_,
+      const Teuchos::RCP<stk::mesh::BulkData>&                  bulkData_,
+      const int                                                 neq_,
+      const int                                                 numDim_,
       const Teuchos::RCP<Albany::StateInfoStruct>&              sis,
       const Teuchos::Array<Teuchos::Array<std::string>>&        solution_vector,
       const int                                                 num_params);
 
   ~MultiSTKFieldContainer() = default;
 
+  void
+  fillSolnVector(
+      Thyra_Vector&                                soln,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs);
   void
   fillVector(
       Thyra_Vector&                                field_vector,
@@ -35,14 +49,52 @@ class MultiSTKFieldContainer : public GenericSTKFieldContainer<Interleaved>
       const Teuchos::RCP<const Thyra_VectorSpace>& field_node_vs,
       const NodalDOFManager&                       nodalDofManager);
   void
+  fillSolnMultiVector(
+      Thyra_MultiVector&                           soln,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs);
+  void
   saveVector(
       const Thyra_Vector&                          field_vector,
       const std::string&                           field_name,
       stk::mesh::Selector&                         field_selection,
       const Teuchos::RCP<const Thyra_VectorSpace>& field_node_vs,
       const NodalDOFManager&                       nodalDofManager);
+  void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs);
+  void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      const Thyra_Vector&                          soln_dot,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs);
+  void
+  saveSolnVector(
+      const Thyra_Vector&                          soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      const Thyra_Vector&                          soln_dot,
+      const Thyra_Vector&                          soln_dotdot,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs);
+  void
+  saveResVector(
+      const Thyra_Vector&                          res,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs);
+  void
+  saveSolnMultiVector(
+      const Thyra_MultiVector&                     soln,
+      const Teuchos::RCP<const Thyra_MultiVector>& soln_dxdp,
+      stk::mesh::Selector&                         sel,
+      const Teuchos::RCP<const Thyra_VectorSpace>& node_vs);
 
-  int getNumParams() {return num_params;}
+  void
+  transferSolutionToCoords();
 
  private:
   void
@@ -67,10 +119,11 @@ class MultiSTKFieldContainer : public GenericSTKFieldContainer<Interleaved>
 
   // Containers for residual and solution
 
+  Teuchos::Array<Teuchos::Array<std::string>> sol_vector_name;
+  Teuchos::Array<Teuchos::Array<int>>         sol_index;
 
   Teuchos::Array<std::string> res_vector_name;
   Teuchos::Array<int>         res_index;
-  int num_params;
 };
 
 }  // namespace Albany
