@@ -39,7 +39,7 @@ def main(parallelEnv):
 
     l = np.linspace(l_min, l_max, n_l)
 
-    theta_star = np.zeros((n_l, 1))
+    theta_star = np.zeros((n_l, 2))
     I_star = np.zeros((n_l,))
     F_star = np.zeros((n_l,))
 
@@ -49,16 +49,20 @@ def main(parallelEnv):
 
         problem.performAnalysis()
 
-        #para_0 = problem.getParameter(0)
-        #theta_star[i, :] = para_0.getData()
+        para_0 = problem.getParameter(0)
+        theta_star[i, :] = para_0.getData()
 
-        #response_1 = problem.getResponse(1)
+        problem.performSolve()
+        response = problem.getResponse(0)
         #response_2 = problem.getResponse(2)
 
-        #I_star[i] = response_1.getData()[0]
+        I_star[i] = response.getData()[0]
         #F_star[i] = response_2.getData()[0]
 
     P_star = np.exp(-I_star)
+
+    print(theta_star)
+    print(I_star)
 
     if myGlobalRank == 0:
         if printPlot:

@@ -126,10 +126,30 @@ evaluateResponse(const double /*current_time*/,
 
   double I = 0.5 * tmp2.dot(tmp1);
 
+  std::cout << "theta_0 = [ " ;
+  for (int i=0; i<n_parameters; i++)
+    std::cout << (*theta_0)(i) << " ";
+  std::cout << "]" << std::endl;
+  std::cout << "theta = [ " ;
+  for (int i=0; i<n_parameters; i++)
+    std::cout << theta(i) << " ";
+  std::cout << "]" << std::endl;
+  std::cout << "theta - theta_0 = [ " ;
+  for (int i=0; i<n_parameters; i++)
+    std::cout << tmp1(i) << " ";
+  std::cout << "]" << std::endl;
+  //std::cout << "C = " << C << std::endl;
+  std::cout << "tmp2 = [ " ;
+  for (int i=0; i<n_parameters; i++)
+    std::cout << tmp2(i) << " ";
+  std::cout << "]" << std::endl;
+  std::cout << "I = " << I << std::endl;
+
   if (g_.is_null())
     g_ = Thyra::createMember(g->space());
 
-  g_->assign(I);
+  Thyra::set_ele(0, I, g_.ptr());
+  //g_->assign(I);
 }
 
 void LDTRateResponseFunction::
@@ -191,7 +211,7 @@ evaluateTangent(const double /*alpha*/,
 
   if (!g_.is_null()) {
     double I = 0.5 * tmp2.dot(tmp1);
-    g_->assign(I);
+    Thyra::set_ele(0, I, g_.ptr());
   }
 
   if (!gx.is_null()) {
@@ -309,7 +329,7 @@ evaluateGradient(const double /*current_time*/,
     const Teuchos::RCP<const Thyra_Vector>& x,
     const Teuchos::RCP<const Thyra_Vector>& /*xdot*/,
     const Teuchos::RCP<const Thyra_Vector>& /*xdotdot*/,
-		const Teuchos::Array<ParamVec>& /*p*/,
+		const Teuchos::Array<ParamVec>& p,
 		ParamVec* /*deriv_p*/,
 		const Teuchos::RCP<Thyra_Vector>& g,
     const Teuchos::RCP<Thyra_MultiVector>& dg_dx,
@@ -325,23 +345,49 @@ evaluateGradient(const double /*current_time*/,
   }
 
   if (!dg_dp.is_null()) {
-    dg_dp->assign(0.0);
+    // I(\theta) = 1/2 \|\theta-\theta_0 \|^2_{C^{-1}}
+    //           = 1/2 (\theta-\theta_0)^T C^{-1} (\theta-\theta_0)
+
+    typedef SerialDenseVector<int, double> DVector;
+
+    DVector theta(n_parameters), tmp1(n_parameters), tmp2(n_parameters);
+
+    ParamVec params_l = p[0];
+    unsigned int num_cols_p_l = params_l.size();
+
+    TEUCHOS_TEST_FOR_EXCEPTION(
+        num_cols_p_l != n_parameters,
+        Teuchos::Exceptions::InvalidParameter,
+        std::endl
+            << "Error!  Albany::LDTRateResponseFunction::evaluateTangent():  "
+            << "The number of parameter in the parameter vector "
+            << num_cols_p_l
+            << " is not consistent with the number of parameter of the xml file "
+            << n_parameters
+            << std::endl);  
+
+    for (int i=0; i<n_parameters; i++) {
+      theta(i) = params_l[i].family->getValue<PHAL::AlbanyTraits::Residual>();;
+    }
+
+    for (int i=0; i<n_parameters; i++) {
+      tmp1(i) = theta(i) - (*theta_0)(i);
+    }
+
+    tmp2.putScalar( ScalarTraits<double>::zero() );
+
+    Teuchos::SerialDenseSolver<int, double> solver;
+    solver.setMatrix( C );
+    solver.setVectors( Teuchos::rcp( &tmp2, false ), Teuchos::rcp( &tmp1, false ) );
+
+    solver.factor();
+    solver.solve();
+
+    for (int i=0; i<n_parameters; i++) {
+      Thyra::set_ele(i, tmp2(i), dg_dp->col(0).ptr());
+    }
   }
 }
-
-/*
-void LDTRateResponseFunction::updateCASManager()
-{
-  const Teuchos::RCP<const Thyra_VectorSpace> solutionVS = app_->getVectorSpace();
-  if (cas_manager.is_null() || !sameAs(solutionVS,cas_manager->getOwnedVectorSpace())) {
-    const Teuchos::Array<GO> selectedGIDs = cullingStrategy_->selectedGIDs(solutionVS);
-    Teuchos::RCP<const Thyra_VectorSpace> targetVS = createVectorSpace(app_->getComm(),selectedGIDs);
-
-    cas_manager = createCombineAndScatterManager(solutionVS,targetVS);
-    culledVec = Thyra::createMember(targetVS);
-  }
-}
-*/
 
 void
 LDTRateResponseFunction::
