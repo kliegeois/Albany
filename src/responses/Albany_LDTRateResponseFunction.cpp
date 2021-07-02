@@ -41,6 +41,7 @@ LDTRateResponseFunction(const Teuchos::RCP<const Application>& app,
   n_parameters = responseParams.get<int>("Number Of Parameters", 1);
   theta_0 = Teuchos::rcp( new Teuchos::SerialDenseVector<int, double>(n_parameters) );
   C = Teuchos::rcp( new Teuchos::SerialDenseMatrix<int, double>(n_parameters,n_parameters) );
+  invC = Teuchos::rcp( new Teuchos::SerialDenseMatrix<int, double>(n_parameters,n_parameters) );
 
   Teuchos::TwoDArray<double> C_data(n_parameters, n_parameters, 0);
   if (responseParams.isParameter("Covariance Matrix")) {
@@ -66,6 +67,19 @@ LDTRateResponseFunction(const Teuchos::RCP<const Application>& app,
 
   for (int i=0; i<n_parameters; i++)
     (*theta_0)(i) = theta_0_data[i];
+  
+  // Fill invC:
+  SerialDenseVector<int, double> tmp1(n_parameters), tmp2(n_parameters);
+  Teuchos::SerialDenseSolver<int, double> solver;
+  solver.setMatrix( C );
+  for (int i=0; i<n_parameters; i++) {
+    tmp1.putScalar( 0.0 );
+    tmp1(i) = 1.0;
+    solver.setVectors( Teuchos::rcp( &tmp2, false ), Teuchos::rcp( &tmp1, false ) );
+    solver.factor();
+    solver.solve();
+    Teuchos::setCol<int, double>( tmp2, i, *invC );
+  }
 }
 
 void LDTRateResponseFunction::setup()
@@ -115,41 +129,16 @@ evaluateResponse(const double /*current_time*/,
     tmp1(i) = theta(i) - (*theta_0)(i);
   }
 
-  tmp2.putScalar( ScalarTraits<double>::zero() );
-
-  Teuchos::SerialDenseSolver<int, double> solver;
-  solver.setMatrix( C );
-  solver.setVectors( Teuchos::rcp( &tmp2, false ), Teuchos::rcp( &tmp1, false ) );
-
-  solver.factor();
-  solver.solve();
+  tmp2.multiply( Teuchos::NO_TRANS, Teuchos::NO_TRANS, 1.0, *invC, tmp1, 0.0 );
 
   double I = 0.5 * tmp2.dot(tmp1);
 
-  std::cout << "theta_0 = [ " ;
-  for (int i=0; i<n_parameters; i++)
-    std::cout << (*theta_0)(i) << " ";
-  std::cout << "]" << std::endl;
-  std::cout << "theta = [ " ;
-  for (int i=0; i<n_parameters; i++)
-    std::cout << theta(i) << " ";
-  std::cout << "]" << std::endl;
-  std::cout << "theta - theta_0 = [ " ;
-  for (int i=0; i<n_parameters; i++)
-    std::cout << tmp1(i) << " ";
-  std::cout << "]" << std::endl;
-  //std::cout << "C = " << C << std::endl;
-  std::cout << "tmp2 = [ " ;
-  for (int i=0; i<n_parameters; i++)
-    std::cout << tmp2(i) << " ";
-  std::cout << "]" << std::endl;
-  std::cout << "I = " << I << std::endl;
+  g->assign(I);
 
   if (g_.is_null())
     g_ = Thyra::createMember(g->space());
 
-  Thyra::set_ele(0, I, g_.ptr());
-  //g_->assign(I);
+  g_->assign(*g);
 }
 
 void LDTRateResponseFunction::
@@ -200,18 +189,15 @@ evaluateTangent(const double /*alpha*/,
     tmp1(i) = theta(i) - (*theta_0)(i);
   }
 
-  tmp2.putScalar( ScalarTraits<double>::zero() );
+  tmp2.multiply( Teuchos::NO_TRANS, Teuchos::NO_TRANS, 1.0, *invC, tmp1, 0.0 );
 
-  Teuchos::SerialDenseSolver<int, double> solver;
-  solver.setMatrix( C );
-  solver.setVectors( Teuchos::rcp( &tmp2, false ), Teuchos::rcp( &tmp1, false ) );
-
-  solver.factor();
-  solver.solve();
-
+  if (!g.is_null()) {
+    double I = 0.5 * tmp2.dot(tmp1);
+    g->assign(I);
+  }
   if (!g_.is_null()) {
     double I = 0.5 * tmp2.dot(tmp1);
-    Thyra::set_ele(0, I, g_.ptr());
+    g_->assign(I);
   }
 
   if (!gx.is_null()) {
@@ -309,14 +295,7 @@ evaluate_HessVecProd_pp(
       tmp1(i) = Thyra::get_ele(*v->col(0),i);
     }
 
-    tmp2.putScalar( ScalarTraits<double>::zero() );
-
-    Teuchos::SerialDenseSolver<int, double> solver;
-    solver.setMatrix( C );
-    solver.setVectors( Teuchos::rcp( &tmp2, false ), Teuchos::rcp( &tmp1, false ) );
-
-    solver.factor();
-    solver.solve();
+    tmp2.multiply( Teuchos::NO_TRANS, Teuchos::NO_TRANS, 1.0, *invC, tmp1, 0.0 );
 
     for (int i=0; i<n_parameters; i++) {
       Thyra::set_ele(i, tmp2(i), Hv_dp->col(0).ptr());
@@ -374,14 +353,7 @@ evaluateGradient(const double /*current_time*/,
       tmp1(i) = theta(i) - (*theta_0)(i);
     }
 
-    tmp2.putScalar( ScalarTraits<double>::zero() );
-
-    Teuchos::SerialDenseSolver<int, double> solver;
-    solver.setMatrix( C );
-    solver.setVectors( Teuchos::rcp( &tmp2, false ), Teuchos::rcp( &tmp1, false ) );
-
-    solver.factor();
-    solver.solve();
+    tmp2.multiply( Teuchos::NO_TRANS, Teuchos::NO_TRANS, 1.0, *invC, tmp1, 0.0 );
 
     for (int i=0; i<n_parameters; i++) {
       Thyra::set_ele(i, tmp2(i), dg_dp->col(0).ptr());
