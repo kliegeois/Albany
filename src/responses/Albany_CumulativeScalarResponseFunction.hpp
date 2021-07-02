@@ -23,7 +23,8 @@ namespace Albany {
     //! Default constructor
     CumulativeScalarResponseFunction(
       const Teuchos::RCP<const Teuchos_Comm>& commT,
-      const Teuchos::Array< Teuchos::RCP<ScalarResponseFunction> >& responses);
+      const Teuchos::Array< Teuchos::RCP<ScalarResponseFunction> >& responses,
+      const Teuchos::Array< double >& scalar_weights);
 
     //! Setup response function
     virtual void setup();
@@ -154,6 +155,7 @@ namespace Albany {
 
     //! Response functions to add
     Teuchos::Array< Teuchos::RCP<ScalarResponseFunction> > responses;
+    Teuchos::Array< double > scalar_weights;
     unsigned int num_responses;
 
   };

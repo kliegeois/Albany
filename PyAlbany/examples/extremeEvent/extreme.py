@@ -26,11 +26,6 @@ def main(parallelEnv):
         filename = "input_dirichletT_1.yaml"
     else:
         filename = "input_dirichletT_2.yaml"
-    parameter = Utils.createParameterList(
-        filename, parallelEnv
-    )
-
-    problem = Utils.createAlbanyProblem(parameter, parallelEnv)
 
     #----------------------------------------------
     #
@@ -39,8 +34,8 @@ def main(parallelEnv):
     #----------------------------------------------
 
     l_min = 0.1
-    l_max = 1
-    n_l = 4
+    l_max = 5
+    n_l = 30
 
     l = np.linspace(l_min, l_max, n_l)
 
@@ -50,7 +45,12 @@ def main(parallelEnv):
 
     # Loop over the lambdas
     for i in range(0, n_l):
-        parameter.sublist("Problem").sublist("Response Functions").sublist("Response 0").sublist("Response 1").set("Scaling Coefficient", -l[i])
+        parameter = Utils.createParameterList(
+            filename, parallelEnv
+        )
+
+        parameter.sublist("Problem").sublist("Response Functions").sublist("Response 0").set("Scaling Coefficient 1", -l[i])
+        problem = Utils.createAlbanyProblem(parameter, parallelEnv)
 
         problem.performAnalysis()
 
