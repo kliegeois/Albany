@@ -56,6 +56,7 @@ namespace Albany
                          const Teuchos::RCP<const Thyra_Vector> &xdot,
                          const Teuchos::RCP<const Thyra_Vector> &xdotdot,
                          const Teuchos::Array<ParamVec> &p,
+                         int parameter_index,
                          ParamVec *deriv_p,
                          const Teuchos::RCP<const Thyra_MultiVector> &Vx,
                          const Teuchos::RCP<const Thyra_MultiVector> &Vxdot,
@@ -132,6 +133,12 @@ namespace Albany
     printResponse(Teuchos::RCP<Teuchos::FancyOStream> out);
 
   private:
+    void evaluateResponseImpl (const Teuchos::Array<ParamVec> &p,
+                              Thyra_Vector& g);
+
+    void evaluateGradientImpl (const Teuchos::Array<ParamVec> &p,
+		                           Teuchos::SerialDenseVector<int, double>& dgdp);
+
     Teuchos::RCP<const Application> app_;
 
     Teuchos::RCP<Thyra_Vector> g_;

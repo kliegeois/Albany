@@ -103,6 +103,7 @@ evaluateTangent(const double alpha,
     const Teuchos::RCP<const Thyra_Vector>& xdot,
     const Teuchos::RCP<const Thyra_Vector>& xdotdot,
 		const Teuchos::Array<ParamVec>& p,
+    int parameter_index,
 		ParamVec* deriv_p,
     const Teuchos::RCP<const Thyra_MultiVector>& Vx,
     const Teuchos::RCP<const Thyra_MultiVector>& Vxdot,
@@ -144,7 +145,7 @@ evaluateTangent(const double alpha,
 
     // Evaluate response function
     responses[i]->evaluateTangent(alpha, beta, omega, current_time, sum_derivs,
-				  x, xdot, xdotdot, p, deriv_p, Vx, Vxdot, Vxdotdot, Vp, 
+				  x, xdot, xdotdot, p, parameter_index, deriv_p, Vx, Vxdot, Vxdotdot, Vp, 
           g_i, gx_i, gp_i);
 
     // Copy results into combined result

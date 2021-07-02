@@ -20,7 +20,12 @@ def main(parallelEnv):
     myGlobalRank = comm.rank
 
     # Create an Albany problem:
-    filename = "input_dirichletT.yaml"
+
+    n_params = 2
+    if n_params==1:
+        filename = "input_dirichletT_1.yaml"
+    else:
+        filename = "input_dirichletT_2.yaml"
     parameter = Utils.createParameterList(
         filename, parallelEnv
     )
@@ -34,23 +39,24 @@ def main(parallelEnv):
     #----------------------------------------------
 
     l_min = 0.1
-    l_max = 2
-    n_l = 1
+    l_max = 1
+    n_l = 4
 
     l = np.linspace(l_min, l_max, n_l)
 
-    theta_star = np.zeros((n_l, 2))
+    theta_star = np.zeros((n_l, n_params))
     I_star = np.zeros((n_l,))
     F_star = np.zeros((n_l,))
 
     # Loop over the lambdas
     for i in range(0, n_l):
-        #parameter.sublist("Problem").sublist("Response Functions").sublist("Response 0").sublist("Response 1").set("Scaling Coefficient", -l[i])
+        parameter.sublist("Problem").sublist("Response Functions").sublist("Response 0").sublist("Response 1").set("Scaling Coefficient", -l[i])
 
         problem.performAnalysis()
 
-        para_0 = problem.getParameter(0)
-        theta_star[i, :] = para_0.getData()
+        for j in range(0, n_params):
+            para = problem.getParameter(j)
+            theta_star[i, j] = para.getData()
 
         problem.performSolve()
         response = problem.getResponse(0)
