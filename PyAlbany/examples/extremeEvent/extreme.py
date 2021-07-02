@@ -34,7 +34,7 @@ def main(parallelEnv):
     #----------------------------------------------
 
     l_min = 0.1
-    l_max = 5
+    l_max = 3.5
     n_l = 30
 
     l = np.linspace(l_min, l_max, n_l)
@@ -59,11 +59,10 @@ def main(parallelEnv):
             theta_star[i, j] = para.getData()
 
         problem.performSolve()
-        response = problem.getResponse(0)
-        #response_2 = problem.getResponse(2)
 
-        I_star[i] = response.getData()[0]
-        #F_star[i] = response_2.getData()[0]
+        data = np.loadtxt('CumulativeScalarResponseFunction.txt')
+        I_star[i] = data[0]
+        F_star[i] = data[1]
 
     P_star = np.exp(-I_star)
 
@@ -73,11 +72,17 @@ def main(parallelEnv):
     if myGlobalRank == 0:
         if printPlot:
             plt.figure()
-            plt.semilogy(F_star,P_star)
+            plt.semilogy(F_star,P_star,'*-')
 
             plt.savefig('extreme.jpeg', dpi=800)
             plt.close()
 
+            if n_params==2:
+                plt.figure()
+                plt.plot(theta_star[:,0],theta_star[:,1],'*-')
+
+                plt.savefig('theta_star.jpeg', dpi=800)
+                plt.close()
     #----------------------------------------------
     #
     #   2. Evaluation of the prefactor using IS

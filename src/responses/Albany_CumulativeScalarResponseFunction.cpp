@@ -445,4 +445,11 @@ printResponse(Teuchos::RCP<Teuchos::FancyOStream> out)
     else
       *out << "]";
   }
+
+  std::ofstream myfile;
+  RCP<Teuchos::FancyOStream> fancy = Teuchos::fancyOStream(Teuchos::rcpFromRef(myfile));
+  myfile.open("CumulativeScalarResponseFunction.txt");
+  for (unsigned int i=0; i<responses.size(); i++)
+    responses[i]->printResponse(fancy);
+  myfile.close();
 }
