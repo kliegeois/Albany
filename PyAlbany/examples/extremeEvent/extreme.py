@@ -17,8 +17,8 @@ except:
     printPlot = False
 
 
-def evaluate_responses(X, Y, parallelEnv):
-    if os.path.isfile('Z1.txt'):
+def evaluate_responses(X, Y, parallelEnv, recompute=False):
+    if not recompute and os.path.isfile('Z1.txt'):
         Z1 = np.loadtxt('Z1.txt')
         Z2 = np.loadtxt('Z2.txt')
     else:
@@ -83,8 +83,8 @@ def main(parallelEnv):
     # ----------------------------------------------
 
     l_min = 0.1
-    l_max = 3.5
-    n_l = 30
+    l_max = 2.5
+    n_l = 20
 
     l = np.linspace(l_min, l_max, n_l)
 
