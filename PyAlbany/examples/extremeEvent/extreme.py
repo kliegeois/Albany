@@ -53,38 +53,11 @@ def evaluate_responses(X, Y, problem, recompute=False):
     return Z1, Z2
 
 
-def main(parallelEnv):
-    comm = MPI.COMM_WORLD
-    myGlobalRank = comm.rank
-
-    # Create an Albany problem:
-
-    n_params = 2
-    if n_params == 1:
-        filename = "input_dirichletT_1.yaml"
-    else:
-        filename = "input_dirichletT_2.yaml"
-
-    # ----------------------------------------------
-    #
-    #      1. Evaluation of the theta star
-    #
-    # ----------------------------------------------
-
-    l_min = 0.1
-    l_max = 2.5
-    n_l = 20
-
-    l = np.linspace(l_min, l_max, n_l)
-
-    theta_star = np.zeros((n_l, n_params))
+def evaluate_theta_star(l, problem, n_params, response_id=0, F_id=1):
+    n_l = len(l)
+    theta_star = np.zeros((n_l,n_params))
     I_star = np.zeros((n_l,))
     F_star = np.zeros((n_l,))
-
-    parameter = Utils.createParameterList(
-        filename, parallelEnv
-    )
-    problem = Utils.createAlbanyProblem(parameter, parallelEnv)
 
     # Loop over the lambdas
     for i in range(0, n_l):
@@ -102,9 +75,88 @@ def main(parallelEnv):
 
     P_star = np.exp(-I_star)
 
-    print(theta_star)
-    print(I_star)
+    return theta_star, I_star, F_star, P_star
 
+
+def importance_sampling_estimator(theta_0, C, theta_star, F_star, P_star, samples_0, problem):
+    invC = np.linalg.inv(C)
+    n_l = len(F_star)
+    P = np.zeros((n_l,))
+    n_samples = np.shape(samples_0)[0]
+    n_params = np.shape(samples_0)[1]
+    for i in range(0, n_l):
+        for j in range(0, n_samples):
+            sample = samples_0[j,:] + theta_star[i,:] - theta_0
+            for k in range(0, n_params):
+                parameter_map = problem.getParameterMap(k)
+                parameter = Tpetra.Vector(parameter_map, dtype="d")
+                parameter[0] = sample[k]
+                problem.setParameter(k, parameter)
+            problem.performSolve()
+
+            if problem.getCumulativeResponseContribution(0, 1) > F_star[i]:
+                P[i] += np.exp(-invC.dot(theta_star[i,:]-theta_0).dot(sample-theta_star[i,:]))
+        P[i] = P_star[i] * P[i] / n_samples
+    return P
+
+
+def main(parallelEnv):
+    comm = MPI.COMM_WORLD
+    myGlobalRank = comm.rank
+
+    # Create an Albany problem:
+
+    n_params = 2
+    if n_params == 1:
+        filename = "input_dirichletT_1.yaml"
+    else:
+        filename = "input_dirichletT_2.yaml"
+
+    parameter = Utils.createParameterList(
+        filename, parallelEnv
+    )
+    problem = Utils.createAlbanyProblem(parameter, parallelEnv)
+
+    # ----------------------------------------------
+    #
+    #      1. Evaluation of the theta star
+    #
+    # ----------------------------------------------
+
+    l_min = 0.1
+    l_max = 2.5
+    n_l = 20
+
+    l = np.linspace(l_min, l_max, n_l)
+
+    theta_star, I_star, F_star, P_star = evaluate_theta_star(l, problem, n_params)
+
+    np.savetxt('theta_star.txt', theta_star)
+    np.savetxt('I_star.txt', I_star)
+    np.savetxt('P_star.txt', P_star)
+
+    # ----------------------------------------------
+    #
+    #   2. Evaluation of the prefactor using IS
+    #
+    # ----------------------------------------------
+
+    N_samples = 1000
+
+    mean = np.array([1., 1.])
+    cov = np.array([[1., 0.], [0., 1.]])
+
+    samples = np.random.multivariate_normal(mean, cov, N_samples)
+
+    P = importance_sampling_estimator(mean, cov, theta_star, F_star, P_star, samples, problem)
+
+    np.savetxt('P.txt', I_star)
+
+    # ----------------------------------------------
+    #
+    #   3.               Plots
+    #
+    # ----------------------------------------------
     if n_params == 2:
         X = np.arange(-5, 5, 0.2)
         Y = np.arange(-5, 5, 0.25)
@@ -117,6 +169,7 @@ def main(parallelEnv):
         if printPlot:
             plt.figure()
             plt.semilogy(F_star, P_star, '*-')
+            plt.semilogy(F_star, P, '*-')
 
             plt.savefig('extreme.jpeg', dpi=800)
             plt.close()
@@ -142,12 +195,6 @@ def main(parallelEnv):
 
                 plt.savefig('Z2.jpeg', dpi=800)
                 plt.close()
-
-    # ----------------------------------------------
-    #
-    #   2. Evaluation of the prefactor using IS
-    #
-    # ----------------------------------------------
 
 
 if __name__ == "__main__":
