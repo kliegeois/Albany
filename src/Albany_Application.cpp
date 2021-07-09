@@ -526,6 +526,20 @@ Application::buildProblem()
 }
 
 void
+Application::updateResponses(Teuchos::RCP<Teuchos::ParameterList> responseList)
+{
+  ResponseFactory responseFactory(
+      Teuchos::rcp(this, false),
+      problem,
+      meshSpecs,
+      Teuchos::rcp(&stateMgr, false));
+  responses            = responseFactory.createResponseFunctions(*responseList);
+  observe_responses    = responseList->get("Observe Responses", true);
+  response_observ_freq = responseList->get("Responses Observation Frequency", 1);
+  for (int i = 0; i < responses.size(); ++i) { responses[i]->postRegSetup(); }
+}
+
+void
 Application::createDiscretization()
 {
   // Create the full mesh

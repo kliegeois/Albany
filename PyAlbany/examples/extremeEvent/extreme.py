@@ -17,21 +17,13 @@ except:
     printPlot = False
 
 
-def evaluate_responses(X, Y, parallelEnv, recompute=False):
+def evaluate_responses(X, Y, problem, recompute=False):
     if not recompute and os.path.isfile('Z1.txt'):
         Z1 = np.loadtxt('Z1.txt')
         Z2 = np.loadtxt('Z2.txt')
     else:
         comm = MPI.COMM_WORLD
         myGlobalRank = comm.rank
-
-        # Create an Albany problem:
-        filename = "input_dirichletT_2_tmp.yaml"
-        parameter = Utils.createParameterList(
-            filename, parallelEnv
-        )
-
-        problem = Utils.createAlbanyProblem(parameter, parallelEnv)
 
         parameter_map_0 = problem.getParameterMap(0)
         parameter_0 = Tpetra.Vector(parameter_map_0, dtype="d")
@@ -52,12 +44,12 @@ def evaluate_responses(X, Y, parallelEnv, recompute=False):
                 problem.setParameter(1, parameter_1)
 
                 problem.performSolve()
+                problem.printResponses()
 
-                response = problem.getResponse(1)
-                Z1[j, i] = response.getData()[0]
+                data = np.loadtxt('CumulativeScalarResponseFunction.txt')
 
-                response = problem.getResponse(2)
-                Z2[j, i] = response.getData()[0]
+                Z1[j, i] = data[0]
+                Z2[j, i] = data[1]
 
         np.savetxt('Z1.txt', Z1)
         np.savetxt('Z2.txt', Z2)
@@ -92,16 +84,16 @@ def main(parallelEnv):
     I_star = np.zeros((n_l,))
     F_star = np.zeros((n_l,))
 
+    parameter = Utils.createParameterList(
+        filename, parallelEnv
+    )
+    problem = Utils.createAlbanyProblem(parameter, parallelEnv)
+    responsesParameter = parameter.sublist("Problem").sublist("Response Functions")
+
     # Loop over the lambdas
     for i in range(0, n_l):
-        parameter = Utils.createParameterList(
-            filename, parallelEnv
-        )
-
-        parameter.sublist("Problem").sublist("Response Functions").sublist(
-            "Response 0").set("Scaling Coefficient 1", -l[i])
-        problem = Utils.createAlbanyProblem(parameter, parallelEnv)
-
+        responsesParameter.sublist("Response 0").set("Scaling Coefficient 1", -l[i])
+        problem.updateResponses(responsesParameter)
         problem.performAnalysis()
 
         for j in range(0, n_params):
@@ -109,6 +101,7 @@ def main(parallelEnv):
             theta_star[i, j] = para.getData()
 
         problem.performSolve()
+        problem.printResponses()
 
         data = np.loadtxt('CumulativeScalarResponseFunction.txt')
         I_star[i] = data[0]
@@ -122,7 +115,8 @@ def main(parallelEnv):
     if n_params == 2:
         X = np.arange(-5, 5, 0.2)
         Y = np.arange(-5, 5, 0.25)
-        Z1, Z2 = evaluate_responses(X, Y, parallelEnv)
+
+        Z1, Z2 = evaluate_responses(X, Y, problem)
 
         X, Y = np.meshgrid(X, Y)
 

@@ -242,6 +242,21 @@ namespace PyAlbany
          * This function reports the Albany timers.
          */
         void reportTimers();
+
+        void updateResponses(Teuchos::RCP<Teuchos::ParameterList> params)
+        {
+            albanyApp->updateResponses(params);
+        }
+
+        void printResponses()
+        {
+            auto out = Teuchos::VerboseObjectBase::getDefaultOStream();
+            for (int j = 0; j < albanyApp->getNumResponses(); ++j) {
+                *out << "Response " << j << ": ";
+                albanyApp->getResponse(j)->printResponse(out);
+                *out << std::endl;
+            }
+        }
     };
 
 } // namespace PyAlbany
