@@ -459,3 +459,12 @@ getContribution(int j)
 
   return std::stod(response_string.str());
 }
+
+void
+Albany::CumulativeScalarResponseFunction::
+updateWeight(int j, double weight)
+{
+  TEUCHOS_TEST_FOR_EXCEPTION(j>responses.size(), std::runtime_error,
+                              "Error! updateWeight(j, weight), j is larger than the responses.size().\n");
+  scalar_weights[j] = weight;
+}

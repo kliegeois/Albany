@@ -198,9 +198,6 @@ public:
       const Teuchos::RCP<Thyra_Vector>&       f,
       const double                            dt = 0.0);
 
-  void
-  updateResponses(Teuchos::RCP<Teuchos::ParameterList> responseList);
-
  private:
   void
   computeGlobalResidualImpl(

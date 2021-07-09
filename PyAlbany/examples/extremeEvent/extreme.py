@@ -85,12 +85,10 @@ def main(parallelEnv):
         filename, parallelEnv
     )
     problem = Utils.createAlbanyProblem(parameter, parallelEnv)
-    responsesParameter = parameter.sublist("Problem").sublist("Response Functions")
 
     # Loop over the lambdas
     for i in range(0, n_l):
-        responsesParameter.sublist("Response 0").set("Scaling Coefficient 1", -l[i])
-        problem.updateResponses(responsesParameter)
+        problem.updateCumulativeResponseContributionWeigth(0, 1, -l[i])
         problem.performAnalysis()
 
         for j in range(0, n_params):

@@ -245,21 +245,6 @@ namespace PyAlbany
          */
         void reportTimers();
 
-        void updateResponses(Teuchos::RCP<Teuchos::ParameterList> params)
-        {
-            albanyApp->updateResponses(params);
-        }
-
-        void printResponses()
-        {
-            auto out = Teuchos::VerboseObjectBase::getDefaultOStream();
-            for (int j = 0; j < albanyApp->getNumResponses(); ++j) {
-                *out << "Response " << j << ": ";
-                albanyApp->getResponse(j)->printResponse(out);
-                *out << std::endl;
-            }
-        }
-
         double getCumulativeResponseContribution( int i, int j)
         {
             Teuchos::RCP<Albany::CumulativeScalarResponseFunction>  csrf = Teuchos::rcp_dynamic_cast<Albany::CumulativeScalarResponseFunction>(albanyApp->getResponse(i), false);
@@ -269,6 +254,16 @@ namespace PyAlbany
             }
             else
                 return csrf->getContribution(j);
+        }
+
+        void updateCumulativeResponseContributionWeigth( int i, int j, double weigth)
+        {
+            Teuchos::RCP<Albany::CumulativeScalarResponseFunction>  csrf = Teuchos::rcp_dynamic_cast<Albany::CumulativeScalarResponseFunction>(albanyApp->getResponse(i), false);
+            if (csrf == Teuchos::null) {
+                std::cout << "Warning: updateCumulativeResponseContributionWeigth() response " << i << " is not a CumulativeScalarResponseFunction." << std::endl;
+            }
+            else
+                csrf->updateWeight(j, weigth);
         }
     };
 

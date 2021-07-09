@@ -85,6 +85,7 @@ namespace Albany {
     printResponse(Teuchos::RCP<Teuchos::FancyOStream> out);
 
     double getContribution(int j);
+    void updateWeight(int j, double weight);
 
   private:
 
