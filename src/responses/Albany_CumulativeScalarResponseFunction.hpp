@@ -84,6 +84,8 @@ namespace Albany {
     virtual void
     printResponse(Teuchos::RCP<Teuchos::FancyOStream> out);
 
+    double getContribution(int j);
+
   private:
 
     //! Evaluate Multi Vector distributed derivative dg_dp

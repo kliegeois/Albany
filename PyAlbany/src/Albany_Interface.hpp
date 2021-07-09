@@ -23,6 +23,8 @@
 #include "Teuchos_XMLParameterListHelpers.hpp"
 #include "Teuchos_YamlParameterListHelpers.hpp"
 
+#include "Albany_CumulativeScalarResponseFunction.hpp"
+
 namespace PyAlbany
 {
     /**
@@ -256,6 +258,17 @@ namespace PyAlbany
                 albanyApp->getResponse(j)->printResponse(out);
                 *out << std::endl;
             }
+        }
+
+        double getCumulativeResponseContribution( int i, int j)
+        {
+            Teuchos::RCP<Albany::CumulativeScalarResponseFunction>  csrf = Teuchos::rcp_dynamic_cast<Albany::CumulativeScalarResponseFunction>(albanyApp->getResponse(i), false);
+            if (csrf == Teuchos::null) {
+                std::cout << "Warning: getCumulativeResponseContribution() response " << i << " is not a CumulativeScalarResponseFunction." << std::endl;
+                return 0.;
+            }
+            else
+                return csrf->getContribution(j);
         }
     };
 

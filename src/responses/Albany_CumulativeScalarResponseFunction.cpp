@@ -445,11 +445,17 @@ printResponse(Teuchos::RCP<Teuchos::FancyOStream> out)
     else
       *out << "]";
   }
+}
 
-  std::ofstream myfile;
-  RCP<Teuchos::FancyOStream> fancy = Teuchos::fancyOStream(Teuchos::rcpFromRef(myfile));
-  myfile.open("CumulativeScalarResponseFunction.txt");
-  for (unsigned int i=0; i<responses.size(); i++)
-    responses[i]->printResponse(fancy);
-  myfile.close();
+double 
+Albany::CumulativeScalarResponseFunction::
+getContribution(int j)
+{
+  std::ostringstream response_string;
+  RCP<Teuchos::FancyOStream> fancy = Teuchos::fancyOStream(Teuchos::rcpFromRef(response_string));
+  TEUCHOS_TEST_FOR_EXCEPTION(j>responses.size(), std::runtime_error,
+                              "Error! getContribution(j), j is larger than the responses.size().\n");
+  responses[j]->printResponse(fancy);
+
+  return std::stod(response_string.str());
 }

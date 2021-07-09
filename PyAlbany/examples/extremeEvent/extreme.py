@@ -44,12 +44,9 @@ def evaluate_responses(X, Y, problem, recompute=False):
                 problem.setParameter(1, parameter_1)
 
                 problem.performSolve()
-                problem.printResponses()
 
-                data = np.loadtxt('CumulativeScalarResponseFunction.txt')
-
-                Z1[j, i] = data[0]
-                Z2[j, i] = data[1]
+                Z1[j, i] = problem.getCumulativeResponseContribution(0, 0)
+                Z2[j, i] = problem.getCumulativeResponseContribution(0, 1)
 
         np.savetxt('Z1.txt', Z1)
         np.savetxt('Z2.txt', Z2)
@@ -101,11 +98,9 @@ def main(parallelEnv):
             theta_star[i, j] = para.getData()
 
         problem.performSolve()
-        problem.printResponses()
 
-        data = np.loadtxt('CumulativeScalarResponseFunction.txt')
-        I_star[i] = data[0]
-        F_star[i] = data[1]
+        I_star[i] = problem.getCumulativeResponseContribution(0, 0)
+        F_star[i] = problem.getCumulativeResponseContribution(0, 1)
 
     P_star = np.exp(-I_star)
 
