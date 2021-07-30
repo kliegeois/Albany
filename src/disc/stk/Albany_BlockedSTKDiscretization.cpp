@@ -43,7 +43,7 @@ namespace Albany
       const Teuchos::RCP<const Teuchos_Comm> &comm_,
       const Teuchos::RCP<RigidBodyModes> &rigidBodyModes_,
       const std::map<int, std::vector<std::string>> &sideSetEquations_)
-      : discParams(discParams_), out(Teuchos::VerboseObjectBase::getDefaultOStream()), comm(comm_)
+      : discParams(discParams_), out(Teuchos::VerboseObjectBase::getDefaultOStream()), comm(comm_), stkMeshStruct(stkMeshStruct_)
   {
 
     using Teuchos::RCP;
@@ -193,7 +193,7 @@ namespace Albany
               }
             }
             TEUCHOS_TEST_FOR_EXCEPTION(eb_topology_not_found, std::logic_error,
-                                       "Error! Cannot cannot find " << mesh << ".\n");
+                                       "Error! Cannot find " << mesh << ".\n");
 
             RCP<const panzer::FieldPattern> pattern;
             std::string topo_name = eb_topology.getName();
