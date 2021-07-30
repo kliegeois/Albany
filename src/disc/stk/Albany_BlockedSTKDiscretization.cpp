@@ -51,6 +51,8 @@ namespace Albany
     using Teuchos::rcp_dynamic_cast;
     typedef double Scalar;
 
+    std::cout << "discParams = " << *discParams << std::endl;
+
     Teuchos::RCP<Teuchos::ParameterList> bDiscParams = Teuchos::sublist(discParams, "Discretization", true);
 
     sideName = bDiscParams->get<std::string>("Side Name", "None");
@@ -81,6 +83,12 @@ namespace Albany
       m_blocks[1] = Teuchos::rcp(new disc_type(discParams, 1, ssSTKMeshStruct_, comm_,
                                                rigidBodyModes_, sideSetEquations_));
     }
+
+    //stkMeshStruct_->
+  
+    Teuchos::RCP<StateInfoStruct> sis = Teuchos::rcp(new StateInfoStruct);
+    AbstractFieldContainer::FieldContainerRequirements req;
+    //stkMeshStruct_->setFieldAndBulkData(comm, req, sis, stkMeshStruct_->getMeshSpecs()[0]->worksetSize);
 
     // build the connection manager
     stkConnMngrVolume = Teuchos::rcp(new Albany::STKConnManager(stkMeshStruct_));
@@ -174,14 +182,18 @@ namespace Albany
             TEUCHOS_TEST_FOR_EXCEPTION(previousFieldsSide, std::logic_error,
                                        "Error! Cannot have fields defined in the volume and on the side for the same block.\n");
 
+            bool eb_topology_not_found = true;
             for (size_t i_ebn = 0; i_ebn < elementBlockNamesVolume.size(); ++i_ebn)
             {
               if (elementBlockNamesVolume[i_ebn] == mesh)
               {
                 eb_topology = elementBlockTopologiesVolume[i_ebn];
+                eb_topology_not_found = false;
                 break;
               }
             }
+            TEUCHOS_TEST_FOR_EXCEPTION(eb_topology_not_found, std::logic_error,
+                                       "Error! Cannot cannot find " << mesh << ".\n");
 
             RCP<const panzer::FieldPattern> pattern;
             std::string topo_name = eb_topology.getName();

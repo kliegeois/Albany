@@ -46,6 +46,12 @@ Teuchos::ArrayRCP<Teuchos::RCP<MeshSpecsStruct> >
 DiscretizationFactory::createMeshSpecs() {
     // First, create the mesh struct
     meshStruct = createMeshStruct(discParams, commT, num_params);
+
+    if(discParams->get("Interleaved Ordering", 1) == 2) {
+      Teuchos::RCP<StateInfoStruct> sis = Teuchos::rcp(new StateInfoStruct);
+      AbstractFieldContainer::FieldContainerRequirements req;
+      //meshStruct->setFieldAndBulkData(commT, req, sis, meshStruct->getMeshSpecs()[0]->worksetSize);
+    }
     return meshStruct->getMeshSpecs();
 }
 
@@ -249,6 +255,11 @@ DiscretizationFactory::createDiscretizationFromInternalMeshStruct(
     {
       auto ms = Teuchos::rcp_dynamic_cast<AbstractSTKMeshStruct>(meshStruct);
       if(ms->interleavedOrdering == DiscType::BlockedDisc){ // Use Panzer to do a blocked discretization
+        Teuchos::RCP<StateInfoStruct> sis = Teuchos::rcp(new StateInfoStruct);
+        AbstractFieldContainer::FieldContainerRequirements req;
+
+        ms->setFieldData(commT, req, sis, ms->getMeshSpecs()[0]->worksetSize);
+
         auto disc = Teuchos::rcp(new BlockedSTKDiscretization(discParams, ms, commT, rigidBodyModes, sideSetEquations));
         return disc;
       } else

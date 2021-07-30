@@ -1631,6 +1631,10 @@ GenericSTKMeshStruct::getValidGenericSTKParameters(std::string listname) const
 
   validPL->sublist("Side Set Discretizations", false, "A sublist containing info for storing side discretizations");
 
+  validPL->sublist("Discretization", false, "A sublist containing info for storing side discretizations");
+  validPL->sublist("Mesh", false, "A sublist containing info for storing side discretizations");
+  validPL->sublist("Solution", false, "A sublist containing info for storing side discretizations");
+
   return validPL;
 }
 

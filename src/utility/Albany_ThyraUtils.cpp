@@ -594,6 +594,10 @@ Teuchos::RCP<Thyra_LinearOp> getTransposedOp (const Teuchos::RCP<const Thyra_Lin
   return lopt;
 } 
 
+Teuchos::RCP<Thyra_PhysicallyBlockedLinearOp> getPhysicallyBlockedOp (const Teuchos::RCP<Thyra_LinearOp>& lop) {
+  return Teuchos::rcp_dynamic_cast<Thyra_PhysicallyBlockedLinearOp>(lop);
+}
+
 void transpose (const Teuchos::RCP<Thyra_LinearOp> lop) {
   Teuchos::RCP<Thyra_LinearOp> lopt;
 

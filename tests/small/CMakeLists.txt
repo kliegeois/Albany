@@ -81,3 +81,5 @@ IF(ALBANY_LANDICE AND ALBANY_SEACAS )
 ENDIF()
 
 ###################
+
+add_subdirectory(Blocked)
