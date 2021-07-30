@@ -167,6 +167,7 @@ list (APPEND SOURCES
   utility/TimeMonitor.cpp
   utility/Albany_CombineAndScatterManager.cpp
   utility/Albany_CombineAndScatterManagerTpetra.cpp
+  utility/Albany_BlockedCombineAndScatterManager.cpp
   utility/Albany_CommUtils.cpp
   utility/Albany_Gather.cpp
   utility/Albany_GlobalLocalIndexer.cpp
@@ -189,6 +190,7 @@ list (APPEND HEADERS
   utility/TimeMonitor.hpp
   utility/Albany_CombineAndScatterManager.hpp
   utility/Albany_CombineAndScatterManagerTpetra.hpp
+  utility/Albany_BlockedCombineAndScatterManager.hpp
   utility/Albany_CommUtils.hpp
   utility/Albany_Gather.hpp
   utility/Albany_GlobalLocalIndexer.hpp

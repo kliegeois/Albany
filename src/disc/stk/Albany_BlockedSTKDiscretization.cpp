@@ -626,7 +626,7 @@ namespace Albany
   Teuchos::RCP<const Thyra_VectorSpace>
   BlockedSTKDiscretization::getVectorSpace() const
   {
-    return this->getVectorSpace(0);
+    return m_pvs;
   }
   Teuchos::RCP<const Thyra_VectorSpace>
   BlockedSTKDiscretization::getVectorSpace(const size_t i_block) const
@@ -637,7 +637,7 @@ namespace Albany
   Teuchos::RCP<const Thyra_VectorSpace>
   BlockedSTKDiscretization::getOverlapVectorSpace() const
   {
-    return this->getOverlapVectorSpace(0);
+    return m_overlap_pvs;
   }
   Teuchos::RCP<const Thyra_VectorSpace>
   BlockedSTKDiscretization::getOverlapVectorSpace(const size_t i_block) const
