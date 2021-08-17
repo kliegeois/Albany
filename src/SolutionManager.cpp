@@ -89,6 +89,11 @@ SolutionManager::SolutionManager(
   // This call allocates the non-overlapped MV
   current_soln = disc_->getSolutionMV();
 
+  std::cout << " current_soln->domain()->dim() = " << current_soln->domain()->dim() << std::endl;
+  std::cout << " current_soln->col(0) = " << current_soln->col(0) << std::endl;
+  std::cout << " current_soln->col(0)->domain() = " << current_soln->col(0)->domain() << std::endl;
+  std::cout << " current_soln->col(0)->domain()->dim() = " << current_soln->col(0)->domain()->dim() << std::endl;
+
   // Create the CombineAndScatterManager for handling distributed memory linear
   // algebra communications
   cas_manager = Albany::createCombineAndScatterManager(owned_vs, overlapped_vs);

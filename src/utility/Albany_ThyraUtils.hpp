@@ -131,6 +131,8 @@ Teuchos::ArrayRCP<const ST> getLocalData (const Thyra_Vector& v);
 Teuchos::ArrayRCP<Teuchos::ArrayRCP<ST>> getNonconstLocalData (Thyra_MultiVector& mv);
 Teuchos::ArrayRCP<Teuchos::ArrayRCP<const ST>> getLocalData (const Thyra_MultiVector& mv);
 
+// We may need to introduce equivalent functions for a particular block ID.
+
 DeviceView1d<const ST> getDeviceData (const Teuchos::RCP<const Thyra_Vector>& v);
 DeviceView1d<ST>       getNonconstDeviceData (const Teuchos::RCP<Thyra_Vector>& v);
 

@@ -25,10 +25,11 @@ ANONYMOUS:
         FE Type: HGRAD_C1
         Domain: Volume
     Solution:
-      blocks names: Ux
-      blocks discretizations: vol_C1
+      blocks names: "[[Ux]]"
+      blocks discretizations: "[[vol_C1]]"
     Mesh:
-      Name: left_lower_qtr
+      Name: Body 1
+      Type: Extruded
   Regression For Response 0:
     Test Value: 1.00069000000000008e+00
     Relative Tolerance: 1.00000000000000005e-04

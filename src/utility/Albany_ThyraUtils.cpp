@@ -967,8 +967,16 @@ Teuchos::ArrayRCP<ST> getNonconstLocalData (const Teuchos::RCP<Thyra_Vector>& v)
     if (!spmd_v.is_null()) {
       spmd_v->getNonconstLocalData(Teuchos::outArg(vals));
     } else {
-      // If all the tries above are unsuccessful, throw an error.
-      TEUCHOS_TEST_FOR_EXCEPTION (true, std::runtime_error, "Error in getNnconstLocalData! Could not cast Thyra_Vector to any of the supported concrete types.\n");
+      auto pv = getProductVector(v, false);//Teuchos::rcp_dynamic_cast<Thyra::ProductVectorBase<ST>>(v);
+      if (!pv.is_null()) {
+        auto tmp = pv->getNonconstVectorBlock(0);
+        auto tv2 = getTpetraVector(tmp,false);
+        vals = tv2->get1dViewNonConst();
+      }
+      else {
+        // If all the tries above are unsuccessful, throw an error.
+        TEUCHOS_TEST_FOR_EXCEPTION (true, std::runtime_error, "Error in getNnconstLocalData! Could not cast Thyra_Vector to any of the supported concrete types.\n");
+      }
     }
   }
 

@@ -276,7 +276,7 @@ tests are a beginning, "work in progress."
 
       // panzer::pauseToAttach();
 
-      bool useExodus = false;
+      bool useExodus = true;
 
       if (comm->getSize() > 1)
          useExodus = true;

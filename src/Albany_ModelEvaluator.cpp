@@ -404,6 +404,7 @@ void ModelEvaluator::allocateVectors()
 
   // Create non-const versions of x_init [and x_dot_init [and x_dotdot_init]]
   const Teuchos::RCP<const Thyra_Vector> x_init = xMV->col(0);
+  std::cout << " x_init->domain()->dim() = " << x_init->domain()->dim() << std::endl;
   const Teuchos::RCP<Thyra_Vector> x_init_nonconst = x_init->clone_v();
   nominalValues.set_x(x_init_nonconst);
 

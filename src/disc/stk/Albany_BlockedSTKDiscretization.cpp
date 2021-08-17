@@ -73,12 +73,12 @@ namespace Albany
 
     Teuchos::RCP<AbstractSTKMeshStruct> ssSTKMeshStruct_ = Teuchos::null;
 
-    m_blocks[0] = Teuchos::rcp(new disc_type(discParams, 1, stkMeshStruct_, comm_,
+    m_blocks[0] = Teuchos::rcp(new disc_type(discParams, 1, stkMeshStruct, comm_,
                                              rigidBodyModes_, sideSetEquations_));
 
     if (hasSide)
     {
-      ssSTKMeshStruct_ = Teuchos::rcp_dynamic_cast<Albany::AbstractSTKMeshStruct>(stkMeshStruct_)->sideSetMeshStructs[sideName];
+      ssSTKMeshStruct_ = Teuchos::rcp_dynamic_cast<Albany::AbstractSTKMeshStruct>(stkMeshStruct)->sideSetMeshStructs[sideName];
 
       m_blocks[1] = Teuchos::rcp(new disc_type(discParams, 1, ssSTKMeshStruct_, comm_,
                                                rigidBodyModes_, sideSetEquations_));
@@ -91,7 +91,7 @@ namespace Albany
     //stkMeshStruct_->setFieldAndBulkData(comm, req, sis, stkMeshStruct_->getMeshSpecs()[0]->worksetSize);
 
     // build the connection manager
-    stkConnMngrVolume = Teuchos::rcp(new Albany::STKConnManager(stkMeshStruct_));
+    stkConnMngrVolume = Teuchos::rcp(new Albany::STKConnManager(stkMeshStruct));
 
     if (hasSide)
       stkConnMngrSide = Teuchos::rcp(new Albany::STKConnManager(ssSTKMeshStruct_));
@@ -107,7 +107,8 @@ namespace Albany
     {
       MPI_Comm rawComm = (*mpiComm->getRawMpiComm().get())();
 
-      blockedDOFManagerVolume = Teuchos::rcp(new panzer::BlockedDOFManager(connMngrVolume, rawComm));
+      std::cout << "stkConnMngrVolume.is_null() = " << stkConnMngrVolume.is_null() << std::endl;
+      blockedDOFManagerVolume = Teuchos::rcp(new panzer::BlockedDOFManager(stkConnMngrVolume, rawComm));
       if (hasSide)
         blockedDOFManagerSide = Teuchos::rcp(new panzer::BlockedDOFManager(connMngrSide, rawComm));
 
@@ -322,7 +323,9 @@ namespace Albany
 
             currentBlocksSide.push_back(blocks[i][j]);
 
+            std::cout << " Before stkConnMngrSide->buildConnectivity(*pattern);" << std::endl;
             stkConnMngrSide->buildConnectivity(*pattern);
+            std::cout << " After stkConnMngrSide->buildConnectivity(*pattern);" << std::endl;
 
             previousFieldsSide = true;
           }
@@ -361,7 +364,13 @@ namespace Albany
       n_f_blocks = blockedDOFManagerVolume->getNumFieldBlocks();
 
       blockedDOFManagerVolume->buildGlobalUnknowns();
+      std::cout<< " Before blockedDOFManagerVolume->printFieldInformation(*out)" << std::endl;
       blockedDOFManagerVolume->printFieldInformation(*out);
+      std::cout<< " After blockedDOFManagerVolume->printFieldInformation(*out)" << std::endl;
+
+      std::cout<< " blockedDOFManagerVolume->getFieldDOFManagers()[0]->getNumOwned() = " << blockedDOFManagerVolume->getFieldDOFManagers()[0]->getNumOwned() << std::endl;
+      std::cout << "n_f_blocks = " << n_f_blocks << std::endl;
+      std::cout << "blocksVolume.size() = " << blocksVolume.size() << std::endl;
 
       if (hasSide)
       {
@@ -385,6 +394,8 @@ namespace Albany
     std::vector<Teuchos::RCP<panzer::GlobalIndexer>> subManagersSide;
     if (hasSide)
       subManagersSide = blockedDOFManagerSide->getFieldDOFManagers();
+
+    std::cout << "2 n_f_blocks = " << n_f_blocks << std::endl;
 
     for (size_t i_block = 0; i_block < n_f_blocks; ++i_block)
     {
@@ -419,10 +430,17 @@ namespace Albany
 
       m_vs[i_block] = Albany::createVectorSpace(comm, t_indices);
       m_overlap_vs[i_block] = Albany::createVectorSpace(comm, t_ov_indices);
+
+      std::cout << i_block << " isBlockVolume[i_block] = " << isBlockVolume[i_block] << std::endl;
+      std::cout << i_block << " indices.size() = " << indices.size() << std::endl;
+      std::cout << i_block << " t_indices.size() = " << t_indices.size() << std::endl;
+      std::cout << i_block << " m_vs[i_block] = " << *(m_vs[i_block]) << std::endl;
     }
 
     m_pvs = Thyra::productVectorSpace<ST>(m_vs);
+    std::cout << "1: *m_pvs = " << *m_pvs << std::endl;
     m_overlap_pvs = Thyra::productVectorSpace<ST>(m_overlap_vs);
+    std::cout << "1: *m_overlap_pvs = " << *m_overlap_pvs << std::endl;
   }
 
   void

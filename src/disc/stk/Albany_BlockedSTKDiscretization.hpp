@@ -483,7 +483,32 @@ namespace Albany
     Teuchos::RCP<Thyra_MultiVector>
     getSolutionMV(bool overlapped) const
     {
-      return this->getSolutionMV(0, overlapped);
+      int num_time_deriv = stkMeshStruct->num_time_deriv;
+      Teuchos::RCP<Thyra_MultiVector> soln =
+          Thyra::createMembers<ST>(m_pvs, num_time_deriv + 1);
+
+      auto soln_pv = Teuchos::rcp_dynamic_cast<Thyra_ProductMultiVector>(soln);
+      for (size_t i_block = 0; i_block < n_f_blocks; ++i_block) {
+        auto tmp = m_blocks[0]->getSolutionMV(overlapped);
+        //(soln_pv->getNonconstMultiVectorBlock(i_block))
+      }
+
+    std::cout << " soln_pv->domain()->dim() = " << soln_pv->domain()->dim() << std::endl;
+    std::cout << " soln_pv->getNonconstMultiVectorBlock(0)->col(0) = " << soln_pv->getNonconstMultiVectorBlock(0)->col(0) << std::endl;
+    std::cout << " soln_pv->getNonconstMultiVectorBlock(0)->col(0)->domain() = " << soln_pv->getNonconstMultiVectorBlock(0)->col(0)->domain() << std::endl;
+    std::cout << " soln_pv->getNonconstMultiVectorBlock(0)->col(0)->domain()->dim() = " << soln_pv->getNonconstMultiVectorBlock(0)->col(0)->domain()->dim() << std::endl;
+
+    std::cout << " *soln = " << *soln << std::endl;
+    std::cout << " *m_pvs = " << *m_pvs << std::endl;
+
+    Teuchos::RCP<Thyra_MultiVector> tmp = soln_pv->col(0);
+    std::cout << " soln_pv->col(0) = " << tmp << std::endl;
+    std::cout << " *soln_pv->col(0) = " << *tmp << std::endl;
+    std::cout << " soln_pv->col(0)->domain() = " << tmp->domain() << std::endl;
+    std::cout << " soln_pv->col(0)->domain()->dim() = " << tmp->domain()->dim() << std::endl;
+
+
+      return soln;
     }
     Teuchos::RCP<Thyra_MultiVector>
     getSolutionMV(const size_t i_block, bool overlapped) const

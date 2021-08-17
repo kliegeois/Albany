@@ -60,7 +60,7 @@ protected:
   void create_owned_aura_users () const override;
 
   int n_blocks;
-  CombineAndScatterManager * block_cas;
+  Teuchos::Array<Teuchos::RCP<CombineAndScatterManager>> cas_blocks;
 };
 
 } // namespace Albany
