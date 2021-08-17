@@ -136,8 +136,9 @@ namespace PyAlbany
          * 
          * This function is used to call the function Piro::PerformSolve and solve the
          * defined problem.
+	 * \return false if solve converged, true otherwise.
          */
-        void performSolve();
+        bool performSolve();
 
         Teuchos::RCP<Teuchos::StackedTimer> getStackedTimer() { return stackedTimer; }
 
