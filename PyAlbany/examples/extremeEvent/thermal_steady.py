@@ -82,9 +82,9 @@ def main(parallelEnv):
 
     theta_star, I_star, F_star, P_star = ee.evaluateThetaStar(l, problem, n_params)
 
-    np.savetxt('theta_star.txt', theta_star)
-    np.savetxt('I_star.txt', I_star)
-    np.savetxt('P_star.txt', P_star)
+    np.savetxt('theta_star_steady.txt', theta_star)
+    np.savetxt('I_star_steady.txt', I_star)
+    np.savetxt('P_star_steady.txt', P_star)
 
     # ----------------------------------------------
     #
