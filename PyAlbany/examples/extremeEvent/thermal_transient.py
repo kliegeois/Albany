@@ -49,6 +49,7 @@ def main(parallelEnv):
     np.savetxt('theta_star_transient.txt', theta_star)
     np.savetxt('I_star_transient.txt', I_star)
     np.savetxt('P_star_transient.txt', P_star)
+    np.savetxt('F_star_transient.txt', F_star)
 
     # ----------------------------------------------
     #
@@ -65,7 +66,7 @@ def main(parallelEnv):
 
     P = ee.importanceSamplingEstimator(mean, cov, theta_star, F_star, P_star, samples, problem)
 
-    np.savetxt('P.txt', I_star)
+    np.savetxt('P_transient.txt', I_star)
 
     problem.reportTimers()
 

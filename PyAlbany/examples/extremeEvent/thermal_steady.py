@@ -85,6 +85,7 @@ def main(parallelEnv):
     np.savetxt('theta_star_steady.txt', theta_star)
     np.savetxt('I_star_steady.txt', I_star)
     np.savetxt('P_star_steady.txt', P_star)
+    np.savetxt('F_star_steady.txt', F_star)
 
     # ----------------------------------------------
     #
