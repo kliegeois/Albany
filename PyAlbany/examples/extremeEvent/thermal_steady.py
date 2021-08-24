@@ -4,6 +4,7 @@ from PyTrilinos import Teuchos
 from mpi4py import MPI
 import numpy as np
 from PyAlbany import Utils
+from PyAlbany import ExtremeEvent as ee
 import os
 import sys
 
@@ -53,53 +54,6 @@ def evaluate_responses(X, Y, problem, recompute=False):
     return Z1, Z2
 
 
-def evaluate_theta_star(l, problem, n_params, response_id=0, F_id=1):
-    n_l = len(l)
-    theta_star = np.zeros((n_l,n_params))
-    I_star = np.zeros((n_l,))
-    F_star = np.zeros((n_l,))
-
-    # Loop over the lambdas
-    for i in range(0, n_l):
-        problem.updateCumulativeResponseContributionWeigth(0, 1, -l[i])
-        problem.performAnalysis()
-
-        for j in range(0, n_params):
-            para = problem.getParameter(j)
-            theta_star[i, j] = para.getData()
-
-        problem.performSolve()
-
-        I_star[i] = problem.getCumulativeResponseContribution(0, 0)
-        F_star[i] = problem.getCumulativeResponseContribution(0, 1)
-
-    P_star = np.exp(-I_star)
-
-    return theta_star, I_star, F_star, P_star
-
-
-def importance_sampling_estimator(theta_0, C, theta_star, F_star, P_star, samples_0, problem):
-    invC = np.linalg.inv(C)
-    n_l = len(F_star)
-    P = np.zeros((n_l,))
-    n_samples = np.shape(samples_0)[0]
-    n_params = np.shape(samples_0)[1]
-    for i in range(0, n_l):
-        for j in range(0, n_samples):
-            sample = samples_0[j,:] + theta_star[i,:] - theta_0
-            for k in range(0, n_params):
-                parameter_map = problem.getParameterMap(k)
-                parameter = Tpetra.Vector(parameter_map, dtype="d")
-                parameter[0] = sample[k]
-                problem.setParameter(k, parameter)
-            problem.performSolve()
-
-            if problem.getCumulativeResponseContribution(0, 1) > F_star[i]:
-                P[i] += np.exp(-invC.dot(theta_star[i,:]-theta_0).dot(sample-theta_star[i,:]))
-        P[i] = P_star[i] * P[i] / n_samples
-    return P
-
-
 def main(parallelEnv):
     comm = MPI.COMM_WORLD
     myGlobalRank = comm.rank
@@ -107,10 +61,7 @@ def main(parallelEnv):
     # Create an Albany problem:
 
     n_params = 2
-    if n_params == 1:
-        filename = "input_dirichletT_1.yaml"
-    else:
-        filename = "input_dirichletT_2.yaml"
+    filename = "thermal_steady.yaml"
 
     parameter = Utils.createParameterList(
         filename, parallelEnv
@@ -123,13 +74,13 @@ def main(parallelEnv):
     #
     # ----------------------------------------------
 
-    l_min = 0.1
-    l_max = 2.5
-    n_l = 20
+    l_min = 0.
+    l_max = 2.
+    n_l = 5
 
     l = np.linspace(l_min, l_max, n_l)
 
-    theta_star, I_star, F_star, P_star = evaluate_theta_star(l, problem, n_params)
+    theta_star, I_star, F_star, P_star = ee.evaluateThetaStar(l, problem, n_params)
 
     np.savetxt('theta_star.txt', theta_star)
     np.savetxt('I_star.txt', I_star)
@@ -141,16 +92,18 @@ def main(parallelEnv):
     #
     # ----------------------------------------------
 
-    N_samples = 1000
+    N_samples = 100
 
     mean = np.array([1., 1.])
     cov = np.array([[1., 0.], [0., 1.]])
 
     samples = np.random.multivariate_normal(mean, cov, N_samples)
 
-    P = importance_sampling_estimator(mean, cov, theta_star, F_star, P_star, samples, problem)
+    P = ee.importanceSamplingEstimator(mean, cov, theta_star, F_star, P_star, samples, problem)
 
-    np.savetxt('P.txt', I_star)
+    np.savetxt('P_steady.txt', I_star)
+
+    problem.reportTimers()
 
     # ----------------------------------------------
     #
@@ -161,7 +114,7 @@ def main(parallelEnv):
         X = np.arange(-5, 5, 0.2)
         Y = np.arange(-5, 5, 0.25)
 
-        Z1, Z2 = evaluate_responses(X, Y, problem)
+        #Z1, Z2 = evaluate_responses(X, Y, problem, True)
 
         X, Y = np.meshgrid(X, Y)
 
@@ -171,27 +124,27 @@ def main(parallelEnv):
             plt.semilogy(F_star, P_star, '*-')
             plt.semilogy(F_star, P, '*-')
 
-            plt.savefig('extreme.jpeg', dpi=800)
+            plt.savefig('extreme_steady.jpeg', dpi=800)
             plt.close()
 
             if n_params == 2:
                 plt.figure()
                 plt.plot(theta_star[:, 0], theta_star[:, 1], '*-')
-                plt.contour(X, Y, Z1, levels=I_star, colors='g')
-                plt.contour(X, Y, Z2, levels=F_star, colors='r')
+                #plt.contour(X, Y, Z1, levels=I_star, colors='g')
+                #plt.contour(X, Y, Z2, levels=F_star, colors='r')
                 plt.savefig('theta_star.jpeg', dpi=800)
                 plt.close()
 
                 fig = plt.figure()
                 ax = fig.gca(projection='3d')
-                ax.plot_surface(X, Y, Z1)
+                #ax.plot_surface(X, Y, Z1)
 
                 plt.savefig('Z1.jpeg', dpi=800)
                 plt.close()
 
                 fig = plt.figure()
                 ax = fig.gca(projection='3d')
-                ax.plot_surface(X, Y, Z2)
+                #ax.plot_surface(X, Y, Z2)
 
                 plt.savefig('Z2.jpeg', dpi=800)
                 plt.close()

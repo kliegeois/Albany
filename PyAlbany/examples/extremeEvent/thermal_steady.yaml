@@ -2,31 +2,27 @@
 ---
 ANONYMOUS:
   Build Type: Tpetra
-  Problem: 
-    Name: Heat 2D
+  Problem:
+    Name: Thermal 2D
+    Solution Method: Steady
     Compute Sensitivities: true
-    Dirichlet BCs: 
+    Dirichlet BCs:
       DBC on NS NodeSet0 for DOF T: 0.00000000000000000e+00
       DBC on NS NodeSet1 for DOF T: -1.00000000000000000e+00
       DBC on NS NodeSet2 for DOF T: 0.00000000000000000e+00
       DBC on NS NodeSet3 for DOF T: 0.00000000000000000e+00
+    Thermal Conductivity: [1.6, 0.8]
+    Thermal Source: None
     Parameters:
-      Number Of Parameters: 1
+      Number Of Parameters: 2
       Parameter 0:
-        Type: Vector
-        Dimension: 1
-        Scalar 0:
-          Name: DBC on NS NodeSet0 for DOF T
-          Lower Bound: -5.00000000000000000e+00
-          Upper Bound: 5.00000000000000000e+00
-        Scalar 1:
-          Name: DBC on NS NodeSet1 for DOF T
-          Lower Bound: -5.00000000000000000e+00
-          Upper Bound: 5.00000000000000000e+00
-    Hessian:
-      Use AD for Hessian-vector products (default): true
-      Response 0:
-        Reconstruct H_pp: false
+        Name: DBC on NS NodeSet0 for DOF T
+        Lower Bound: -5.00000000000000000e+00
+        Upper Bound: 5.00000000000000000e+00
+      Parameter 1:
+        Name: DBC on NS NodeSet1 for DOF T
+        Lower Bound: -5.00000000000000000e+00
+        Upper Bound: 5.00000000000000000e+00
     Response Functions: 
       Number Of Responses: 1
       Response 0:
@@ -34,9 +30,9 @@ ANONYMOUS:
         Number Of Responses: 2
         Response 0:
           Name: LDT-rate function
-          Number Of Parameters: 1
-          Mean: [0.5]
-          Covariance Matrix: [[1.]]
+          Number Of Parameters: 2
+          Mean: [1., 1.]
+          Covariance Matrix: [[1., 0.], [0., 1.]]
         Response 1:
           Name: Squared L2 Difference Source ST Target PST
           Field Rank: Scalar
@@ -54,7 +50,7 @@ ANONYMOUS:
     Analysis: 
       Analysis Package: ROL
       ROL: 
-        Number Of Parameters: 1
+        Number Of Parameters: 2
         Check Gradient: false
         Gradient Tolerance: 1.0e-04
         Step Tolerance: 1.0e-04
