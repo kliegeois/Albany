@@ -16,6 +16,8 @@
 #include "Teuchos_SerialDenseMatrix.hpp"
 #include "Teuchos_SerialDenseVector.hpp"
 
+#include "Albany_UnivariateDistribution.hpp"
+
 namespace Albany
 {
 
