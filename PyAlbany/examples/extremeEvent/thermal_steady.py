@@ -100,9 +100,14 @@ def main(parallelEnv):
 
     samples = np.random.multivariate_normal(mean, cov, N_samples)
 
-    P = ee.importanceSamplingEstimator(mean, cov, theta_star, F_star, P_star, samples, problem)
+    angle_1 = 0.49999*np.pi
+    angle_2 = np.pi - angle_1
 
-    np.savetxt('P_steady.txt', I_star)
+    P_IS = ee.importanceSamplingEstimator(mean, cov, theta_star, F_star, P_star, samples, problem)
+    P_mixed = ee.mixedImportanceSamplingEstimator(mean, cov, theta_star, F_star, P_star, samples, problem, angle_1, angle_2)
+
+    np.savetxt('P_steady_IS.txt', P_IS)
+    np.savetxt('P_steady_mixed.txt', P_mixed)
 
     problem.reportTimers()
 
@@ -122,8 +127,9 @@ def main(parallelEnv):
     if myGlobalRank == 0:
         if printPlot:
             plt.figure()
-            plt.semilogy(F_star, P_star, '*-')
-            plt.semilogy(F_star, P, '*-')
+            plt.semilogy(F_star, P_star, 'k*-')
+            plt.semilogy(F_star, P_IS, 'b*-')
+            plt.semilogy(F_star, P_mixed, 'r*--')
 
             plt.savefig('extreme_steady.jpeg', dpi=800)
             plt.close()
