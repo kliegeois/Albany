@@ -65,6 +65,7 @@ set (ALBANY_INCLUDE_DIRS
      ${Albany_SOURCE_DIR}/src/evaluators/response
      ${Albany_SOURCE_DIR}/src/evaluators/scatter
      ${Albany_SOURCE_DIR}/src/evaluators/state
+     ${Albany_SOURCE_DIR}/src/evaluators/uq
      ${Albany_SOURCE_DIR}/src/evaluators/utility
      ${Albany_SOURCE_DIR}/src/problems
      ${Albany_SOURCE_DIR}/src/responses
@@ -444,6 +445,7 @@ list (APPEND SOURCES
   evaluators/state/PHAL_SaveNodalField.cpp
   evaluators/state/PHAL_SaveSideSetStateField.cpp
   evaluators/state/PHAL_SaveStateField.cpp
+  evaluators/uq/PHAL_RandomPhysicalParameter.cpp
   evaluators/utility/PHAL_Absorption.cpp
   evaluators/utility/PHAL_AddNoise.cpp
   evaluators/utility/PHAL_ComputeBasisFunctions.cpp
@@ -563,6 +565,9 @@ list (APPEND HEADERS
   evaluators/state/PHAL_SaveSideSetStateField_Def.hpp
   evaluators/state/PHAL_SaveStateField.hpp
   evaluators/state/PHAL_SaveStateField_Def.hpp
+  evaluators/uq/PHAL_RandomPhysicalParameter_Def.hpp
+  evaluators/uq/PHAL_RandomPhysicalParameter.hpp
+  evaluators/uq/PHAL_UnivariateDistribution.hpp
   evaluators/utility/PHAL_Absorption.hpp
   evaluators/utility/PHAL_Absorption_Def.hpp
   evaluators/utility/PHAL_AddNoise.hpp

@@ -17,6 +17,7 @@ set (ALBANY_INCLUDE_DIRS
      ${Albany_SOURCE_DIR}/src/evaluators/response
      ${Albany_SOURCE_DIR}/src/evaluators/scatter
      ${Albany_SOURCE_DIR}/src/evaluators/state
+     ${Albany_SOURCE_DIR}/src/evaluators/uq
      ${Albany_SOURCE_DIR}/src/evaluators/utility
      ${Albany_SOURCE_DIR}/src/problems
      ${Albany_SOURCE_DIR}/src/responses
