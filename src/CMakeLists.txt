@@ -445,7 +445,6 @@ list (APPEND SOURCES
   evaluators/state/PHAL_SaveNodalField.cpp
   evaluators/state/PHAL_SaveSideSetStateField.cpp
   evaluators/state/PHAL_SaveStateField.cpp
-  evaluators/uq/PHAL_RandomPhysicalParameter.cpp
   evaluators/utility/PHAL_Absorption.cpp
   evaluators/utility/PHAL_AddNoise.cpp
   evaluators/utility/PHAL_ComputeBasisFunctions.cpp
@@ -565,9 +564,6 @@ list (APPEND HEADERS
   evaluators/state/PHAL_SaveSideSetStateField_Def.hpp
   evaluators/state/PHAL_SaveStateField.hpp
   evaluators/state/PHAL_SaveStateField_Def.hpp
-  evaluators/uq/PHAL_RandomPhysicalParameter_Def.hpp
-  evaluators/uq/PHAL_RandomPhysicalParameter.hpp
-  evaluators/uq/PHAL_UnivariateDistribution.hpp
   evaluators/utility/PHAL_Absorption.hpp
   evaluators/utility/PHAL_Absorption_Def.hpp
   evaluators/utility/PHAL_AddNoise.hpp
@@ -590,8 +586,10 @@ list (APPEND HEADERS
   evaluators/utility/PHAL_MapToPhysicalFrameSide.hpp
   evaluators/utility/PHAL_MapToPhysicalFrameSide_Def.hpp
   evaluators/utility/PHAL_MapToPhysicalFrame_Def.hpp
+  evaluators/utility/PHAL_RandomPhysicalParameter.hpp
   evaluators/utility/PHAL_Source.hpp
   evaluators/utility/PHAL_Source_Def.hpp
+  evaluators/utility/PHAL_UnivariateDistribution.hpp
   evaluators/utility/PHAL_Field_Source.hpp
   evaluators/utility/PHAL_Field_Source_Def.hpp
   )

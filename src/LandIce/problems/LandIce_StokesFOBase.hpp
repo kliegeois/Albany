@@ -39,6 +39,7 @@
 #include "LandIce_ParamEnum.hpp"
 #include "LandIce_ProblemUtils.hpp"
 #include "PHAL_SharedParameter.hpp"
+#include "PHAL_RandomPhysicalParameter.hpp"
 #include "LandIce_StokesFOBasalResid.hpp"
 #include "LandIce_StokesFOLateralResid.hpp"
 #include "LandIce_StokesFOResid.hpp"
