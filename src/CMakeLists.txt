@@ -252,6 +252,7 @@ list (APPEND SOURCES
   responses/Albany_SamplingBasedScalarResponseFunction.cpp
   responses/Albany_KLResponseFunction.cpp
   responses/Albany_WeightedMisfitResponseFunction.cpp
+  responses/Albany_PowerScalarResponseFunction.cpp
   responses/Albany_ResponseFactory.cpp
   responses/Albany_ScalarResponseFunction.cpp
   responses/Albany_SolutionCullingStrategy.cpp
@@ -271,6 +272,7 @@ list (APPEND HEADERS
   responses/Albany_KLResponseFunction.hpp
   responses/Albany_WeightedMisfitResponseFunction.hpp
   responses/Albany_SamplingBasedScalarResponseFunction.hpp
+  responses/Albany_PowerScalarResponseFunction.hpp
   responses/Albany_ResponseFactory.hpp
   responses/Albany_ScalarResponseFunction.hpp
   responses/Albany_SolutionAverageResponseFunction.hpp
@@ -335,10 +337,13 @@ list (APPEND HEADERS
   disc/stk/Albany_GenericSTKMeshStruct.hpp
   disc/stk/Albany_GmshSTKMeshStruct.hpp
   disc/stk/Albany_GenericSTKFieldContainer.hpp
+  disc/stk/Albany_GenericSTKFieldContainer_Def.hpp
   disc/stk/Albany_IossSTKMeshStruct.hpp
   disc/stk/Albany_MultiSTKFieldContainer.hpp
+  disc/stk/Albany_MultiSTKFieldContainer_Def.hpp
   disc/stk/Albany_NodalGraphUtils.hpp
   disc/stk/Albany_OrdinarySTKFieldContainer.hpp
+  disc/stk/Albany_OrdinarySTKFieldContainer_Def.hpp
   disc/stk/Albany_SideSetSTKMeshStruct.hpp
   disc/stk/Albany_STKDiscretization.hpp
   disc/stk/Albany_STKFieldContainerHelper.hpp
@@ -545,6 +550,8 @@ list (APPEND HEADERS
   evaluators/utility/PHAL_FieldFrobeniusNorm_Def.hpp
   evaluators/utility/PHAL_LangevinNoiseTerm.hpp
   evaluators/utility/PHAL_LangevinNoiseTerm_Def.hpp
+  evaluators/utility/PHAL_LinearCombinationParameter.hpp
+  evaluators/utility/PHAL_LogGaussianDistributedParameter.hpp
   evaluators/utility/PHAL_MapToPhysicalFrame.hpp
   evaluators/utility/PHAL_MapToPhysicalFrameSide.hpp
   evaluators/utility/PHAL_MapToPhysicalFrameSide_Def.hpp
