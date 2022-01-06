@@ -555,6 +555,7 @@ list (APPEND HEADERS
   evaluators/utility/PHAL_FieldFrobeniusNorm_Def.hpp
   evaluators/utility/PHAL_LangevinNoiseTerm.hpp
   evaluators/utility/PHAL_LangevinNoiseTerm_Def.hpp
+  evaluators/utility/PHAL_LinearCombinationParameter.hpp
   evaluators/utility/PHAL_MapToPhysicalFrame.hpp
   evaluators/utility/PHAL_MapToPhysicalFrameSide.hpp
   evaluators/utility/PHAL_MapToPhysicalFrameSide_Def.hpp

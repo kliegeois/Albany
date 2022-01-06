@@ -19,6 +19,7 @@
 #include "PHAL_ConvertFieldType.hpp"
 #include "Albany_MaterialDatabase.hpp"
 
+#include "PHAL_LinearCombinationParameter.hpp"
 #include "PHAL_RandomPhysicalParameter.hpp"
 
 #include "PHAL_IsAvailable.hpp"
