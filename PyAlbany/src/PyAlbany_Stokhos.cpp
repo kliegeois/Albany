@@ -44,43 +44,50 @@ void KLExpention::createModes() {
     randomField = RandomFieldType(solverParams);
 }
 
-Teuchos::RCP<PyTrilinosVector> KLExpention::getMode(int i_mode, Teuchos::RCP<PyTrilinosVector> x, Teuchos::RCP<PyTrilinosVector> y, Teuchos::RCP<PyTrilinosVector> z) {
-    Teuchos::RCP<PyTrilinosVector> phi = Teuchos::rcp(new PyTrilinosVector(x->getMap()));
-    auto phi_view = phi->getLocalView<PyTrilinosVector::node_type::device_type>();
-
-    Kokkos::View<double *, Kokkos::LayoutLeft, PyTrilinosVector::node_type::device_type> weights("w", num_KL_terms);
-    for (std::size_t j_mode = 0; j_mode<num_KL_terms; ++ j_mode) {
-        weights(j_mode) = i_mode == j_mode ? 1 : 0;
+void KLExpention::getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x) {
+    Kokkos::View<double *, Kokkos::LayoutLeft, PyTrilinosVector::node_type::device_type> weights("w", n_modes);
+    for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
+        weights(i_mode) = 0;
     }
 
-    if (ndim == 1) {
-        auto x_view = x->getLocalView<PyTrilinosVector::node_type::device_type>();
-
-        for (std::size_t i_node = 0; i_node<phi_view.extent(0); ++ i_node) {
-            const double point[1] = {x_view(i_node, 0)};
-            phi_view(i_node, 0) = randomField.evaluate(point, weights);            
+    for (std::size_t i_node = 0; i_node<n_nodes; ++ i_node) {
+        const double point[1] = {x[i_node]};
+        for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
+            weights(i_mode) = 1.;
+            phi[i_node * n_modes + i_mode] = randomField.evaluate(point, weights);
+            weights(i_mode) = 0.;
         }
     }
-    if (ndim == 2) {
-        auto x_view = x->getLocalView<PyTrilinosVector::node_type::device_type>();
-        auto y_view = y->getLocalView<PyTrilinosVector::node_type::device_type>();
-
-        for (std::size_t i_node = 0; i_node<phi_view.extent(0); ++ i_node) {
-            const double point[2] = {x_view(i_node, 0), y_view(i_node, 0)};
-            phi_view(i_node, 0) = randomField.evaluate(point, weights);            
-        }
-    }
-    if (ndim == 3) {
-        auto x_view = x->getLocalView<PyTrilinosVector::node_type::device_type>();
-        auto y_view = y->getLocalView<PyTrilinosVector::node_type::device_type>();
-        auto z_view = z->getLocalView<PyTrilinosVector::node_type::device_type>();
-
-        for (std::size_t i_node = 0; i_node<phi_view.extent(0); ++ i_node) {
-            const double point[3] = {x_view(i_node, 0), y_view(i_node, 0), z_view(i_node, 0)};
-            phi_view(i_node, 0) = randomField.evaluate(point, weights);            
-        }
-    }
-
-    return phi;
 }
 
+void KLExpention::getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x, double* y, int n_nodes_y) {
+    Kokkos::View<double *, Kokkos::LayoutLeft, PyTrilinosVector::node_type::device_type> weights("w", n_modes);
+    for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
+        weights(i_mode) = 0;
+    }
+
+    for (std::size_t i_node = 0; i_node<n_nodes; ++ i_node) {
+        const double point[2] = {x[i_node], y[i_node]};
+        for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
+            weights(i_mode) = 1.;
+            phi[i_node * n_modes + i_mode] = randomField.evaluate(point, weights);
+            weights(i_mode) = 0.;
+        }
+    }
+}
+
+void KLExpention::getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x, double* y, int n_nodes_y, double* z, int n_nodes_z) {
+    Kokkos::View<double *, Kokkos::LayoutLeft, PyTrilinosVector::node_type::device_type> weights("w", n_modes);
+    for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
+        weights(i_mode) = 0;
+    }
+
+    for (std::size_t i_node = 0; i_node<n_nodes; ++ i_node) {
+        const double point[3] = {x[i_node], y[i_node], z[i_node]};
+        for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
+            weights(i_mode) = 1.;
+            phi[i_node * n_modes + i_mode] = randomField.evaluate(point, weights);
+            weights(i_mode) = 0.;
+        }
+    }
+}

@@ -42,7 +42,9 @@ namespace PyAlbany
 
         void createModes();
 
-        Teuchos::RCP<PyTrilinosVector> getMode(int i, Teuchos::RCP<PyTrilinosVector> x, Teuchos::RCP<PyTrilinosVector> y = Teuchos::null, Teuchos::RCP<PyTrilinosVector> z = Teuchos::null);
+        void getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x);
+        void getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x, double* y, int n_nodes_y);
+        void getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x, double* y, int n_nodes_y, double* z, int n_nodes_z);
 
         ~KLExpention(){}
     };

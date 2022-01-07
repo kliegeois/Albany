@@ -48,4 +48,10 @@ using std::string;
 %include "Albany_PyAlbanyTypes.hpp"
 %apply (double* INPLACE_ARRAY2, int DIM1, int DIM2) {(double* C, int n, int m)}
 %include "Albany_Interface.hpp"
+
+
+%apply (double* INPLACE_ARRAY2, int DIM1, int DIM2) {(double* phi, int n_nodes, int n_modes)}
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* x, int n_nodes_x)}
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* y, int n_nodes_y)}
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* z, int n_nodes_z)}
 %include "PyAlbany_Stokhos.hpp"

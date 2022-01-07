@@ -27,8 +27,8 @@ except:
 def read_mesh_coordinates(filename):
     model = exomerge.import_model(filename)
     positions = np.array(model.nodes)
-    x = positions[:,0]
-    y = positions[:,1]
+    x = np.ascontiguousarray(positions[:,0])
+    y = np.ascontiguousarray(positions[:,1])
 
     min_x = np.min(x)
     min_y = np.min(y)
@@ -42,48 +42,50 @@ def main(parallelEnv):
     myGlobalRank = comm.rank
 
     x, y, min_x, min_y, max_x, max_y = read_mesh_coordinates('steady2d.exo')
-    filename = "thermal_steady_distributed.yaml"
 
-    problem = Utils.createAlbanyProblem(filename, parallelEnv)
-
-    parameter_map = problem.getParameterMap(0)
-    x_vector = Tpetra.MultiVector(parameter_map, 1, dtype="d")
-    y_vector = Tpetra.MultiVector(parameter_map, 1, dtype="d")
-
-    print(x.shape)
-    print(x_vector.shape)
-    x_vector[0,:] = x
-    y_vector[0,:] = y
-
+    n_KLTerms = 10
     kl = wpa.KLExpention(2)
     print(min_x)
     kl.setLowerBound(0, min_x)
     kl.setLowerBound(1, min_y)
     kl.setUpperBound(0, max_x)
     kl.setUpperBound(1, max_y)
-    kl.setNumberOfKLTerms(10)
-    kl.setNumberOfKLTerm(0, 10)
-    kl.setNumberOfKLTerm(1, 10)
+    kl.setNumberOfKLTerms(n_KLTerms)
+    kl.setNumberOfKLTerm(0, n_KLTerms)
+    kl.setNumberOfKLTerm(1, n_KLTerms)
     kl.createModes()
 
+    phi = np.zeros((len(x), n_KLTerms))
+    kl.getModes(phi, x, y)
 
-    plt.plot(x_vector[0,:], y_vector[0,:], '.')
+    plt.figure()
+    plt.plot(x, y, '.')
     plt.plot([min_x, max_x, max_x, min_x, min_x], [min_y, min_y, max_y, max_y, min_y], 'r')
     plt.savefig('nodes.jpeg')
 
-    for i in range(0, 10):
-        phi_i = kl.getMode(i, x_vector, y_vector)
+    for i in range(0, n_KLTerms):
 
-        print(phi_i)
-
-        Z = np.reshape(phi_i, (11, 11))
+        Z = np.reshape(phi[:,i], (11, 11))
         X = np.reshape(x, (11, 11))
         Y = np.reshape(y, (11, 11))
 
+        plt.figure()
         plt.contourf(X,Y,Z)
-        plt.plot(x_vector[0,:], y_vector[0,:], '.')
-        plt.plot([min_x, max_x, max_x, min_x, min_x], [min_y, min_y, max_y, max_y, min_y], 'r')
         plt.savefig('phi_'+str(i)+'.jpeg')
+
+    weights = np.random.normal(0, 1, n_KLTerms)
+
+    Z = weights[0] * phi[:,0]
+    for i in range(1, n_KLTerms):
+        Z += weights[i] * phi[:,i]
+
+    Z = np.reshape(Z, (11, 11))
+    X = np.reshape(x, (11, 11))
+    Y = np.reshape(y, (11, 11))
+
+    plt.figure()
+    plt.contourf(X,Y,Z)
+    plt.savefig('random.jpeg')
 
 if __name__ == "__main__":
     comm = Teuchos.DefaultComm.getComm()
