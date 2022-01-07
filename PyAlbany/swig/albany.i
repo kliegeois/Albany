@@ -16,6 +16,7 @@
 #include <Albany_PyAlbanyTypes.hpp>
 #define SWIG_FILE_WITH_INIT
 #include <Albany_Interface.hpp>
+#include <PyAlbany_Stokhos.hpp>
 %}
 // ----------- Numpy -----------
 %include "numpy.i"
@@ -42,7 +43,9 @@ using std::string;
 // ---------- Shared_ptr ----------
 %teuchos_rcp(PyAlbany::PyParallelEnv)
 %teuchos_rcp(PyAlbany::PyProblem)
+%teuchos_rcp(PyAlbany::KLExpention)
 
 %include "Albany_PyAlbanyTypes.hpp"
 %apply (double* INPLACE_ARRAY2, int DIM1, int DIM2) {(double* C, int n, int m)}
 %include "Albany_Interface.hpp"
+%include "PyAlbany_Stokhos.hpp"
