@@ -21,6 +21,7 @@
 
 #include "PHAL_LinearCombinationParameter.hpp"
 #include "PHAL_RandomPhysicalParameter.hpp"
+#include "PHAL_LogGaussianDistributedParameter.hpp"
 
 #include "PHAL_IsAvailable.hpp"
 
@@ -315,27 +316,57 @@ Albany::ThermalProblem::constructEvaluators(
   }
   else //conductivityIsDistParam
   {
-    RCP<ParameterList> p = rcp(new ParameterList);
-    Albany::StateStruct::MeshFieldEntity entity = Albany::StateStruct::NodalDistParameter;
-    std::string stateName = "thermal_conductivity";
     std::string fieldName = "ThermalConductivity";
-    p = stateMgr.registerStateVariable(stateName, dl->node_scalar, meshSpecs.ebName, true, &entity, "");
+  
+    if (params->isSublist("Linear Combination Parameters")) {
+      auto lcparams = params->sublist("Linear Combination Parameters");
+      int nlcparams = lcparams.get<int>("Number Of Parameters");
+      for (int i_lcparams=0; i_lcparams<nlcparams; ++i_lcparams)
+      {
+        auto lcparams_i = lcparams.sublist(Albany::strint("Parameter",i_lcparams));
 
-    //Gather parameter (similarly to what done with the solution)
-    ev = evalUtils.constructGatherScalarNodalParameter(stateName,fieldName);
-    fm0.template registerEvaluator<EvalT>(ev);
+        RCP<ParameterList> p = rcp(new ParameterList("LCParam"));
+        const std::string param_name = lcparams_i.get<std::string>("Name");
+        std::size_t numModes = lcparams_i.get<std::size_t>("Number of modes");
 
-    // Scalar Nodal parameter is stored as a ParamScalarT, while the residual evaluator expect a ScalarT.
-    // Hence, if ScalarT!=ParamScalarT, we need to convert the field into a ScalarT 
-    if(!std::is_same<typename EvalT::ScalarT,typename EvalT::ParamScalarT>::value) {
-      p->set<Teuchos::RCP<PHX::DataLayout> >("Data Layout", dl->node_scalar);
-      p->set<std::string>("Field Name", fieldName);
-      ev = Teuchos::rcp(new PHAL::ConvertFieldTypePSTtoST<EvalT,PHAL::AlbanyTraits>(*p));
-      fm0.template registerEvaluator<EvalT>(ev);
+        p->set<std::string>("Parameter Name", param_name);
+        p->set<std::size_t>("Number of modes", numModes);
+
+        for (std::size_t i = 0; i < numModes; ++i) {
+          RCP<ParameterList> pi = rcp(new ParameterList("Mode"));
+          pi->set<std::string>("Coefficient Name", lcparams_i.sublist(strint("Mode",i)).get<std::string>("Coefficient Name"));
+          pi->set<std::string>("Mode Name", lcparams_i.sublist(strint("Mode",i)).get<std::string>("Mode Name"));
+          p->sublist(strint("Mode",i)) = *pi;
+        }
+
+        RCP<PHAL::LinearCombinationParameter<EvalT,PHAL::AlbanyTraits>> ptr_lcparam;
+        ptr_lcparam = rcp(new PHAL::LinearCombinationParameter<EvalT,PHAL::AlbanyTraits>(*p,dl));
+        fm0.template registerEvaluator<EvalT>(ptr_lcparam);
+      }
     }
-    fm0.template registerEvaluator<EvalT> (evalUtils.constructDOFInterpolationEvaluator(fieldName));
-    /*stateName = "thermal_conductivity_sensitivity";
-    p = stateMgr.registerStateVariable(stateName, dl->node_scalar, meshSpecs.ebName, true, &entity, "");*/
+
+    if(!PHAL::is_field_evaluated<EvalT>(fm0, fieldName, dl->node_scalar)) {
+      RCP<ParameterList> p = rcp(new ParameterList);
+      Albany::StateStruct::MeshFieldEntity entity = Albany::StateStruct::NodalDistParameter;
+      std::string stateName = "thermal_conductivity";
+      p = stateMgr.registerStateVariable(stateName, dl->node_scalar, meshSpecs.ebName, true, &entity, "");
+
+      //Gather parameter (similarly to what done with the solution)
+      ev = evalUtils.constructGatherScalarNodalParameter(stateName,fieldName);
+      fm0.template registerEvaluator<EvalT>(ev);
+
+      // Scalar Nodal parameter is stored as a ParamScalarT, while the residual evaluator expect a ScalarT.
+      // Hence, if ScalarT!=ParamScalarT, we need to convert the field into a ScalarT 
+      if(!std::is_same<typename EvalT::ScalarT,typename EvalT::ParamScalarT>::value) {
+        p->set<Teuchos::RCP<PHX::DataLayout> >("Data Layout", dl->node_scalar);
+        p->set<std::string>("Field Name", fieldName);
+        ev = Teuchos::rcp(new PHAL::ConvertFieldTypePSTtoST<EvalT,PHAL::AlbanyTraits>(*p));
+        fm0.template registerEvaluator<EvalT>(ev);
+      }
+      fm0.template registerEvaluator<EvalT> (evalUtils.constructDOFInterpolationEvaluator(fieldName));
+      /*stateName = "thermal_conductivity_sensitivity";
+      p = stateMgr.registerStateVariable(stateName, dl->node_scalar, meshSpecs.ebName, true, &entity, "");*/
+    }
   }
 
   {  // Temperature Resid

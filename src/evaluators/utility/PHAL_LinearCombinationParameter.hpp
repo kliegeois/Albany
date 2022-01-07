@@ -36,17 +36,17 @@ class LinearCombinationParameterBase :
   LinearCombinationParameterBase (const Teuchos::ParameterList& p, const Teuchos::RCP<Albany::Layouts>& dl)
   {
     std::string field_name   = p.get<std::string>("Parameter Name");
-    numModes = p.get<int>("Number of modes");
+    numModes = p.get<std::size_t>("Number of modes");
 
     val = decltype(val)(field_name,dl->node_scalar);
     numNodes = 0;
 
     for (std::size_t i = 0; i < numModes; ++i) {
-      std::string coefficient_name   = p.sublist(strint("Mode",i)).get<std::string>("Coefficient Name");
-      std::string mode_name          = p.sublist(strint("Mode",i)).get<std::string>("Mode Name");
+      std::string coefficient_name   = p.sublist(Albany::strint("Mode",i)).get<std::string>("Coefficient Name");
+      std::string mode_name          = p.sublist(Albany::strint("Mode",i)).get<std::string>("Mode Name");
 
-      coefficients_as_field.push_back(PHX::MDField<ScalarT,Dim>(coefficient_name,dl->shared_param));
-      modes_val.push_back(decltype(val)(mode_name,dl->node_scalar));
+      coefficients_as_field.push_back(PHX::MDField<const ScalarT,Dim>(coefficient_name,dl->shared_param));
+      modes_val.push_back(PHX::MDField<const RealType,Cell,Node>(mode_name,dl->node_scalar));
     }
 
     this->addEvaluatedField(val);
@@ -54,7 +54,7 @@ class LinearCombinationParameterBase :
       this->addDependentField(coefficients_as_field[i]);
       this->addDependentField(modes_val[i]);
     }
-    this->setName("Linear Combination " + param_name + PHX::print<EvalT>());
+    this->setName("Linear Combination " + field_name + PHX::print<EvalT>());
   }
 
   void postRegistrationSetup(typename Traits::SetupData d, PHX::FieldManager<Traits>& fm)
@@ -66,9 +66,9 @@ class LinearCombinationParameterBase :
 
 protected:
   std::size_t numModes, numNodes;
-  PHX::MDField<const ParamScalarT,Cell,Node> val;
-  std::vector<PHX::MDField<ScalarT,Dim>>   coefficients_as_field;
-  std::vector<PHX::MDField<const ParamScalarT,Cell,Node>>   modes_val;
+  PHX::MDField<ScalarT,Cell,Node> val;
+  std::vector<PHX::MDField<const ScalarT,Dim>>   coefficients_as_field; // or ParamScalarT
+  std::vector<PHX::MDField<const RealType,Cell,Node>>   modes_val;
 };
 
 template<typename EvalT, typename Traits> class LinearCombinationParameter;
@@ -112,7 +112,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::Residual,Traits>
       }
 
 
-      for (std::size_t i = 0; i < numModes; ++i) {
+      for (std::size_t i = 0; i < this->numModes; ++i) {
         for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
@@ -144,7 +144,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::Jacobian,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::EvalData d)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       // reset to zero first:
 
@@ -155,7 +155,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::Jacobian,Traits>
       }
 
 
-      for (std::size_t i = 0; i < numModes; ++i) {
+      for (std::size_t i = 0; i < this->numModes; ++i) {
         for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
@@ -187,7 +187,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::Tangent,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::EvalData d)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       // reset to zero first:
 
@@ -198,7 +198,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::Tangent,Traits>
       }
 
 
-      for (std::size_t i = 0; i < numModes; ++i) {
+      for (std::size_t i = 0; i < this->numModes; ++i) {
         for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
@@ -230,7 +230,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::DistParamDeriv,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::EvalData d)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       // reset to zero first:
 
@@ -241,7 +241,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::DistParamDeriv,Traits>
       }
 
 
-      for (std::size_t i = 0; i < numModes; ++i) {
+      for (std::size_t i = 0; i < this->numModes; ++i) {
         for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
@@ -273,7 +273,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::HessianVec,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::EvalData d)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       // reset to zero first:
 
@@ -284,7 +284,7 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::HessianVec,Traits>
       }
 
 
-      for (std::size_t i = 0; i < numModes; ++i) {
+      for (std::size_t i = 0; i < this->numModes; ++i) {
         for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
