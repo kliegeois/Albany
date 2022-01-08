@@ -10,11 +10,6 @@ import sys
 from PyAlbany import wpyalbany as wpa
 
 try:
-    import exomerge
-except:
-    import exomerge2 as exomerge
-
-try:
     import matplotlib as mpl
     mpl.use('Agg')
     import matplotlib.pyplot as plt
@@ -23,25 +18,13 @@ try:
 except:
     printPlot = False
 
-
-def read_mesh_coordinates(filename):
-    model = exomerge.import_model(filename)
-    positions = np.array(model.nodes)
-    x = np.ascontiguousarray(positions[:,0])
-    y = np.ascontiguousarray(positions[:,1])
-
-    min_x = np.min(x)
-    min_y = np.min(y)
-    max_x = np.max(x)
-    max_y = np.max(y)
-
-    return x, y, min_x, min_y, max_x, max_y
-
 def main(parallelEnv):
     comm = MPI.COMM_WORLD
     myGlobalRank = comm.rank
 
-    x, y, min_x, min_y, max_x, max_y = read_mesh_coordinates('steady2d.exo')
+    x, y, min_x, min_y, max_x, max_y = ee.read_mesh_coordinates('steady2d.exo')
+
+    filename = "thermal_steady_distributed.yaml"
 
     n_KLTerms = 10
     kl = wpa.KLExpention(2)
@@ -86,6 +69,13 @@ def main(parallelEnv):
     plt.figure()
     plt.contourf(X,Y,Z)
     plt.savefig('random.jpeg')
+
+    parameter = Utils.createParameterList(
+        filename, parallelEnv
+    )
+
+    ee.update_parameter_list(parameter, n_KLTerms)
+
 
 if __name__ == "__main__":
     comm = Teuchos.DefaultComm.getComm()

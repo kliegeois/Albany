@@ -8,6 +8,55 @@ try:
 except: 
     import Distributions as dist
 
+try:
+    import exomerge
+except:
+    import exomerge2 as exomerge
+
+
+def read_mesh_coordinates(filename):
+    model = exomerge.import_model(filename)
+    positions = np.array(model.nodes)
+    x = np.ascontiguousarray(positions[:,0])
+    y = np.ascontiguousarray(positions[:,1])
+
+    min_x = np.min(x)
+    min_y = np.min(y)
+    max_x = np.max(x)
+    max_y = np.max(y)
+
+    return x, y, min_x, min_y, max_x, max_y
+
+
+def update_parameter_list(parameter, n_modes, max_n_modes_per_vec=10):
+    # Update the Parameters sublist:
+    n_vectors = int(np.ceil(n_modes/max_n_modes_per_vec))
+    n_params = n_vectors + n_modes
+    parameterlist = Teuchos.ParameterList()
+    parameterlist.set('Number Of Parameters', n_params)
+    for i in range(0, n_vectors):
+        parameterlist.set('Parameter '+str(i), {'Type':'Vector'})
+        currentvector = parameterlist.sublist('Parameter '+str(i))
+        if (i+1)*max_n_modes_per_vec > n_modes:
+            dim = n_modes - i * max_n_modes_per_vec
+        else:
+            dim = n_modes
+        currentvector.set('Dimension', int(dim))
+        for j in range(0, dim):
+            coeff_id = i*max_n_modes_per_vec+j
+            currentvector.set('Scalar '+str(j), {'Name':'Coefficient '+str(coeff_id), 'Lower Bound':-5.e+04, 'Upper Bound':5.e+04})
+    for i in range(n_vectors, n_params):
+        parameterlist.set('Parameter '+str(i), {'Type':'Distributed', 'Name':'Mode '+str(i-n_vectors)})
+    parameter.sublist('Problem').set('Parameters', parameterlist)
+
+    # Update the Linear Combination Parameters sublist:
+    lcparams = parameter.sublist('Problem').sublist('Linear Combination Parameters').sublist('Parameter 0')
+    lcparams.set('Number of modes', n_modes)
+    for i in range(0, n_modes):
+        lcparams.set('Mode '+str(i), {'Coefficient Name':'Coefficient '+str(i), 'Mode Name':'Mode '+str(i)})
+
+
+
 def getDistributionParameters(problem, parameter):
     parameter_weighted_misfit = parameter.sublist("Problem").sublist("Response Functions").sublist("Response 0").sublist("Response 0")
     n_vec_params = parameter_weighted_misfit.get("Number Of Parameters")
