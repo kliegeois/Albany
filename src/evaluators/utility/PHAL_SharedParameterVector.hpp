@@ -14,7 +14,7 @@
 namespace PHAL
 {
 
-template<typename EvalT, typename Traits>
+template<typename EvalT, typename Traits, typename ParamNameEnum, ParamNameEnum ParamName>
 class SharedParameterVector : public PHX::EvaluatorWithBaseImpl<Traits>,
                         public PHX::EvaluatorDerived<EvalT, Traits>,
                         public Sacado::ParameterAccessor<EvalT, SPL_Traits>
@@ -22,14 +22,16 @@ class SharedParameterVector : public PHX::EvaluatorWithBaseImpl<Traits>,
 public:
 
   typedef typename EvalT::ScalarT   ScalarT;
+  typedef ParamNameEnum             EnumType;
 
   SharedParameterVector (const Teuchos::ParameterList& p, const Teuchos::RCP<Albany::Layouts>& dl)
   {
     param_name   = p.get<std::string>("Parameter Name");
     vecDim       = p.get<int>("Vector Dimension");
-    param_as_field = PHX::MDField<ScalarT,Dim>(param_name, rcp(new MDALayout<Dim>(vecDim)));
+    dl->shared_param_vec = Teuchos::rcp(new PHX::MDALayout<Dim>(vecDim));
+    param_as_field = PHX::MDField<ScalarT,Dim>(param_name, dl->shared_param_vec);
 
-    value = ScalarT[vecDim];
+    value = new ScalarT[vecDim];
 
     // Never actually evaluated, but creates the evaluation tag
     this->addEvaluatedField(param_as_field);
@@ -97,7 +99,7 @@ public:
       }
 
       if(!nominalValueSet) 
-        value = p.get<double>("Default Nominal Value");
+        value[i_vec] = p.get<double>("Default Nominal Value");
 
     }
     dummy = 0;
@@ -111,23 +113,30 @@ public:
 
   static ScalarT getValue ()
   {
-    return value;
+    return value[0];
+  }
+
+  static ScalarT getValue (int i)
+  {
+    return value[i];
   }
 
   ScalarT& getValue(const std::string &n)
   {
     if (n==param_name)
-      return value;
+      return value[0];
 
     return dummy;
   }
 
   void evaluateFields(typename Traits::EvalData /*d*/)
   {
-    if (log_parameter) {
-      param_as_field(0) = std::exp(value);
-    } else {
-      param_as_field(0) = value;
+    for (int i_vec=0; i_vec<vecDim; ++i_vec) {
+      if (log_parameter) {
+        param_as_field(i_vec) = std::exp(value[i_vec]);
+      } else {
+        param_as_field(i_vec) = value[i_vec];
+      }
     }
   }
 
@@ -142,17 +151,20 @@ protected:
   PHX::MDField<ScalarT,Dim>   param_as_field;
 };
 
-template<typename EvalT, typename Traits>
-typename EvalT::ScalarT* SharedParameterVector<EvalT,Traits>::value;
+template<typename EvalT, typename Traits, typename ParamNameEnum, ParamNameEnum ParamName>
+typename EvalT::ScalarT* SharedParameterVector<EvalT,Traits,ParamNameEnum,ParamName>::value;
 
-template<typename EvalT, typename Traits>
-typename EvalT::ScalarT SharedParameterVector<EvalT,Traits>::dummy;
+template<typename EvalT, typename Traits, typename ParamNameEnum, ParamNameEnum ParamName>
+typename EvalT::ScalarT SharedParameterVector<EvalT,Traits,ParamNameEnum,ParamName>::dummy;
 
-template<typename EvalT, typename Traits>
-std::string SharedParameterVector<EvalT,Traits>::param_name;
+template<typename EvalT, typename Traits, typename ParamNameEnum, ParamNameEnum ParamName>
+std::string SharedParameterVector<EvalT,Traits,ParamNameEnum,ParamName>::param_name;
 
-template<typename EvalT, typename Traits>
-bool SharedParameterVector<EvalT,Traits>::log_parameter;
+template<typename EvalT, typename Traits, typename ParamNameEnum, ParamNameEnum ParamName>
+bool SharedParameterVector<EvalT,Traits,ParamNameEnum,ParamName>::log_parameter;
+
+template<typename EvalT, typename Traits, typename ParamNameEnum, ParamNameEnum ParamName>
+int SharedParameterVector<EvalT,Traits,ParamNameEnum,ParamName>::vecDim;
 
 } // Namespace PHAL
 

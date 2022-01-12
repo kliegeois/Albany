@@ -109,6 +109,11 @@ public:
     return value;
   }
 
+  static ScalarT getValue (int i)
+  {
+    return value;
+  }
+
   ScalarT& getValue(const std::string &n)
   {
     if (n==param_name)
