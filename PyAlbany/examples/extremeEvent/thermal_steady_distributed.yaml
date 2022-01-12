@@ -12,14 +12,17 @@ ANONYMOUS:
       DBC on NS NodeSet1 for DOF T: -1.00000000000000000e+00
       DBC on NS NodeSet2 for DOF T: 0.00000000000000000e+00
       DBC on NS NodeSet3 for DOF T: 0.00000000000000000e+00
-    Thermal Conductivity: [1.6, 0.8]
     Thermal Source: None
     Linear Combination Parameters:
       Number Of Parameters: 1
       Parameter 0:
-        Name: thermal_conductivity
-        Number of modes:
-
+        Name: ThermalConductivity_Gauss
+        Number of modes: 0
+    LogNormal Parameter:
+      Log Gaussian Name: ThermalConductivity
+      Gaussian Name: ThermalConductivity_Gauss
+      mean: 1.
+      deviation: 0.1
     Response Functions: 
       Number Of Responses: 1
       Response 0:

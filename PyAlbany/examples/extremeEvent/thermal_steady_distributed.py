@@ -75,7 +75,36 @@ def main(parallelEnv):
     )
 
     ee.update_parameter_list(parameter, n_KLTerms)
+    problem = Utils.createAlbanyProblem(parameter, parallelEnv)
 
+    for i in range(1, n_KLTerms+1):
+        parameter_map = problem.getParameterMap(i)
+        mode_i = Tpetra.MultiVector(parameter_map, 1, dtype="d")
+
+        mode_i[0,:] = phi[:,i-1]
+        problem.setParameter(i, mode_i)
+    
+    '''
+    parameter_map = problem.getParameterMap(0)
+    mode_i = Tpetra.MultiVector(parameter_map, 1, dtype="d")
+    mode_i[0,:] = 1.
+    problem.setParameter(0, mode_i)
+    '''
+
+    l_min = 8.
+    l_max = 20.
+    n_l = 5
+
+    p = 1.
+
+    l = l_min + np.power(np.linspace(0.0, 1.0, n_l), p) * (l_max-l_min)
+
+    theta_star, I_star, F_star, P_star = ee.evaluateThetaStar(l, problem, n_KLTerms)
+
+    np.savetxt('theta_star_steady_distributed.txt', theta_star)
+    np.savetxt('I_star_steady_distributed.txt', I_star)
+    np.savetxt('P_star_steady_distributed.txt', P_star)
+    np.savetxt('F_star_steady_distributed.txt', F_star)
 
 if __name__ == "__main__":
     comm = Teuchos.DefaultComm.getComm()

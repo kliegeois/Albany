@@ -48,6 +48,8 @@ class LogGaussianDistributedParameterBase :
 
     a = log(mean/sqrt(1+deviation*deviation));
     b = sqrt(log(1+deviation*deviation));
+
+    //std::cout << " a = " << a << " b = " << b << std::endl;
   
     this->addEvaluatedField(logGaussian);
     this->addDependentField(gaussian);
@@ -59,11 +61,11 @@ class LogGaussianDistributedParameterBase :
   {
     this->utils.setFieldData(logGaussian,fm);
     numNodes = logGaussian.extent(1);
-    d.fill_field_dependencies(this->dependentFields(),this->elogGaussianuatedFields(),false);
+    d.fill_field_dependencies(this->dependentFields(),this->evaluatedFields(),false);
   }
 
 protected:
-  std::size_t numModes, numNodes;
+  std::size_t numNodes;
   PHX::MDField<ScalarT,Cell,Node> logGaussian;
   PHX::MDField<const ScalarT,Cell,Node> gaussian;
   RealType a, b;
@@ -99,11 +101,12 @@ class LogGaussianDistributedParameter<PHAL::AlbanyTraits::Residual,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::ElogGaussianData workset)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
         for (std::size_t node = 0; node < this->numNodes; ++node) {
           (this->logGaussian)(cell, node) = exp(this->a + this->b * (this->gaussian)(cell, node));
+          //std::cout << "Residual logGaussian coeff " << (this->logGaussian)(cell, node) << " " <<  (this->gaussian)(cell, node) << std::endl;
         }
       }
     }
@@ -130,11 +133,12 @@ class LogGaussianDistributedParameter<PHAL::AlbanyTraits::Jacobian,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::ElogGaussianData workset)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
         for (std::size_t node = 0; node < this->numNodes; ++node) {
           (this->logGaussian)(cell, node) = exp(this->a + this->b * (this->gaussian)(cell, node));
+          //std::cout << "Jacobian logGaussian coeff " << (this->logGaussian)(cell, node) << " " <<  (this->gaussian)(cell, node) << std::endl;
         }
       }
     }
@@ -161,11 +165,12 @@ class LogGaussianDistributedParameter<PHAL::AlbanyTraits::Tangent,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::ElogGaussianData workset)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
         for (std::size_t node = 0; node < this->numNodes; ++node) {
           (this->logGaussian)(cell, node) = exp(this->a + this->b * (this->gaussian)(cell, node));
+          //std::cout << "Tangent logGaussian coeff " << (this->logGaussian)(cell, node) << " " <<  (this->gaussian)(cell, node) << std::endl;
         }
       }
     }
@@ -192,11 +197,12 @@ class LogGaussianDistributedParameter<PHAL::AlbanyTraits::DistParamDeriv,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::ElogGaussianData workset)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
         for (std::size_t node = 0; node < this->numNodes; ++node) {
           (this->logGaussian)(cell, node) = exp(this->a + this->b * (this->gaussian)(cell, node));
+          //std::cout << "DistParamDeriv logGaussian coeff " << (this->logGaussian)(cell, node) << " " <<  (this->gaussian)(cell, node) << std::endl;
         }
       }
     }
@@ -223,11 +229,12 @@ class LogGaussianDistributedParameter<PHAL::AlbanyTraits::HessianVec,Traits>
         postRegistrationSetup(d, fm);
     }
 
-    void evaluateFields(typename Traits::ElogGaussianData workset)
+    void evaluateFields(typename Traits::EvalData workset)
     {
       for (std::size_t cell = 0; cell < workset.numCells; ++cell) {
         for (std::size_t node = 0; node < this->numNodes; ++node) {
           (this->logGaussian)(cell, node) = exp(this->a + this->b * (this->gaussian)(cell, node));
+          //std::cout << "HessianVec logGaussian coeff " << (this->logGaussian)(cell, node) << " " <<  (this->gaussian)(cell, node) << std::endl;
         }
       }
     }

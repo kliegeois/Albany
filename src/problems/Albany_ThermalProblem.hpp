@@ -123,6 +123,7 @@ namespace Albany {
 //#include "PHAL_Neumann.hpp"
 #include "PHAL_ThermalResid.hpp"
 #include "PHAL_SharedParameter.hpp"
+#include "PHAL_SharedParameterVector.hpp"
 #include "Albany_ParamEnum.hpp"
 
 template <typename EvalT>
@@ -225,6 +226,139 @@ Albany::ThermalProblem::constructEvaluators(
         evalUtils.constructDOFGradInterpolationEvaluator(dof_names[i]));
   }
 
+  size_t max_coeff_index = 10;
+  {
+    size_t coeff_index = 0;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_0>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_0>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 1;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_1>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_1>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 2;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_2>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_2>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 3;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_3>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_3>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 4;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_4>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_4>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 5;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_5>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_5>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 6;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_6>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_6>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 7;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_7>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_7>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 8;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_8>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_8>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  {
+    size_t coeff_index = 9;
+    RCP<ParameterList> p = rcp(new ParameterList(Albany::strint("Coeff", coeff_index)));
+    p->set< RCP<ParamLib> >("Parameter Library", paramLib);
+    const std::string param_name = Albany::strint("Coefficient", coeff_index);
+    p->set<std::string>("Parameter Name", param_name);
+    p->set<const Teuchos::ParameterList*>("Parameters List", &params->sublist("Parameters"));
+    p->set<double>("Default Nominal Value", 0.);
+    RCP<PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_9>> ptr_coeff;
+    ptr_coeff = rcp(new PHAL::SharedParameter<EvalT,PHAL::AlbanyTraits,Albany::ParamEnum,Albany::ParamEnum::Coeff_9>(*p,dl));
+    fm0.template registerEvaluator<EvalT>(ptr_coeff);
+  }
+  for(size_t coeff_index = 0; coeff_index<max_coeff_index; ++coeff_index)
+  {
+    RCP<ParameterList> p = rcp(new ParameterList);
+    Albany::StateStruct::MeshFieldEntity entity = Albany::StateStruct::NodalDistParameter;
+    std::string stateName = Albany::strint("Mode", coeff_index);
+    std::string fieldName = Albany::strint("Mode", coeff_index);
+    p = stateMgr.registerStateVariable(stateName, dl->node_scalar, meshSpecs.ebName, true, &entity, "");
+
+    //Gather parameter (similarly to what done with the solution)
+    ev = evalUtils.constructGatherScalarNodalParameter(stateName,fieldName);
+    fm0.template registerEvaluator<EvalT>(ev);
+  }
 
   {
     RCP<ParameterList> p = rcp(new ParameterList("Theta 0"));
@@ -268,6 +402,56 @@ Albany::ThermalProblem::constructEvaluators(
       ptr_rparam = rcp(new PHAL::RandomPhysicalParameter<EvalT,PHAL::AlbanyTraits>(*p,dl));
       fm0.template registerEvaluator<EvalT>(ptr_rparam);
     }
+  }
+
+  if (params->isSublist("Linear Combination Parameters")) {
+    auto lcparams = params->sublist("Linear Combination Parameters");
+    int nlcparams = lcparams.get<int>("Number Of Parameters");
+    for (int i_lcparams=0; i_lcparams<nlcparams; ++i_lcparams)
+    {
+      auto lcparams_i = lcparams.sublist(Albany::strint("Parameter",i_lcparams));
+
+      RCP<ParameterList> p = rcp(new ParameterList("LCParam"));
+      const std::string param_name = lcparams_i.get<std::string>("Name");
+      std::size_t numModes = lcparams_i.get<int>("Number of modes");
+
+      p->set<std::string>("Parameter Name", param_name);
+      p->set<std::size_t>("Number of modes", numModes);
+
+      for (std::size_t i = 0; i < numModes; ++i) {
+        RCP<ParameterList> pi = rcp(new ParameterList("Mode"));
+        pi->set<std::string>("Coefficient Name", lcparams_i.sublist(strint("Mode",i)).get<std::string>("Coefficient Name"));
+        pi->set<std::string>("Mode Name", lcparams_i.sublist(strint("Mode",i)).get<std::string>("Mode Name"));
+        p->sublist(strint("Mode",i)) = *pi;
+      }
+
+      RCP<PHAL::LinearCombinationParameter<EvalT,PHAL::AlbanyTraits>> ptr_lcparam;
+      ptr_lcparam = rcp(new PHAL::LinearCombinationParameter<EvalT,PHAL::AlbanyTraits>(*p,dl));
+      fm0.template registerEvaluator<EvalT>(ptr_lcparam);
+      if (!params->isSublist("LogNormal Parameter"))
+        fm0.template registerEvaluator<EvalT> (evalUtils.constructDOFInterpolationEvaluator(param_name));
+    }
+    if (params->isSublist("LogNormal Parameter")) {
+      auto lnparam = params->sublist("LogNormal Parameter");
+
+      RCP<ParameterList> p = rcp(new ParameterList("LNParam"));
+      const std::string param_name_out = lnparam.get<std::string>("Log Gaussian Name");
+      const std::string param_name_in = lnparam.get<std::string>("Gaussian Name");
+      const RealType mean = lnparam.get<RealType>("mean");
+      const RealType deviation = lnparam.get<RealType>("deviation");
+
+      p->set<std::string>("Log Gaussian Name", param_name_out);
+      p->set<std::string>("Gaussian Name", param_name_in);
+      p->set<RealType>("mean", mean);
+      p->set<RealType>("deviation", deviation);
+
+      RCP<PHAL::LogGaussianDistributedParameter<EvalT,PHAL::AlbanyTraits>> ptr_lnparam;
+      ptr_lnparam = rcp(new PHAL::LogGaussianDistributedParameter<EvalT,PHAL::AlbanyTraits>(*p,dl));
+      fm0.template registerEvaluator<EvalT>(ptr_lnparam);
+      fm0.template registerEvaluator<EvalT> (evalUtils.constructDOFInterpolationEvaluator(param_name_out));
+    }
+
+    conductivityIsDistParam = true;
   }
 
   if (!conductivityIsDistParam) {  
@@ -317,35 +501,9 @@ Albany::ThermalProblem::constructEvaluators(
   else //conductivityIsDistParam
   {
     std::string fieldName = "ThermalConductivity";
-  
-    if (params->isSublist("Linear Combination Parameters")) {
-      auto lcparams = params->sublist("Linear Combination Parameters");
-      int nlcparams = lcparams.get<int>("Number Of Parameters");
-      for (int i_lcparams=0; i_lcparams<nlcparams; ++i_lcparams)
-      {
-        auto lcparams_i = lcparams.sublist(Albany::strint("Parameter",i_lcparams));
-
-        RCP<ParameterList> p = rcp(new ParameterList("LCParam"));
-        const std::string param_name = lcparams_i.get<std::string>("Name");
-        std::size_t numModes = lcparams_i.get<std::size_t>("Number of modes");
-
-        p->set<std::string>("Parameter Name", param_name);
-        p->set<std::size_t>("Number of modes", numModes);
-
-        for (std::size_t i = 0; i < numModes; ++i) {
-          RCP<ParameterList> pi = rcp(new ParameterList("Mode"));
-          pi->set<std::string>("Coefficient Name", lcparams_i.sublist(strint("Mode",i)).get<std::string>("Coefficient Name"));
-          pi->set<std::string>("Mode Name", lcparams_i.sublist(strint("Mode",i)).get<std::string>("Mode Name"));
-          p->sublist(strint("Mode",i)) = *pi;
-        }
-
-        RCP<PHAL::LinearCombinationParameter<EvalT,PHAL::AlbanyTraits>> ptr_lcparam;
-        ptr_lcparam = rcp(new PHAL::LinearCombinationParameter<EvalT,PHAL::AlbanyTraits>(*p,dl));
-        fm0.template registerEvaluator<EvalT>(ptr_lcparam);
-      }
-    }
 
     if(!PHAL::is_field_evaluated<EvalT>(fm0, fieldName, dl->node_scalar)) {
+      std::cout<< "fieldName = " << fieldName << " NOT yet evaluated !" <<std::endl;
       RCP<ParameterList> p = rcp(new ParameterList);
       Albany::StateStruct::MeshFieldEntity entity = Albany::StateStruct::NodalDistParameter;
       std::string stateName = "thermal_conductivity";

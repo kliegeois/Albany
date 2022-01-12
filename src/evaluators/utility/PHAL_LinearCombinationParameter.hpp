@@ -46,7 +46,7 @@ class LinearCombinationParameterBase :
       std::string mode_name          = p.sublist(Albany::strint("Mode",i)).get<std::string>("Mode Name");
 
       coefficients_as_field.push_back(PHX::MDField<const ScalarT,Dim>(coefficient_name,dl->shared_param));
-      modes_val.push_back(PHX::MDField<const RealType,Cell,Node>(mode_name,dl->node_scalar));
+      modes_val.push_back(PHX::MDField<const ParamScalarT,Cell,Node>(mode_name,dl->node_scalar));
     }
 
     this->addEvaluatedField(val);
@@ -68,7 +68,7 @@ protected:
   std::size_t numModes, numNodes;
   PHX::MDField<ScalarT,Cell,Node> val;
   std::vector<PHX::MDField<const ScalarT,Dim>>   coefficients_as_field; // or ParamScalarT
-  std::vector<PHX::MDField<const RealType,Cell,Node>>   modes_val;
+  std::vector<PHX::MDField<const ParamScalarT,Cell,Node>>   modes_val;
 };
 
 template<typename EvalT, typename Traits> class LinearCombinationParameter;
@@ -117,6 +117,8 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::Residual,Traits>
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
               (this->coefficients_as_field[i])(0) * (this->modes_val[i])(cell, node);
+            
+              //std::cout << "Residual coeff " << i << " = " <<  (this->coefficients_as_field[i])(0) << " * " << (this->modes_val[i])(cell, node) << std::endl;
           }
         }
       }
@@ -160,6 +162,8 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::Jacobian,Traits>
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
               (this->coefficients_as_field[i])(0) * (this->modes_val[i])(cell, node);
+            
+            //std::cout << "Jacobian coeff " << i << " = " <<  (this->coefficients_as_field[i])(0) << " * " << (this->modes_val[i])(cell, node) << std::endl;
           }
         }
       }
@@ -203,6 +207,8 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::Tangent,Traits>
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
               (this->coefficients_as_field[i])(0) * (this->modes_val[i])(cell, node);
+            
+            //std::cout << "Tangent coeff " << i << " = " <<  (this->coefficients_as_field[i])(0) << " * " << (this->modes_val[i])(cell, node) << std::endl;
           }
         }
       }
@@ -246,6 +252,8 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::DistParamDeriv,Traits>
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
               (this->coefficients_as_field[i])(0) * (this->modes_val[i])(cell, node);
+            
+            //std::cout << "DistParamDeriv coeff " << i << " = " <<  (this->coefficients_as_field[i])(0) << " * " << (this->modes_val[i])(cell, node) << std::endl;
           }
         }
       }
@@ -289,6 +297,8 @@ class LinearCombinationParameter<PHAL::AlbanyTraits::HessianVec,Traits>
           for (std::size_t node = 0; node < this->numNodes; ++node) {
             (this->val)(cell, node) +=
               (this->coefficients_as_field[i])(0) * (this->modes_val[i])(cell, node);
+            
+            //std::cout << "HessianVec coeff " << i << " = " <<  (this->coefficients_as_field[i])(0) << " * " << (this->modes_val[i])(cell, node) << std::endl;
           }
         }
       }

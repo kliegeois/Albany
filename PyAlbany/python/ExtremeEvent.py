@@ -1,4 +1,5 @@
 from PyTrilinos import Tpetra
+from PyTrilinos import Teuchos
 
 import numpy as np
 import scipy.sparse.linalg as slinalg
@@ -30,7 +31,7 @@ def read_mesh_coordinates(filename):
 
 def update_parameter_list(parameter, n_modes, max_n_modes_per_vec=10):
     # Update the Parameters sublist:
-    n_vectors = int(np.ceil(n_modes/max_n_modes_per_vec))
+    n_vectors = int(np.ceil(1.*n_modes/max_n_modes_per_vec))
     n_params = n_vectors + n_modes
     parameterlist = Teuchos.ParameterList()
     parameterlist.set('Number Of Parameters', n_params)
