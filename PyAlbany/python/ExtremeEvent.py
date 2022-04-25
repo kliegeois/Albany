@@ -7,8 +7,10 @@ import scipy.sparse.linalg as slinalg
 import scipy.linalg as linalg
 try: 
     from PyAlbany import Distributions as dist
+    from PyAlbany import Utils
 except: 
     import Distributions as dist
+    import Utils
 
 try:
     import exomerge
@@ -18,7 +20,6 @@ except:
     if sys.version_info.major == 3:
         import exomerge3 as exomerge
 
-from PyAlbany import Utils
 
 import multiprocessing
 import time
