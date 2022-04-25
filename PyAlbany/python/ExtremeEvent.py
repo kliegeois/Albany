@@ -20,6 +20,8 @@ except:
 
 from PyAlbany import Utils
 
+import multiprocessing
+import time
 
 class triangleQuadrature:
     def __init__(this, degree=2):
@@ -165,6 +167,71 @@ class covarianceFunction:
 
             return np.exp(exponential)
 
+def dot_Nystrom_PROC(X, x, y, covarianceFunction, row_indices, i_PROC):
+    n_coordinates = len(X[:,0])
+    n_vec = np.shape(x)[0]
+    if i_PROC == 0:
+        timer_0 = time.time()
+        print('Start dot')
+    for i_index in range(0, len(row_indices)):
+        i = row_indices[i_index]
+        for j in range(i, n_coordinates):
+            tmp = covarianceFunction.apply(X[i,:], X[j,:])
+            for k in range(0, n_vec):
+                y[k, i] += tmp * x[k,i]
+            if i != j:
+                for k in range(0, n_vec):
+                    y[k, j] += tmp * x[k,j]
+        if i_PROC == 0:
+            timer_1 = time.time()
+            diff = timer_1-timer_0
+            estimated = (len(row_indices)-i_index-1)*diff/(i_index+1)
+            print('i = ' +str(i_index) + '/'+str(len(row_indices))+ ' elapsed timer ' +str(diff)+' estimated timed ' + str(estimated), end='\r')
+    if i_PROC == 0:
+        print('End dot')
+
+class Op_Nystrom(slinalg.LinearOperator):
+    def __init__(self, X, sqrt_W, covarianceFunction, Map, NUM_PROC=1):
+        self.dtype = np.dtype('float64')
+        self.X = X
+        self.Map = Map
+        self.sqrt_W = sqrt_W
+        self.NUM_PROC = NUM_PROC
+        self.n_coordinates = len(X[:,0])
+        self.shape = (self.n_coordinates, self.n_coordinates)
+        self.covarianceFunction = covarianceFunction
+    def dot(self, x):
+        n_vec = np.shape(x)[0]
+
+        scaled_x = Tpetra.MultiVector(self.Map, n_vec, dtype="d")
+        y = Tpetra.MultiVector(self.Map, n_vec, dtype="d")
+        for i in range(0, self.n_coordinates):
+            scaled_x[:,i] = self.sqrt_W[i] * x[:,i]
+
+        jobs = []
+
+        for i_PROC in range(self.NUM_PROC):
+            n_per_PROC = int(np.ceil(self.n_coordinates / self.NUM_PROC))
+            first_index = i_PROC*n_per_PROC
+            last_index = np.amin([first_index+n_per_PROC, self.n_coordinates])
+
+            row_indices = np.arange(first_index, last_index)
+            process = multiprocessing.Process(
+                target=dot_Nystrom_PROC, 
+                args=(self.X, scaled_x, y, self.covarianceFunction, row_indices, i_PROC)
+            )
+            jobs.append(process)
+
+        for j in jobs:
+            j.start()
+
+        for j in jobs:
+            j.join()
+
+        for i in range(0, self.n_coordinates):
+            y[:,i] *= self.sqrt_W[i]
+
+        return y
 
 def compute_C(X, covarianceFunction):
     n = X.shape[0]
@@ -184,7 +251,7 @@ def compute_W(X, elements):
     n_elements = elements.shape[0]
     n_nodes_per_element = elements.shape[1]
 
-    W = np.zeros((n_nodes, n_nodes))
+    W = np.zeros((n_nodes, ))
     for i in range(0, n_elements):
         if d == 2 and n_nodes_per_element == 3:
             # 2D and triangles
@@ -193,7 +260,7 @@ def compute_W(X, elements):
                            X[elements[i,2], 0]*(X[elements[i,0], 1]-X[elements[i,1], 1]))/2.) / 3
             for j in range(0, n_nodes_per_element):
                 node_i = elements[i,j]
-                W[node_i, node_i] += area_3
+                W[node_i] += area_3
 
     return W
 
