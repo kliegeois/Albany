@@ -428,6 +428,8 @@ list (APPEND SOURCES
   evaluators/utility/PHAL_DummyResidual.cpp
   evaluators/utility/PHAL_FieldFrobeniusNorm.cpp
   evaluators/utility/PHAL_LangevinNoiseTerm.cpp
+  evaluators/utility/PHAL_LinearCombinationParameter.cpp
+  evaluators/utility/PHAL_LogGaussianDistributedParameter.cpp
   evaluators/utility/PHAL_MapToPhysicalFrame.cpp
   evaluators/utility/PHAL_MapToPhysicalFrameSide.cpp
   evaluators/utility/PHAL_Source.cpp
