@@ -338,8 +338,14 @@ def update_parameter_list(parameter, n_modes, max_abs=5.e+04, sufix='', max_n_mo
     lcparams.set('On Side', onSideDisc)
     if onSideDisc:
         lcparams.set('Side Name', sideName)
+    mode_names = []
+    coeff_names = []
     for i in range(0, n_modes):
-        lcparams.set('Mode '+str(i), {'Coefficient Name':'Coefficient '+str(i), 'Mode Name':'Mode '+str(i)+sufix})
+        mode_names.append('Mode '+str(i)+sufix)
+        coeff_names.append('Coefficient '+str(i))
+    
+    lcparams.set('Modes', mode_names)
+    lcparams.set('Coeffs', coeff_names)
 
 
 
