@@ -1075,8 +1075,8 @@ constructVelocityEvaluators (PHX::FieldManager<PHAL::AlbanyTraits>& fm0,
     for (int i_lcparams=0; i_lcparams<nlcparams; ++i_lcparams)
     {
       auto lcparams_i = lcparams.sublist(util::strint("Parameter", i_lcparams));
-      Teuchos::Array<std::string> mode_names  = params->get<Teuchos::Array<std::string> >("Modes");
-      Teuchos::Array<std::string> coeff_names = params->get<Teuchos::Array<std::string> >("Coeffs");
+      Teuchos::Array<std::string> mode_names  = lcparams_i.get<Teuchos::Array<std::string> >("Modes");
+      Teuchos::Array<std::string> coeff_names = lcparams_i.get<Teuchos::Array<std::string> >("Coeffs");
       size_t numModes = mode_names.size();
 
       onSide = lcparams_i.get<bool>("On Side");

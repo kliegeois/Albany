@@ -187,7 +187,7 @@ def dot_Nystrom_PROC(X, x, y, covarianceFunction, row_indices, i_PROC):
             timer_1 = time.time()
             diff = timer_1-timer_0
             estimated = (len(row_indices)-i_index-1)*diff/(i_index+1)
-            print('i = ' +str(i_index) + '/'+str(len(row_indices))+ ' elapsed timer ' +str(diff)+' estimated timed ' + str(estimated), end='\r')
+            #print('i = ' +str(i_index) + '/'+str(len(row_indices))+ ' elapsed timer ' +str(diff)+' estimated timed ' + str(estimated), end='\r')
     if i_PROC == 0:
         print('End dot')
 

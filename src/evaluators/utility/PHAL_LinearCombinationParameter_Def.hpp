@@ -22,8 +22,8 @@ LinearCombinationParameter (const Teuchos::ParameterList& p, const Teuchos::RCP<
   }
 
   scale = false;
-  if (p.isParameter("Scalar scale")) {
-    scalar_scale = p.get<Teuchos::Array<double> >("Scalar scale");
+  if (p.isParameter("Weights")) {
+    scalar_scale = p.get<Teuchos::Array<double> >("Weights");
     scale = true;
   }
 
