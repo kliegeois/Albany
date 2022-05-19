@@ -198,6 +198,8 @@ BasalFrictionCoefficient (const Teuchos::ParameterList& p,
       mu_type = FIELD_TYPE::CONSTANT;
     } else if (muType == "FIELD") {
       mu_type = FIELD_TYPE::FIELD;
+    } else if (muType == "SCALAR TYPE FIELD") {
+      mu_type = FIELD_TYPE::SCALAR_TYPE_FIELD;
     } else if (muType == "EXPONENT OF FIELD AT NODES") {
       mu_type = FIELD_TYPE::EXPONENT_OF_FIELD_AT_NODES;
     } else if (muType == "EXPONENT OF FIELD") {
@@ -224,8 +226,14 @@ BasalFrictionCoefficient (const Teuchos::ParameterList& p,
         this->addDependentField (BF);
       }
 
-      muField = PHX::MDField<const ParamScalarT>(mu_field_name, layout_mu_field);
-      this->addDependentField (muField);
+      if(mu_type == FIELD_TYPE::SCALAR_TYPE_FIELD) {
+        muField_ST = PHX::MDField<const ScalarT>(mu_field_name, layout_mu_field);
+        this->addDependentField (muField_ST);
+      }
+      else {
+        muField_PST = PHX::MDField<const ParamScalarT>(mu_field_name, layout_mu_field);
+        this->addDependentField (muField_PST);
+      }
     }
 
     powerParam     = PHX::MDField<const ScalarT,Dim>("Power Exponent", dl->shared_param);
@@ -332,7 +340,7 @@ KOKKOS_INLINE_FUNCTION
 void BasalFrictionCoefficient<EvalT, Traits, EffPressureST, VelocityST, TemperatureST>::
 operator() (const BasalFrictionCoefficient_Tag& tag, const int& cell) const {
 
-  ParamScalarT muValue = 1.0;
+  ScalarT muValue = 1.0;
   typename Albany::StrongestScalarType<EffPressureST,MeshScalarT>::type NVal = N_val;
 
   if(beta_type != BETA_TYPE::CONSTANT) {
@@ -390,20 +398,23 @@ operator() (const BasalFrictionCoefficient_Tag& tag, const int& cell) const {
       }
 
       switch (mu_type) {
+      case FIELD_TYPE::SCALAR_TYPE_FIELD:
+        muValue = muField_ST(cell,ipt);
+        break;
       case FIELD_TYPE::FIELD:
-        muValue = muField(cell,ipt);
+        muValue = muField_PST(cell,ipt);
         break;
       case FIELD_TYPE::EXPONENT_OF_FIELD_AT_NODES:
         if(nodal)
-          muValue = std::exp(muField(cell,ipt));
+          muValue = std::exp(muField_PST(cell,ipt));
         else {
           muValue = 0;
           for (unsigned int node=0; node<numNodes; ++node)
-            muValue += std::exp(muField(cell,node))*BF(cell,node,ipt);
+            muValue += std::exp(muField_PST(cell,node))*BF(cell,node,ipt);
         }
         break;
       case FIELD_TYPE::EXPONENT_OF_FIELD:
-        muValue = std::exp(muField(cell,ipt));
+        muValue = std::exp(muField_PST(cell,ipt));
         break;
       case FIELD_TYPE::CONSTANT:
         muValue = mu;

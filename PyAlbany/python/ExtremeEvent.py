@@ -334,13 +334,22 @@ def read_mesh_coordinates(filename):
 
 # Update the parameter list to add the KL expansion.
 def update_parameter_list(parameter, n_modes, max_abs=5.e+04, sufix='', max_n_modes_per_vec=10, useDistributed=True, filename=None, onSideDisc=False, sideName='basalside'):
+
+    if parameter.sublist("Problem").isSublist("Parameters"):
+        old_parameter = parameter.sublist("Problem").sublist("Parameters")
+        old_parameter_exist = True
+        n_params_offset = old_parameter.get('Number Of Parameters')
+    else:
+        old_parameter_exist = False
+        n_params_offset = 0
+
     # Update the Parameters sublist:
     n_vectors = int(np.ceil(1.*n_modes/max_n_modes_per_vec))
     n_params = n_vectors
     if useDistributed:
         n_params += n_modes
     parameterlist = Teuchos.ParameterList()
-    parameterlist.set('Number Of Parameters', n_params)
+    parameterlist.set('Number Of Parameters', n_params + n_params_offset)
     for i in range(0, n_vectors):
         parameterlist.set('Parameter '+str(i), {'Type':'Vector'})
         currentvector = parameterlist.sublist('Parameter '+str(i))
@@ -355,6 +364,9 @@ def update_parameter_list(parameter, n_modes, max_abs=5.e+04, sufix='', max_n_mo
     if useDistributed:
         for i in range(n_vectors, n_params):
             parameterlist.set('Parameter '+str(i), {'Type':'Distributed', 'Name':'Mode '+str(i-n_vectors)})
+    if old_parameter_exist:
+        for i in range(0, n_params_offset):
+            parameterlist.set('Parameter '+str(i+n_params), old_parameter.get('Parameter '+str(i)))
     parameter.sublist('Problem').set('Parameters', parameterlist)
 
     if not useDistributed:

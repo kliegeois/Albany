@@ -62,7 +62,8 @@ private:
   PHX::MDField<const RealType>          BF;
   PHX::MDField<const VelocityST>        u_norm;          // [m yr^{-1}]
   PHX::MDField<const ParamScalarT>      lambdaField;     // [km], characteristic length
-  PHX::MDField<const ParamScalarT>      muField;         // [yr^q m^{-q}] or [adim], Power Law with exponent q, Coulomb Friction
+  PHX::MDField<const ScalarT>           muField_ST;      // [yr^q m^{-q}] or [adim], Power Law with exponent q, Coulomb Friction
+  PHX::MDField<const ParamScalarT>      muField_PST;     // [yr^q m^{-q}] or [adim], Power Law with exponent q, Coulomb Friction
   PHX::MDField<const EffPressureST>     N;               // [kPa]
   PHX::MDField<const MeshScalarT>       coordVec;        // [km]
 
@@ -99,7 +100,7 @@ private:
   bool is_side_equation;
   bool is_power_parameter;
   enum class BETA_TYPE {CONSTANT, FIELD, POWER_LAW, REGULARIZED_COULOMB};
-  enum class FIELD_TYPE {CONSTANT, FIELD, EXPONENT_OF_FIELD, EXPONENT_OF_FIELD_AT_NODES};
+  enum class FIELD_TYPE {CONSTANT, FIELD, SCALAR_TYPE_FIELD, EXPONENT_OF_FIELD, EXPONENT_OF_FIELD_AT_NODES};
   enum class EFFECTIVE_PRESSURE_TYPE {CONSTANT, FIELD, HYDROSTATIC, HYDROSTATIC_AT_NODES};
   BETA_TYPE beta_type;
   EFFECTIVE_PRESSURE_TYPE effectivePressure_type;
