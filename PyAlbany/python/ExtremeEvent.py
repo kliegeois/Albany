@@ -34,7 +34,7 @@ import time
 # And:
 # 
 # [2] Betz, W., Papaioannou, I., & Straub, D. (2014). Numerical methods for the discretization
-# of random fields by means of the Karhunen–Loève expansion. Computer Methods in Applied
+# of random fields by means of the Karhunen–Loeve expansion. Computer Methods in Applied
 # Mechanics and Engineering, 271, 109-129.
 #
 
@@ -493,45 +493,72 @@ def setInitialGuess(problem, p, n_params, params_in_vector=True):
 
 
 # Solve (2.5) of [1] using a quadratic penalty method for a sequence of targeted QoI values.
-def evaluateThetaStar_QPM(QoI, problem, n_params, alpha=5e0, response_id=0, F_id=1, params_in_vector=True):
+def evaluateThetaStar_QPM(QoI, problem, n_params, alpha=5e0, start_I_zero=False, response_id=0, F_id=1, params_in_vector=True):
     n_QoI = len(QoI)
     theta_star = np.zeros((n_QoI,n_params))
     I_star = np.zeros((n_QoI,))
     sdF_star = np.zeros((n_QoI,))
+    QoI_star = np.zeros((n_QoI,))
 
     # Loop over the lambdas
     for i in range(0, n_QoI):
-        problem.updateCumulativeResponseContributionTargetAndExponent(0, 1, QoI[i], 2)
-        problem.updateCumulativeResponseContributionWeigth(0, 1, alpha)
+        if i == 0 and start_I_zero:
+            problem.updateCumulativeResponseContributionTargetAndExponent(0, 1, 0, 1)
 
-        error = problem.performAnalysis()
+            if params_in_vector:
+                parameter_map = problem.getParameterMap(0)
+                parameter = Tpetra.Vector(parameter_map, dtype="d")
+                for j_param in range(0, n_params):
+                    parameter[j_param] = 0.
+                problem.setParameter(0, parameter)
+            else:
+                for k in range(0, n_params):
+                    parameter_map = problem.getParameterMap(k)
+                    parameter = Tpetra.Vector(parameter_map, dtype="d")
+                    parameter[0] = 0.
+                    problem.setParameter(k, parameter)
+            problem.performSolve()
 
-        if error:
-            print("The forward solve has not converged for lambda = "+str(l[i]))
-            raise NameError("Has not converged")
+            QoI[i] = problem.getCumulativeResponseContribution(0, F_id)
+            QoI_star[i] = QoI[i]
+            I_star[i] = 0.
+            sdF_star[i] = 0.
 
-        if params_in_vector:
-            para = problem.getParameter(0)
-            for j in range(0, n_params):
-                theta_star[i, j] = para.getData()[j]
         else:
-            for j in range(0, n_params):
-                para = problem.getParameter(j)
-                theta_star[i, j] = para.getData()
+            problem.updateCumulativeResponseContributionTargetAndExponent(0, 1, QoI[i], 2)
+            problem.updateCumulativeResponseContributionWeigth(0, 1, alpha)
 
-        problem.performSolve()
+            error = problem.performAnalysis()
 
-        I_star[i] = problem.getCumulativeResponseContribution(0, response_id)
-        sdF_star[i] = problem.getCumulativeResponseContribution(0, F_id)
+            if error:
+                print("The forward solve has not converged for lambda = "+str(l[i]))
+                raise NameError("Has not converged")
+
+            if params_in_vector:
+                para = problem.getParameter(0)
+                for j in range(0, n_params):
+                    theta_star[i, j] = para.getData()[j]
+            else:
+                for j in range(0, n_params):
+                    para = problem.getParameter(j)
+                    theta_star[i, j] = para.getData()
+
+            problem.updateCumulativeResponseContributionTargetAndExponent(0, 1, 0, 1)
+            problem.performSolve()
+
+            I_star[i] = problem.getCumulativeResponseContribution(0, response_id)
+            QoI_star[i] = problem.getCumulativeResponseContribution(0, F_id)
+            sdF_star[i] = (QoI[i]-QoI_star[i])**2
 
         np.savetxt('theta_star_steady_distributed_tmp.txt', theta_star)
         np.savetxt('I_star_steady_distributed_tmp.txt', I_star)
         np.savetxt('sdF_star_steady_distributed_tmp.txt', sdF_star)
-        np.savetxt('F_star_steady_distributed_tmp.txt', QoI)
+        np.savetxt('Q_dricer_star_steady_distributed_tmp.txt', QoI)
+        np.savetxt('F_star_steady_distributed_tmp.txt', QoI_star)
 
     P_star = np.exp(-I_star)
 
-    return theta_star, I_star, sdF_star, P_star
+    return theta_star, I_star, QoI_star, sdF_star, P_star
 
 
 # Solve (2.20) of [1] using an unconstrained optimization problem for
