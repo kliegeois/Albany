@@ -115,3 +115,21 @@ if (INSTALL_ALBANY)
     LIBRARY DESTINATION ${LIB_INSTALL_DIR}
     ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
 endif()
+
+
+include(FetchContent)
+FetchContent_Declare(
+	pybind11
+	GIT_REPOSITORY https://github.com/pybind/pybind11.git
+	GIT_TAG        v2.6.2
+	GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(pybind11)
+
+pybind11_add_module(Albany_Pybind11 Albany_Pybind11.cpp)
+target_include_directories(Albany_Pybind11 PUBLIC ${Trilinos_INCLUDE_DIRS})
+target_compile_features(Albany_Pybind11 PUBLIC cxx_std_11)
+#target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES} ${TPL_LIBRARIES})
+target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES})
+set_target_properties(Albany_Pybind11 PROPERTIES SUFFIX ".so")

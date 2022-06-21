@@ -34,7 +34,6 @@ EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c
 MESSAGE("  -- PYTHON_VERSION = ${PYTHON_VERSION}")
 
 add_subdirectory( src )
-add_subdirectory( swig )
 
 # The CMAKE install logic of PyAlbany is based on the one of PyTrilinos.
 
@@ -66,13 +65,11 @@ FILE(GLOB PyAlbanyPyFiles ${CMAKE_CURRENT_SOURCE_DIR}/python/*.py)
 
 INSTALL(FILES
   ${PyAlbanyPyFiles}
-  ${CMAKE_CURRENT_BINARY_DIR}/swig/wpyalbany.py
-  ${CMAKE_CURRENT_BINARY_DIR}/swig/_wpyalbany.so
   DESTINATION ${PyAlbany_INSTALL_DIR})
 
 MESSAGE("End of the configuration of PyAlbany")
 
 IF (ALBANY_PYTHON_TESTS)
-  SET(PYALBANY_PYTHONPATH "PYTHONPATH=${Trilinos_LIB_DIRS}/:${Trilinos_LIB_DIRS}/python${PYTHON_VERSION}/site-packages:${CMAKE_CURRENT_BINARY_DIR}/swig:$ENV{PYTHONPATH}")
+  SET(PYALBANY_PYTHONPATH "PYTHONPATH=${Trilinos_LIB_DIRS}/:${Trilinos_LIB_DIRS}/python${PYTHON_VERSION}/site-packages:$ENV{PYTHONPATH}")
   add_subdirectory( tests )
 ENDIF()
