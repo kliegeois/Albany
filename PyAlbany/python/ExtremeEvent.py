@@ -343,20 +343,23 @@ def update_parameter_list(parameter, n_modes, max_abs=5.e+04, sufix='', max_n_mo
         old_parameter_exist = False
         n_params_offset = 0
 
+    n_random_field = parameter.sublist('Problem').sublist('Linear Combination Parameters').get('Number Of Parameters')
+
     # Update the Parameters sublist:
-    n_vectors = int(np.ceil(1.*n_modes/max_n_modes_per_vec))
+    n_params_random_field = n_modes*n_random_field
+    n_vectors = int(np.ceil(1.*n_params_random_field/max_n_modes_per_vec))
     n_params = n_vectors
     if useDistributed:
-        n_params += n_modes
+        n_params += n_params_random_field
     parameterlist = Teuchos.ParameterList()
     parameterlist.set('Number Of Parameters', n_params + n_params_offset)
     for i in range(0, n_vectors):
         parameterlist.set('Parameter '+str(i), {'Type':'Vector'})
         currentvector = parameterlist.sublist('Parameter '+str(i))
-        if (i+1)*max_n_modes_per_vec > n_modes:
-            dim = n_modes - i * max_n_modes_per_vec
+        if (i+1)*max_n_modes_per_vec > n_params_random_field:
+            dim = n_params_random_field - i * max_n_modes_per_vec
         else:
-            dim = n_modes
+            dim = n_params_random_field
         currentvector.set('Dimension', int(dim))
         for j in range(0, dim):
             coeff_id = i*max_n_modes_per_vec+j
@@ -388,19 +391,21 @@ def update_parameter_list(parameter, n_modes, max_abs=5.e+04, sufix='', max_n_mo
             rfi.set('Field '+str(n_field_0+i), parameterlist)
 
     # Update the Linear Combination Parameters sublist:
-    lcparams = parameter.sublist('Problem').sublist('Linear Combination Parameters').sublist('Parameter 0')
-    lcparams.set('Number of modes', n_modes)
-    lcparams.set('On Side', onSideDisc)
-    if onSideDisc:
-        lcparams.set('Side Name', sideName)
-    mode_names = []
-    coeff_names = []
-    for i in range(0, n_modes):
-        mode_names.append('Mode '+str(i)+sufix)
-        coeff_names.append('Coefficient '+str(i))
-    
-    lcparams.set('Modes', mode_names)
-    lcparams.set('Coeffs', coeff_names)
+    for i_random_field in range(n_random_field):
+        lcparams = parameter.sublist('Problem').sublist('Linear Combination Parameters').sublist('Parameter '+str(i_random_field))
+        lcparams.set('Number of modes', n_modes)
+        lcparams.set('On Side', onSideDisc)
+        if onSideDisc:
+            lcparams.set('Side Name', sideName)
+        mode_names = []
+        coeff_names = []
+        n_mode_offset = i_random_field * n_modes
+        for i in range(0, n_modes):
+            mode_names.append('Mode '+str(i)+sufix)
+            coeff_names.append('Coefficient '+str(i + n_mode_offset))
+        
+        lcparams.set('Modes', mode_names)
+        lcparams.set('Coeffs', coeff_names)
 
 
 ### Functions associated to the computation of the extreme events:

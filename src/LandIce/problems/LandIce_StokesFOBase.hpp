@@ -1133,29 +1133,41 @@ constructVelocityEvaluators (PHX::FieldManager<PHAL::AlbanyTraits>& fm0,
       else
         ptr_lcparam = Teuchos::rcp(new PHAL::LinearCombinationParameter<EvalT,PHAL::AlbanyTraits>(*p,dl));
       fm0.template registerEvaluator<EvalT>(ptr_lcparam);
-      if (!params->isSublist("LogNormal Parameter")) {
+      if (!params->isSublist("LogNormal Parameters")) {
         if(onSide)
           fm0.template registerEvaluator<EvalT> (evalUtils.constructDOFInterpolationSideEvaluator(param_name, sideName));
         else
           fm0.template registerEvaluator<EvalT> (evalUtils.constructDOFInterpolationEvaluator(param_name));
       }
     }
-    if (params->isSublist("LogNormal Parameter")) {
-      auto lnparam = params->sublist("LogNormal Parameter");
+  }
+  if (params->isSublist("LogNormal Parameters")) {
+    auto lnparams = params->sublist("LogNormal Parameters");
+    int nlnparams = lnparams.get<int>("Number Of Parameters");
+
+    bool onSide;
+    std::string sideName;
+
+    for (int i_lnparams=0; i_lnparams<nlnparams; ++i_lnparams)
+    {
+      auto lnparams_i = lnparams.sublist(util::strint("Parameter", i_lnparams));
+
+      onSide = lnparams_i.get<bool>("On Side");
+      sideName = lnparams_i.get<std::string>("Side Name");      
 
       Teuchos::RCP<Teuchos::ParameterList> p = Teuchos::rcp(new Teuchos::ParameterList("LNParam"));
-      const std::string param_name_out = lnparam.get<std::string>("Log Gaussian Name");
-      const std::string param_name_in = lnparam.get<std::string>("Gaussian Name");
-      if (lnparam.isParameter("Mean Name")) {
-        const std::string mean_field_name = lnparam.get<std::string>("Mean Name");
+      const std::string param_name_out = lnparams_i.get<std::string>("Log Gaussian Name");
+      const std::string param_name_in = lnparams_i.get<std::string>("Gaussian Name");
+      if (lnparams_i.isParameter("Mean Name")) {
+        const std::string mean_field_name = lnparams_i.get<std::string>("Mean Name");
         p->set<std::string>("Mean Name", mean_field_name);
       }
       else {
-        const RealType mean = lnparam.get<RealType>("mean");
+        const RealType mean = lnparams_i.get<RealType>("mean");
         p->set<RealType>("mean", mean);
       }
 
-      const RealType deviation = lnparam.get<RealType>("deviation");
+      const RealType deviation = lnparams_i.get<RealType>("deviation");
 
       p->set<std::string>("Log Gaussian Name", param_name_out);
       p->set<std::string>("Gaussian Name", param_name_in);

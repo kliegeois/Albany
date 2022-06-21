@@ -13,6 +13,8 @@
 #include "LandIce_ViscosityFO.hpp"
 #include "LandIce_ViscosityFO.hpp"
 
+#include "Albany_StringUtils.hpp" // for 'upper_case'
+
 //uncomment the following line if you want debug output to be printed to screen
 //#define OUTPUT_TO_SCREEN
 
@@ -49,6 +51,15 @@ ViscosityFO(const Teuchos::ParameterList& p,
   extractStrainRateSq = visc_list->get("Extract Strain Rate Sq", false);
   useStiffeningFactor = visc_list->get("Use Stiffening Factor", false);
 
+  std::string stiffeningFactorType = util::upper_case((visc_list->isParameter("Stiffening Factor Type") ? visc_list->get<std::string>("Stiffening Factor Type") : "Field"));
+
+  if (stiffeningFactorType == "SCALAR TYPE FIELD") {
+    stiffeningFactor_type = FIELD_TYPE::SCALAR_TYPE_FIELD;
+  }
+  else {
+    stiffeningFactor_type = FIELD_TYPE::FIELD;
+  }
+
   std::string flowRateType;
   if(visc_list->isParameter("Flow Rate Type"))
     flowRateType = visc_list->get<std::string>("Flow Rate Type");
@@ -61,8 +72,12 @@ ViscosityFO(const Teuchos::ParameterList& p,
   if(useStereographicMap)
     U = decltype(U)(p.get<std::string> ("Velocity QP Variable Name"), dl->qp_vector);
 
-  if(useStiffeningFactor)
-    stiffeningFactor = decltype(stiffeningFactor)(p.get<std::string> ("Stiffening Factor QP Name"), dl->qp_scalar);
+  if(useStiffeningFactor) {
+    if(stiffeningFactor_type == FIELD_TYPE::SCALAR_TYPE_FIELD)
+      stiffeningFactor_ST = decltype(stiffeningFactor_ST)(p.get<std::string> ("Stiffening Factor QP Name"), dl->qp_scalar);
+    else
+      stiffeningFactor_PST = decltype(stiffeningFactor_PST)(p.get<std::string> ("Stiffening Factor QP Name"), dl->qp_scalar);
+  }
 
   A = visc_list->get("Glen's Law A", 1.0);
   n = visc_list->get("Glen's Law n", 3.0);
@@ -135,8 +150,12 @@ ViscosityFO(const Teuchos::ParameterList& p,
   this->addDependentField(Ugrad);
   this->addDependentField(homotopyParam);
   if (visc_type == EXPTRIG) this->addDependentField(coordVec);
-  if(useStiffeningFactor)
-    this->addDependentField(stiffeningFactor);
+  if(useStiffeningFactor) {
+    if(stiffeningFactor_type == FIELD_TYPE::SCALAR_TYPE_FIELD)
+      this->addDependentField(stiffeningFactor_ST);
+    else
+      this->addDependentField(stiffeningFactor_PST);
+  }
   this->addEvaluatedField(mu);
 
   if (extractStrainRateSq) {
@@ -167,8 +186,12 @@ postRegistrationSetup(typename Traits::SetupData d,
 {
   this->utils.setFieldData(Ugrad,fm);
   this->utils.setFieldData(mu,fm);
-  if(useStiffeningFactor)
-    this->utils.setFieldData(stiffeningFactor,fm);
+  if(useStiffeningFactor) {
+    if(stiffeningFactor_type == FIELD_TYPE::SCALAR_TYPE_FIELD)
+      this->utils.setFieldData(stiffeningFactor_ST,fm);
+    else
+      this->utils.setFieldData(stiffeningFactor_PST,fm);
+  }
   if (extractStrainRateSq)
     this->utils.setFieldData(epsilonSq,fm);
 
@@ -308,9 +331,16 @@ void ViscosityFO<EvalT, Traits, VelT, TemprT>::glenslaw (const ScalarT &flowFact
         }
       }
     }
-    if(useStiffeningFactor)
-      for (unsigned int qp=0; qp < numQPs; ++qp)
-        mu(cell,qp) *= std::exp(stiffeningFactor(cell,qp));
+    if(useStiffeningFactor) {
+      if(stiffeningFactor_type == FIELD_TYPE::SCALAR_TYPE_FIELD) {
+        for (unsigned int qp=0; qp < numQPs; ++qp)
+          mu(cell,qp) *= std::exp(stiffeningFactor_ST(cell,qp));
+      }
+      else {
+        for (unsigned int qp=0; qp < numQPs; ++qp)
+          mu(cell,qp) *= std::exp(stiffeningFactor_PST(cell,qp));
+      }
+    }
   }
 }
 

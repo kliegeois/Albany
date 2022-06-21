@@ -67,10 +67,13 @@ private:
   PHX::MDField<const MeshScalarT,Cell,QuadPoint, Dim> coordVec; // [Km]
   PHX::MDField<const TemprT,Cell> temperature; // [K]
   PHX::MDField<const RealType,Cell> flowFactorA;  // [k^{-(n+1)} Pa^{-n} yr^{-1} ], k=1000.  This is the coefficient A.
-  PHX::MDField<const ParamScalarT,Cell,QuadPoint> stiffeningFactor;
+  PHX::MDField<const ScalarT,Cell,QuadPoint> stiffeningFactor_ST;
+  PHX::MDField<const ParamScalarT,Cell,QuadPoint> stiffeningFactor_PST;
   PHX::MDField<const ScalarT> homotopyParam;
   bool performContinuousHomotopy;
   double expCoeff;
+  enum class FIELD_TYPE {FIELD, SCALAR_TYPE_FIELD};
+  FIELD_TYPE stiffeningFactor_type;
 
   // Output:
   PHX::MDField<OutputScalarT,Cell,QuadPoint> mu;  // [k^2 Pa yr], k=1000
