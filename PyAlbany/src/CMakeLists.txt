@@ -127,6 +127,12 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(pybind11)
 
+
+#python3 -c 'import mpi4py; print(mpi4py.get_include())'
+#python3 -c 'import numpy; print(numpy.get_include())'
+# "/home/knliege/miniconda3/envs/my_pytrilinos_env/lib/python3.8/site-packages/numpy/core/include" 
+
+
 pybind11_add_module(Albany_Pybind11 Albany_Pybind11.cpp)
 target_include_directories(Albany_Pybind11 PUBLIC ${Trilinos_INCLUDE_DIRS} "/home/knliege/.local/lib/python3.8/site-packages/mpi4py/include")
 target_compile_features(Albany_Pybind11 PUBLIC cxx_std_11)

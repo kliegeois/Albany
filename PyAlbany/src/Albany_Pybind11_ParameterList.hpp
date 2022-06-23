@@ -1,6 +1,7 @@
 #include "Albany_Utils.hpp"
 #include "Teuchos_XMLParameterListHelpers.hpp"
 #include "Teuchos_YamlParameterListHelpers.hpp"
+#include "Albany_Pybind11_Numpy.hpp"
 
 using PyParameterList = Teuchos::ParameterList;
 using RCP_PyParameterList = Teuchos::RCP<PyParameterList>;
@@ -69,6 +70,14 @@ bool setPythonParameter(Teuchos::ParameterList & plist,
     plist.set(name, h.cast<std::string>());
   }
 
+/*
+  // Sublist values
+  else if (PyObject_TypeCheck(value.ptr(), PyParameterList))
+  {
+    plist.set(name, *(h.cast<RCP_PyParameterList>()));
+  }
+*/
+
   // None object not allowed: this is a python type not usable by
   // Trilinos solver packages, so we reserve it for the
   // getPythonParameter() function to indicate that the requested
@@ -88,6 +97,46 @@ bool setPythonParameter(Teuchos::ParameterList & plist,
   // Successful type conversion
   return true;
 }    // setPythonParameter
+
+// **************************************************************** //
+
+template< typename T >
+py::object copyTeuchosArrayToNumPy(Teuchos::Array< T > & tArray)
+{
+  int typecode = NumPy_TypeCode< T >();
+  npy_intp dims[] = { tArray.size() };
+  PyObject *pyArray = PyArray_SimpleNew(1, dims, typecode);
+  T * data = (T*) PyArray_DATA((PyArrayObject*) pyArray);
+  for (typename Teuchos::Array< T >::iterator it = tArray.begin();
+       it != tArray.end(); ++it)
+    *(data++) = *it;
+  return py::object(py::handle(pyArray), py::object::stolen_t{});
+}
+
+template<>
+py::object copyTeuchosArrayToNumPy(Teuchos::Array< std::string > & tArray)
+{
+  int typecode = NumPy_TypeCode< std::string >();
+  npy_intp dims[] = { tArray.size() };
+  int strlen = 1;
+  for (typename Teuchos::Array< std::string >::iterator it = tArray.begin();
+       it != tArray.end(); ++it)
+  {
+    int itlen = it->size();
+    if (itlen > strlen) strlen = itlen;
+  }
+  py::object pyArray;
+  pyArray.ptr() =
+    PyArray_New(&PyArray_Type, 1, dims, typecode, NULL, NULL, strlen, 0, NULL);
+  char* data = (char*) PyArray_DATA((PyArrayObject*) pyArray.ptr());
+  for (typename Teuchos::Array< std::string >::iterator it = tArray.begin();
+       it != tArray.end(); ++it)
+  {
+    strncpy(data, it->c_str(), strlen);
+    data += strlen;
+  }
+  return pyArray;
+}
 
 // **************************************************************** //
 
@@ -130,6 +179,67 @@ py::object getPythonParameter(const Teuchos::ParameterList & plist,
   {
     char * value = Teuchos::any_cast< char * >(entry->getAny(false));
     return py::cast(value);
+  }
+
+  else if (entry->isArray())
+  {
+    // try
+    // {
+    //   Teuchos::Array< bool > tArray =
+    //     Teuchos::any_cast< Teuchos::Array< bool > >(entry->getAny(false));
+    //   return copyTeuchosArrayToNumPy(tArray);
+    // }
+    // catch(Teuchos::bad_any_cast &e)
+    // {
+      try
+      {
+        Teuchos::Array< int > tArray =
+          Teuchos::any_cast< Teuchos::Array< int > >(entry->getAny(false));
+        return copyTeuchosArrayToNumPy(tArray);
+      }
+      catch(Teuchos::bad_any_cast &e)
+      {
+        try
+        {
+          Teuchos::Array< long > tArray =
+            Teuchos::any_cast< Teuchos::Array< long > >(entry->getAny(false));
+          return copyTeuchosArrayToNumPy(tArray);
+        }
+        catch(Teuchos::bad_any_cast &e)
+        {
+          try
+          {
+            Teuchos::Array< float > tArray =
+              Teuchos::any_cast< Teuchos::Array< float > >(entry->getAny(false));
+            return copyTeuchosArrayToNumPy(tArray);
+          }
+          catch(Teuchos::bad_any_cast &e)
+          {
+            try
+            {
+              Teuchos::Array< double > tArray =
+                Teuchos::any_cast< Teuchos::Array< double > >(entry->getAny(false));
+              return copyTeuchosArrayToNumPy(tArray);
+            }
+            catch(Teuchos::bad_any_cast &e)
+            {
+              try
+              {
+                Teuchos::Array< std::string > tArray =
+                  Teuchos::any_cast< Teuchos::Array< std::string > >(entry->getAny(false));
+                return copyTeuchosArrayToNumPy(tArray);
+              }
+              catch(Teuchos::bad_any_cast &e)
+              {
+                // Teuchos::Arrays of type other than int or double are
+                // currently unsupported
+                //return NULL;
+              }
+            }
+          }
+        }
+      }
+    // }
   }
 
   // All  other types are unsupported
