@@ -21,13 +21,24 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
             return m->getSize();
         });
 
-    py::class_<PyParallelEnv>(m, "PyParallelEnv")
-        .def(py::init<RCP_Teuchos_Comm_PyAlbany>())
-        .def(py::init<RCP_Teuchos_Comm_PyAlbany, int, int, int>())
-        .def_readwrite("comm", &PyParallelEnv::comm)
-        .def_readonly("num_threads", &PyParallelEnv::num_threads)
-        .def_readonly("num_numa", &PyParallelEnv::num_numa)
-        .def_readonly("device_id", &PyParallelEnv::device_id);
+    py::class_<RCP_PyParallelEnv>(m, "PyParallelEnv")
+        .def(py::init(&createPyParallelEnv))
+        .def(py::init(&createDefaultKokkosPyParallelEnv))
+        .def("getNumThreads", [](RCP_PyParallelEnv &m) {
+            return m->num_threads;
+        })
+        .def("getNumNuma", [](RCP_PyParallelEnv &m) {
+            return m->num_numa;
+        })
+        .def("getDeviceID", [](RCP_PyParallelEnv &m) {
+            return m->device_id;
+        })
+        .def("getComm", [](RCP_PyParallelEnv &m) {
+            return m->comm;
+        })
+        .def("setComm", [](RCP_PyParallelEnv &m, RCP_Teuchos_Comm_PyAlbany &comm) {
+            m->comm = comm;
+        });
 
     m.doc() = "pybind11 example plugin";
     m.def("getDefaultComm", &getDefaultComm, "A function which multiplies two numbers");

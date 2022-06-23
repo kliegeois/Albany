@@ -21,3 +21,13 @@ public:
         std::cout << "~PyParallelEnv()\n";
     }
 };
+
+using RCP_PyParallelEnv = Teuchos::RCP<PyParallelEnv>;
+
+RCP_PyParallelEnv createPyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads = -1, int _num_numa = -1, int _device_id = -1) {
+    return Teuchos::rcp<PyParallelEnv>(new PyParallelEnv(_comm, _num_threads, _num_numa, _device_id));
+}
+
+RCP_PyParallelEnv createDefaultKokkosPyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm) {
+    return Teuchos::rcp<PyParallelEnv>(new PyParallelEnv(_comm, -1, -1, -1));
+}
