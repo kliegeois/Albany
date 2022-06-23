@@ -18,7 +18,8 @@ public:
     ~PyParallelEnv()
     {
         Kokkos::finalize_all();
-        std::cout << "~PyParallelEnv()\n";
+        if (comm->getRank() == 0)
+            std::cout << "~PyParallelEnv()\n";
     }
 };
 
