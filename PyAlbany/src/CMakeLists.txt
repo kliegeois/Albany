@@ -128,7 +128,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(pybind11)
 
 pybind11_add_module(Albany_Pybind11 Albany_Pybind11.cpp)
-target_include_directories(Albany_Pybind11 PUBLIC ${Trilinos_INCLUDE_DIRS})
+target_include_directories(Albany_Pybind11 PUBLIC ${Trilinos_INCLUDE_DIRS} "/home/knliege/.local/lib/python3.8/site-packages/mpi4py/include")
 target_compile_features(Albany_Pybind11 PUBLIC cxx_std_11)
 #target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES} ${TPL_LIBRARIES})
 target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES})
