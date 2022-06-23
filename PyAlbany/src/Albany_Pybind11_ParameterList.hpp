@@ -319,6 +319,10 @@ py::object getPythonParameter(const Teuchos::ParameterList & plist,
 
 // **************************************************************** //
 
-RCP_PyParameterList createPyParameterList() {
+PyParameterList createPyParameterList() {
+    return PyParameterList();
+}
+
+RCP_PyParameterList createRCPPyParameterList() {
     return Teuchos::rcp<PyParameterList>(new PyParameterList());
 }
