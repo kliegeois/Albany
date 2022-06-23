@@ -72,7 +72,10 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
     py::class_<RCP_PyParameterList>(m, "PyParameterList")
         .def(py::init(&createPyParameterList))
         .def("sublist", [](RCP_PyParameterList &m, const std::string &name) {
-            return m->sublist(name);
+            return Teuchos::rcp<PyParameterList>(new PyParameterList(m->sublist(name)));
+        })
+        .def("setSublist", [](RCP_PyParameterList &m, const std::string &name, RCP_PyParameterList &sub) {
+            m->set(name, *sub);
         })
         .def("isParameter", [](RCP_PyParameterList &m, const std::string &name) {
             return m->isParameter(name);
@@ -87,4 +90,5 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
             if (!setPythonParameter(*m,name,value))
                 PyErr_SetString(PyExc_TypeError, "ParameterList value type not supported");
         });
+    m.def("getParameterList", &getParameterList, "A function which multiplies two numbers");
 }
