@@ -28,6 +28,19 @@ RCP_PyParameterList getParameterList(std::string inputFile, RCP_PyParallelEnv py
     return params;
 }
 
+template< typename T >
+void copyNumPyToTeuchosArray(PyObject * pyArray,
+                             Teuchos::Array< T > & tArray)
+{
+  typedef typename Teuchos::Array< T >::size_type size_type;
+  size_type length = PyArray_DIM((PyArrayObject*) pyArray, 0);
+  tArray.resize(length);
+  T * data = (T*) PyArray_DATA((PyArrayObject*) pyArray);
+  for (typename Teuchos::Array< T >::iterator it = tArray.begin();
+       it != tArray.end(); ++it)
+    *it = *(data++);
+}
+
 // ****************************************************************** //
 
 bool setPythonParameter(Teuchos::ParameterList & plist,
@@ -89,6 +102,64 @@ bool setPythonParameter(Teuchos::ParameterList & plist,
     return false;
   }
 
+  // NumPy arrays and non-dictionary Python sequences
+  else if (PyArray_Check(value.ptr ()) || PySequence_Check(value.ptr ()))
+  {
+    PyObject * pyArray =
+      PyArray_CheckFromAny(value.ptr (),
+                           NULL,
+                           1,
+                           1,
+                           NPY_ARRAY_DEFAULT | NPY_ARRAY_NOTSWAPPED,
+                           NULL);
+    if (!pyArray) return false;
+    // if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_BOOL)
+    // {
+    //   Teuchos::Array< bool > tArray;
+    //   copyNumPyToTeuchosArray(pyArray, tArray);
+    //   plist.set(name, tArray);
+    // }
+    // else if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_INT)
+    if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_INT)
+    {
+      Teuchos::Array< int > tArray;
+      copyNumPyToTeuchosArray(pyArray, tArray);
+      plist.set(name, tArray);
+    }
+    else if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_LONG)
+    {
+      Teuchos::Array< long > tArray;
+      copyNumPyToTeuchosArray(pyArray, tArray);
+      plist.set(name, tArray);
+    }
+    else if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_FLOAT)
+    {
+      Teuchos::Array< float > tArray;
+      copyNumPyToTeuchosArray(pyArray, tArray);
+      plist.set(name, tArray);
+    }
+    else if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_DOUBLE)
+    {
+      Teuchos::Array< double > tArray;
+      copyNumPyToTeuchosArray(pyArray, tArray);
+      plist.set(name, tArray);
+    }
+    else if ((PyArray_TYPE((PyArrayObject*) pyArray) == NPY_STRING) ||
+             (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_UNICODE))
+    {
+      Teuchos::Array< std::string > tArray;
+      copyNumPyToTeuchosArray(pyArray, tArray);
+      plist.set(name, tArray);
+    }
+    else
+    {
+      // Unsupported data type
+      if (pyArray != value.ptr ()) Py_DECREF(pyArray);
+      return false;
+    }
+  }
+
+  // All other value types are unsupported
   else
   {
     return false;
