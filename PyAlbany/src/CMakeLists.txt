@@ -127,15 +127,29 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(pybind11)
 
+# Retrieve the Mpi4Py version
+EXECUTE_PROCESS(COMMAND
+  ${PYTHON_EXECUTABLE} -c "import mpi4py; print(mpi4py.__version__)"
+  OUTPUT_VARIABLE Mpi4Py_VERSION
+  ERROR_VARIABLE  Mpi4Py_VERSION_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
 
-#python3 -c 'import mpi4py; print(mpi4py.get_include())'
-#python3 -c 'import numpy; print(numpy.get_include())'
-# "/home/knliege/miniconda3/envs/my_pytrilinos_env/lib/python3.8/site-packages/numpy/core/include" 
+# If Mpi4Py_VERSION_ERROR does not exist, then we know Mpi4Py exists;
+# now look for the Mpi4Py include directory
+IF(NOT Mpi4Py_VERSION_ERROR)
+  EXECUTE_PROCESS(COMMAND
+    ${PYTHON_EXECUTABLE} -c "import mpi4py; print(mpi4py.get_include())"
+    OUTPUT_VARIABLE Mpi4Py_INCLUDE_DIR
+    ERROR_VARIABLE  Mpi4Py_INCLUDE_ERROR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
+  pybind11_add_module(Albany_Pybind11 Albany_Pybind11.cpp)
+  target_include_directories(Albany_Pybind11 PUBLIC ${Trilinos_INCLUDE_DIRS} ${Mpi4Py_INCLUDE_DIR})
+  target_compile_features(Albany_Pybind11 PUBLIC cxx_std_11)
+  #target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES} ${TPL_LIBRARIES})
+  target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES})
+  set_target_properties(Albany_Pybind11 PROPERTIES SUFFIX ".so")
 
-pybind11_add_module(Albany_Pybind11 Albany_Pybind11.cpp)
-target_include_directories(Albany_Pybind11 PUBLIC ${Trilinos_INCLUDE_DIRS} "/home/knliege/.local/lib/python3.8/site-packages/mpi4py/include")
-target_compile_features(Albany_Pybind11 PUBLIC cxx_std_11)
-#target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES} ${TPL_LIBRARIES})
-target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES})
-set_target_properties(Albany_Pybind11 PROPERTIES SUFFIX ".so")
+ENDIF(NOT Mpi4Py_VERSION_ERROR)
