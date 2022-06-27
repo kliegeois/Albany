@@ -69,38 +69,15 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
             m->comm = comm;
         });
 
-    py::class_<PyParameterList>(m, "PyParameterList")
-        .def(py::init(&createPyParameterList))
-        .def("sublist", [](PyParameterList &m, const std::string &name) {
-            return m.sublist(name);
-        })
-        .def("setSublist", [](PyParameterList &m, const std::string &name, PyParameterList &sub) {
-            m.set(name, sub);
-        })
-        .def("setSublist", [](PyParameterList &m, const std::string &name, RCP_PyParameterList &sub) {
-            m.set(name, *sub);
-        })
-        .def("isParameter", [](PyParameterList &m, const std::string &name) {
-            return m.isParameter(name);
-        })
-        .def("get", [](PyParameterList &m, const std::string &name) {
-            if (m.isParameter(name)) {
-                return getPythonParameter(m, name);
-            }
-            return py::cast("Invalid parameter name");
-        })
-        .def("set", [](PyParameterList &m, const std::string &name, py::object value) {
-            if (!setPythonParameter(m,name,value))
-                PyErr_SetString(PyExc_TypeError, "ParameterList value type not supported");
-        });
-
     py::class_<RCP_PyParameterList>(m, "RCPPyParameterList")
         .def(py::init(&createRCPPyParameterList))
         .def("sublist", [](RCP_PyParameterList &m, const std::string &name) {
-            return m->sublist(name);
-        })
-        .def("setSublist", [](RCP_PyParameterList &m, const std::string &name, PyParameterList &sub) {
-            m->set(name, sub);
+            if (m->isSublist(name))
+                return py::cast(sublist(m,name));
+            return py::cast("Invalid sublist name");
+        }, py::return_value_policy::reference)
+        .def("print", [](RCP_PyParameterList &m) {
+            m->print();
         })
         .def("setSublist", [](RCP_PyParameterList &m, const std::string &name, RCP_PyParameterList &sub) {
             m->set(name, *sub);
