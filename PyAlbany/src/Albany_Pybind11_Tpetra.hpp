@@ -136,7 +136,11 @@ RCP_PyVector createRCPPyVectorEmpty() {
     return Teuchos::rcp<Tpetra_Vector>(new Tpetra_Vector());
 }
 
-RCP_PyVector createRCPPyVector(RCP_PyMap &map, const bool zeroOut) {
+RCP_PyVector createRCPPyVector1(RCP_PyMap &map, const bool zeroOut) {
+    return Teuchos::rcp<Tpetra_Vector>(new Tpetra_Vector(map, zeroOut));
+}
+
+RCP_PyVector createRCPPyVector2(RCP_ConstPyMap &map, const bool zeroOut) {
     return Teuchos::rcp<Tpetra_Vector>(new Tpetra_Vector(map, zeroOut));
 }
 
@@ -144,7 +148,11 @@ RCP_PyMultiVector createRCPPyMultiVectorEmpty() {
     return Teuchos::rcp<Tpetra_MultiVector>(new Tpetra_MultiVector());
 }
 
-RCP_PyMultiVector createRCPPyMultiVector(RCP_PyMap &map, const int n_cols, const bool zeroOut) {
+RCP_PyMultiVector createRCPPyMultiVector1(RCP_PyMap &map, const int n_cols, const bool zeroOut) {
+    return Teuchos::rcp<Tpetra_MultiVector>(new Tpetra_MultiVector(map, n_cols, zeroOut));
+}
+
+RCP_PyMultiVector createRCPPyMultiVector2(RCP_ConstPyMap &map, const int n_cols, const bool zeroOut) {
     return Teuchos::rcp<Tpetra_MultiVector>(new Tpetra_MultiVector(map, n_cols, zeroOut));
 }
 

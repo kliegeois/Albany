@@ -237,8 +237,9 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         });
 
     py::class_<RCP_PyVector>(m, "RCPPyVector")
+        .def(py::init(&createRCPPyVector1))
+        .def(py::init(&createRCPPyVector2))
         .def(py::init(&createRCPPyVectorEmpty))
-        .def(py::init(&createRCPPyVector))
         .def("putScalar",[](RCP_PyVector &m, ST val) {
             m->putScalar(val);
         })
@@ -250,8 +251,9 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         });
 
     py::class_<RCP_PyMultiVector>(m, "RCPPyMultiVector")
+        .def(py::init(&createRCPPyMultiVector1))
+        .def(py::init(&createRCPPyMultiVector2))
         .def(py::init(&createRCPPyMultiVectorEmpty))
-        .def(py::init(&createRCPPyMultiVector))
         .def("getVector", [](RCP_PyMultiVector &m, int i) {
             return m->getVectorNonConst(i);
         })

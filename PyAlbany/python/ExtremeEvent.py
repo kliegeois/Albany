@@ -1,6 +1,3 @@
-from PyTrilinos import Tpetra
-from PyTrilinos import Teuchos
-
 import sys
 import numpy as np
 import scipy.sparse.linalg as slinalg

@@ -1,6 +1,3 @@
-from PyTrilinos import Tpetra
-from PyTrilinos import Teuchos
-
 import unittest
 import numpy as np
 try:
@@ -12,8 +9,8 @@ import os
 class TestSteadyHeat(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.comm = Teuchos.DefaultComm.getComm()
-        cls.parallelEnv = Utils.createDefaultParallelEnv(cls.comm)
+        cls.parallelEnv = Utils.createDefaultParallelEnv()
+        cls.comm = cls.parallelEnv.getComm()
 
     def test_all(self):
         cls = self.__class__
@@ -27,12 +24,20 @@ class TestSteadyHeat(unittest.TestCase):
 
         n_directions = 4
         parameter_map = problem.getParameterMap(0)
-        directions = Tpetra.MultiVector(parameter_map, n_directions, dtype="d")
+        print('hi')
+        print(parameter_map.getGlobalNumElements())
+        directions = Utils.createMultiVector(parameter_map, n_directions)
 
-        directions[0,:] = 1.
-        directions[1,:] = -1.
-        directions[2,:] = 3.
-        directions[3,:] = -3.
+        directions_view = directions.getLocalViewHost()
+
+        print(directions_view.shape)
+
+        directions_view[0,:] = 1.
+        directions_view[1,:] = -1.
+        directions_view[2,:] = 3.
+        directions_view[3,:] = -3.
+
+        directions.setLocalViewHost(directions_view)
 
         problem.setDirections(0, directions)
 
@@ -53,7 +58,7 @@ class TestSteadyHeat(unittest.TestCase):
         norm_target = 8.94463776843999921e-03
         h_target = np.array([0.009195356672103817, 0.009195356672103817, 0.027586070971800013, 0.027586070971800013])
 
-        g_data = response.getData()
+        g_data = response.getLocalViewHost()
         norm = Utils.norm(sensitivity.getData(0), cls.comm)
 
         print("g_target = " + str(g_target))

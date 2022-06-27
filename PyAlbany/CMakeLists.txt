@@ -33,8 +33,6 @@ EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c
 
 MESSAGE("  -- PYTHON_VERSION = ${PYTHON_VERSION}")
 
-add_subdirectory( src )
-
 # The CMAKE install logic of PyAlbany is based on the one of PyTrilinos.
 
 # Determine the PyAlbany default installation directory prefix.  If
@@ -59,6 +57,8 @@ SET(PyAlbany_INSTALL_DIR
   ${PyAlbany_INSTALL_PREFIX}/lib/python${PYTHON_VERSION}/site-packages/PyAlbany
   )
 MESSAGE("-- PyAlbany installation path: ${PyAlbany_INSTALL_DIR}")
+
+add_subdirectory( src )
 
 # Python files to install
 FILE(GLOB PyAlbanyPyFiles ${CMAKE_CURRENT_SOURCE_DIR}/python/*.py)

@@ -4,14 +4,11 @@ Documentation for the PyAlbany.Utils module.
 This module provides utility functions for the Python wrapper of Albany (wpyalbany).
 """
 
-from PyTrilinos import Tpetra
-from PyTrilinos import Teuchos
 try:
-    from PyAlbany import wpyalbany as wpa
+    from PyAlbany import Albany_Pybind11 as wpa
 except:
-    import wpyalbany as wpa
+    import Albany_Pybind11 as wpa
 import numpy as np
-from numpy import linalg as LA
 import sys
 
 def norm(distributedVector, comm):
@@ -50,7 +47,13 @@ def innerMVectorMat(distributedMVector, array):
     return C 
 
 
-def createDefaultParallelEnv(comm = Teuchos.DefaultComm.getComm(), n_threads=-1,n_numa=-1,device_id=-1):
+def createMultiVector(map, n):
+    return wpa.RCPPyMultiVector(map, n, True)
+
+def createVector(map, n):
+    return wpa.RCPPyVector(map, n, True)
+
+def createDefaultParallelEnv(comm = wpa.getDefaultComm(sys.argv), n_threads=-1,n_numa=-1,device_id=-1):
     """@brief Creates a default parallel environment.
     
     This function initializes Kokkos; Kokkos will be finalized when the destructor of the returned ParallelEnv 

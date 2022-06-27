@@ -152,4 +152,10 @@ IF(NOT Mpi4Py_VERSION_ERROR)
   target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES} albanyPyInterface)
   set_target_properties(Albany_Pybind11 PROPERTIES SUFFIX ".so")
 
+  if (INSTALL_ALBANY)
+    install(TARGETS Albany_Pybind11
+      LIBRARY DESTINATION ${PyAlbany_INSTALL_DIR}
+      ARCHIVE DESTINATION ${PyAlbany_INSTALL_DIR})
+  endif()
+
 ENDIF(NOT Mpi4Py_VERSION_ERROR)

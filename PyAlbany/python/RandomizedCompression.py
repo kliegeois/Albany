@@ -22,12 +22,10 @@
 
 
 
-from PyTrilinos import Tpetra
-from PyTrilinos import Teuchos
 try:
-    from PyAlbany import wpyalbany as wpa
+    from PyAlbany import Albany_Pybind11 as wpa
 except:
-    import wpyalbany as wpa
+    import Albany_Pybind11 as wpa
 
 try:
     from PyAlbany import Utils as utils

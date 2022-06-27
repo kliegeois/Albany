@@ -56,7 +56,7 @@ namespace PyAlbany
    * 
    * The function returns an RCP to a map supported by PyTrilinos.
    */
-  Teuchos::RCP<const PyTrilinosMap> getPyTrilinosMap(Teuchos::RCP<const Tpetra_Map> t_map, bool correctGIDs);
+  Teuchos::RCP<const Tpetra_Map> getPyTrilinosMap(Teuchos::RCP<const Tpetra_Map> t_map, bool correctGIDs);
 } // namespace PyAlbany
 
 #endif // ALBANY_PYUTILS_H

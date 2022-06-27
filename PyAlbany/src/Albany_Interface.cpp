@@ -181,7 +181,7 @@ Teuchos::RCP<const Tpetra_Map> PyProblem::getResponseMap(const int g_index)
         auto g_space = g->space();
         stackedTimer->stop("PyAlbany: getResponseMap");
         stackedTimer->stopBaseTimer();
-        //return getPyTrilinosMap(Albany::getTpetraMap(g_space), false);
+        return getPyTrilinosMap(Albany::getTpetraMap(g_space), false);
     }
     stackedTimer->stop("PyAlbany: getResponseMap");
     stackedTimer->stopBaseTimer();
@@ -206,7 +206,7 @@ Teuchos::RCP<const Tpetra_Map> PyProblem::getStateMap()
         auto s_space = s->space();
         stackedTimer->stop("PyAlbany: getStateMap");
         stackedTimer->stopBaseTimer();
-        //return getPyTrilinosMap(Albany::getTpetraMap(s_space), false);
+        return getPyTrilinosMap(Albany::getTpetraMap(s_space), false);
     }
     stackedTimer->stop("PyAlbany: getStateMap");
     stackedTimer->stopBaseTimer();
@@ -219,10 +219,10 @@ Teuchos::RCP<const Tpetra_Map> PyProblem::getParameterMap(const int p_index)
     stackedTimer->startBaseTimer();
     stackedTimer->start("PyAlbany: getParameterMap");
     auto p_space = solver->get_p_space(p_index);
-    //auto outputMap = getPyTrilinosMap(Albany::getTpetraMap(p_space), true);
+    auto outputMap = getPyTrilinosMap(Albany::getTpetraMap(p_space), true);
     stackedTimer->stop("PyAlbany: getParameterMap");
     stackedTimer->stopBaseTimer();
-    return Teuchos::null;
+    return outputMap;
 }
 
 void PyProblem::setDirections(const int p_index, Teuchos::RCP<Tpetra_MultiVector> direction)
