@@ -31,6 +31,7 @@
 #include "Albany_Pybind11_Comm.hpp"
 #include "Albany_Pybind11_ParallelEnv.hpp"
 #include "Albany_Pybind11_ParameterList.hpp"
+#include "Albany_Pybind11_Tpetra.hpp"
 
 namespace py = pybind11;
 
@@ -96,4 +97,85 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
                 PyErr_SetString(PyExc_TypeError, "ParameterList value type not supported");
         });
     m.def("getParameterList", &getParameterList, "A function which multiplies two numbers");
+
+    py::class_<RCP_PyMap>(m, "RCPPyMap")
+        .def(py::init(&createRCPPyMapEmpty))
+        .def(py::init(&createRCPPyMap))
+        .def("isOneToOne", [](RCP_PyMap &m) {
+            return m->isOneToOne();
+        })
+        .def("getIndexBase", [](RCP_PyMap &m) {
+            return m->getIndexBase();
+        })
+        .def("getMinLocalIndex", [](RCP_PyMap &m) {
+            return m->getMinLocalIndex();
+        })
+        .def("getMaxLocalIndex", [](RCP_PyMap &m) {
+            return m->getMaxLocalIndex();
+        })
+        .def("getMinGlobalIndex", [](RCP_PyMap &m) {
+            return m->getMinGlobalIndex();
+        })
+        .def("getMaxGlobalIndex", [](RCP_PyMap &m) {
+            return m->getMaxGlobalIndex();
+        })
+        .def("getMinAllGlobalIndex", [](RCP_PyMap &m) {
+            return m->getMinAllGlobalIndex();
+        })
+        .def("getMaxAllGlobalIndex", [](RCP_PyMap &m) {
+            return m->getMaxAllGlobalIndex();
+        })
+        .def("getLocalNumElements", [](RCP_PyMap &m) {
+            return m->getLocalNumElements();
+        })
+        .def("getGlobalNumElements", [](RCP_PyMap &m) {
+            return m->getGlobalNumElements();
+        })
+        .def("getLocalElement", [](RCP_PyMap &m, const Tpetra_GO i) {
+            return m->getLocalElement(i);
+        })
+        .def("getGlobalElement", [](RCP_PyMap &m, const Tpetra_LO i) {
+            return m->getGlobalElement(i);
+        })
+        .def("isNodeGlobalElement", [](RCP_PyMap &m, const Tpetra_GO i) {
+            return m->isNodeGlobalElement(i);
+        })
+        .def("isNodeLocalElement", [](RCP_PyMap &m, const Tpetra_LO i) {
+            return m->isNodeLocalElement(i);
+        })
+        .def("isUniform", [](RCP_PyMap &m) {
+            return m->isUniform();
+        })
+        .def("isContiguous", [](RCP_PyMap &m) {
+            return m->isContiguous();
+        })
+        .def("isDistributed", [](RCP_PyMap &m) {
+            return m->isDistributed();
+        })
+        .def("isCompatible", [](RCP_PyMap &m, RCP_PyMap &m2) {
+            return m->isCompatible(*m2);
+        })
+        .def("isSameAs", [](RCP_PyMap &m, RCP_PyMap &m2) {
+            return m->isSameAs(*m2);
+        })
+        .def("locallySameAs", [](RCP_PyMap &m, RCP_PyMap &m2) {
+            return m->locallySameAs(*m2);
+        })
+        .def("getComm", [](RCP_PyMap &m) {
+            return m->getComm();
+        });
+
+    py::class_<RCP_PyVector>(m, "RCPPyVector")
+        .def(py::init(&createRCPPyVectorEmpty))
+        .def(py::init(&createRCPPyVector))
+        .def("putScalar",[](RCP_PyVector &m, ST val) {
+            m->putScalar(val);
+        });
+
+    py::class_<RCP_PyMultiVector>(m, "RCPPyMultiVector")
+        .def(py::init(&createRCPPyMultiVectorEmpty))
+        .def(py::init(&createRCPPyMultiVector))
+        .def("getVector", [](RCP_PyMultiVector &m, int i) {
+            return m->getVectorNonConst(i);
+        });
 }
