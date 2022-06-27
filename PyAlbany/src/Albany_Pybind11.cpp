@@ -33,6 +33,8 @@
 #include "Albany_Pybind11_ParameterList.hpp"
 #include "Albany_Pybind11_Tpetra.hpp"
 
+#include "Albany_Interface.hpp"
+
 namespace py = pybind11;
 
 PYBIND11_MODULE(Albany_Pybind11, m) {
@@ -191,4 +193,13 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def("setLocalViewHost",[](RCP_PyMultiVector &m, py::array_t<ST> input){
             return setLocalViewHost(m, input);
         });
+
+    py::class_<PyAlbany::PyProblem>(m, "PyProblem")
+        .def(py::init<std::string, Teuchos::RCP<PyParallelEnv>>())
+        .def(py::init<Teuchos::RCP<Teuchos::ParameterList>, Teuchos::RCP<PyParallelEnv>>())
+        .def("performSolve", &PyAlbany::PyProblem::performSolve)
+        .def("performAnalysis", &PyAlbany::PyProblem::performAnalysis)
+        .def("setDirections", &PyAlbany::PyProblem::setDirections)
+        .def("setParameter", &PyAlbany::PyProblem::setParameter)
+        .def("getParameter", &PyAlbany::PyProblem::getParameter);
 }

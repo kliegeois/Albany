@@ -1,3 +1,6 @@
+#ifndef PYALBANY_PARALLELENV_H
+#define PYALBANY_PARALLELENV_H
+
 #include "Kokkos_Core.hpp"
 
 class PyParallelEnv
@@ -32,3 +35,5 @@ RCP_PyParallelEnv createPyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_
 RCP_PyParallelEnv createDefaultKokkosPyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm) {
     return Teuchos::rcp<PyParallelEnv>(new PyParallelEnv(_comm, -1, -1, -1));
 }
+
+#endif

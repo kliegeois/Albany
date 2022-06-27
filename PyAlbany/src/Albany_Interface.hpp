@@ -33,6 +33,10 @@
 #include "BelosOrthoManager.hpp"
 
 #include <Teuchos_TwoDArray.hpp>
+
+using Teuchos_Comm_PyAlbany = Teuchos::Comm<int>;
+using RCP_Teuchos_Comm_PyAlbany = Teuchos::RCP<const Teuchos_Comm_PyAlbany >;
+#include "Albany_Pybind11_ParallelEnv.hpp"
 namespace PyAlbany
 {
     /**
@@ -60,30 +64,6 @@ namespace PyAlbany
    * The function returns an RCP to the gathered multivector.
    */
     Teuchos::RCP<PyTrilinosMultiVector> gatherMVector(Teuchos::RCP<PyTrilinosMultiVector> inVector, Teuchos::RCP<PyTrilinosMap> distributedMap);
-    
-    
-    /**
-   * \brief PyParallelEnv class
-   * 
-   * This class is used to communicate from Python to c++ the parallel environment information such as
-   * a Teuchos communicator and the Kokkos arguments.
-   * 
-   * The constructor of this object calls Kokkos::initialize and its destructors calls finalize_all.
-    
-   */
-    class PyParallelEnv
-    {
-    public:
-        Teuchos::RCP<Teuchos::Comm<int>> comm;
-        const int num_threads, num_numa, device_id;
-
-        PyParallelEnv(Teuchos::RCP<Teuchos::Comm<int>> _comm, int _num_threads = -1, int _num_numa = -1, int _device_id = -1);
-        ~PyParallelEnv()
-        {
-            Kokkos::finalize_all();
-            std::cout << "~PyParallelEnv()\n";
-        }
-    };
 
     /**
     * \brief orthogTpMVecs function
@@ -98,7 +78,7 @@ namespace PyAlbany
    * 
    * The function returns an RCP to the parameter list.
    */
-    Teuchos::RCP<Teuchos::ParameterList> getParameterList(std::string filename, Teuchos::RCP<PyAlbany::PyParallelEnv> pyParallelEnv);
+    Teuchos::RCP<Teuchos::ParameterList> getParameterList(std::string filename, Teuchos::RCP<PyParallelEnv> pyParallelEnv);
 
     /**
    * \brief writeParameterList function
@@ -184,9 +164,9 @@ namespace PyAlbany
          * 
          * This function should ne be called before calling performSolve().
          */
-        Teuchos::RCP<const PyTrilinosMap> getResponseMap(const int g_index);
+        Teuchos::RCP<const Tpetra_Map> getResponseMap(const int g_index);
 
-	/**
+	    /**
          * \brief getStateMap member function
          * 
          * This function is used to communicate the map of the state to Python.
@@ -195,7 +175,7 @@ namespace PyAlbany
          * 
          * This function should ne be called before calling performSolve().
          */
-	Teuchos::RCP<const PyTrilinosMap> getStateMap();
+	    Teuchos::RCP<const Tpetra_Map> getStateMap();
         
         /**
          * \brief getParameterMap member function
@@ -206,7 +186,7 @@ namespace PyAlbany
          * 
          * The function returns an RCP to a map supported by PyTrilinos.
          */
-        Teuchos::RCP<const PyTrilinosMap> getParameterMap(const int p_index);
+        Teuchos::RCP<const Tpetra_Map> getParameterMap(const int p_index);
 
         /**
          * \brief setDirections member function
@@ -217,7 +197,7 @@ namespace PyAlbany
          * 
          * \param direction [in] A distributed multivector which stores the directions of the parameters.
          */
-        void setDirections(const int p_index, Teuchos::RCP<PyTrilinosMultiVector> direction);
+        void setDirections(const int p_index, Teuchos::RCP<Tpetra_MultiVector> direction);
 
         /**
          * \brief setParameter member function
@@ -228,7 +208,7 @@ namespace PyAlbany
          * 
          * \param p [in] A distributed vector which stores the values of the parameters.
          */
-        void setParameter(const int p_index, Teuchos::RCP<PyTrilinosVector> p);
+        void setParameter(const int p_index, Teuchos::RCP<Tpetra_Vector> p);
 
         /**
          * \brief getParameter member function
@@ -237,7 +217,7 @@ namespace PyAlbany
          * 
          * \param p_index [in] Index of the parameter for which the value has to be gotten.
          */
-        Teuchos::RCP<PyTrilinosVector> getParameter(const int p_index);
+        Teuchos::RCP<Tpetra_Vector> getParameter(const int p_index);
 
         /**
          * \brief getResponse member function
@@ -250,9 +230,9 @@ namespace PyAlbany
          *
          * This function should ne be called before calling performSolve().
          */
-        Teuchos::RCP<PyTrilinosVector> getResponse(const int g_index);
+        Teuchos::RCP<Tpetra_Vector> getResponse(const int g_index);
 
-	/**
+	    /**
          * \brief getState member function
          * 
          * This function is used to communicate the state from Albany to Python.
@@ -261,7 +241,7 @@ namespace PyAlbany
          *
          * This function should ne be called before calling performSolve().
          */	
-	Teuchos::RCP<PyTrilinosVector> getState();
+	    Teuchos::RCP<Tpetra_Vector> getState();
 
         /**
          * \brief getSensitivity member function
@@ -277,7 +257,7 @@ namespace PyAlbany
          *
          * This function should ne be called before calling performSolve().
          */
-        Teuchos::RCP<PyTrilinosMultiVector> getSensitivity(const int g_index, const int p_index);
+        Teuchos::RCP<Tpetra_MultiVector> getSensitivity(const int g_index, const int p_index);
 
         /**
          * \brief getReducedHessian member function
@@ -293,7 +273,7 @@ namespace PyAlbany
          *
          * This function should ne be called before calling performSolve().
          */
-        Teuchos::RCP<PyTrilinosMultiVector> getReducedHessian(const int g_index, const int p_index);
+        Teuchos::RCP<Tpetra_MultiVector> getReducedHessian(const int g_index, const int p_index);
 
         /**
          * \brief reportTimers member function
@@ -414,7 +394,7 @@ Teuchos::RCP<PyAlbany::PyTrilinosMultiVector> PyAlbany::gatherMVector(Teuchos::R
     return outVector;
 }
 
-Teuchos::RCP<Teuchos::ParameterList> PyAlbany::getParameterList(std::string inputFile, Teuchos::RCP<PyAlbany::PyParallelEnv> pyParallelEnv)
+Teuchos::RCP<Teuchos::ParameterList> PyAlbany::getParameterList(std::string inputFile, Teuchos::RCP<PyParallelEnv> pyParallelEnv)
 {
     Teuchos::RCP<Teuchos::ParameterList> params = Teuchos::createParameterList("Albany Parameters");
 

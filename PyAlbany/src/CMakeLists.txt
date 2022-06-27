@@ -149,7 +149,7 @@ IF(NOT Mpi4Py_VERSION_ERROR)
   target_include_directories(Albany_Pybind11 PUBLIC ${Trilinos_INCLUDE_DIRS} ${Mpi4Py_INCLUDE_DIR})
   target_compile_features(Albany_Pybind11 PUBLIC cxx_std_11)
   #target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES} ${TPL_LIBRARIES})
-  target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES})
+  target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES} albanyPyInterface)
   set_target_properties(Albany_Pybind11 PROPERTIES SUFFIX ".so")
 
 ENDIF(NOT Mpi4Py_VERSION_ERROR)
