@@ -101,6 +101,7 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
     py::class_<RCP_PyMap>(m, "RCPPyMap")
         .def(py::init(&createRCPPyMapEmpty))
         .def(py::init(&createRCPPyMap))
+        .def(py::init(&createRCPPyMapFromView))
         .def("isOneToOne", [](RCP_PyMap &m) {
             return m->isOneToOne();
         })
@@ -174,7 +175,7 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def("getLocalViewHost",[](RCP_PyVector &m){
             return getLocalViewHost(m);
         })
-        .def("setLocalViewHost",[](RCP_PyVector &m, py::array_t<double> input){
+        .def("setLocalViewHost",[](RCP_PyVector &m, py::array_t<ST> input){
             return setLocalViewHost(m, input);
         });
 
@@ -187,7 +188,7 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def("getLocalViewHost",[](RCP_PyMultiVector &m){
             return getLocalViewHost(m);
         })
-        .def("setLocalViewHost",[](RCP_PyMultiVector &m, py::array_t<double> input){
+        .def("setLocalViewHost",[](RCP_PyMultiVector &m, py::array_t<ST> input){
             return setLocalViewHost(m, input);
         });
 }

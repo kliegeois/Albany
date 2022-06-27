@@ -125,6 +125,12 @@ RCP_PyMap createRCPPyMap(int numGlobalEl, int numMyEl, int indexBase, RCP_Teucho
     return Teuchos::rcp<Tpetra_Map>(new Tpetra_Map(numGlobalEl, numMyEl, indexBase, comm));
 }
 
+RCP_PyMap createRCPPyMapFromView(int numGlobalEl, py::array_t<int> indexList, int indexBase, RCP_Teuchos_Comm_PyAlbany comm ) {
+    Kokkos::View<Tpetra_GO*, Kokkos::DefaultExecutionSpace> indexView("map index view", indexList.shape(0));
+    convert_np_to_kokkos_1d(indexList, indexView);
+    return Teuchos::rcp<Tpetra_Map>(new Tpetra_Map(numGlobalEl, indexView, indexBase, comm));
+}
+
 RCP_PyVector createRCPPyVectorEmpty() {
     return Teuchos::rcp<Tpetra_Vector>(new Tpetra_Vector());
 }
