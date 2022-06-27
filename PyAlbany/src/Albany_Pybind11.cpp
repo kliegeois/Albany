@@ -168,6 +168,74 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
             return m->getComm();
         });
 
+    py::class_<RCP_ConstPyMap>(m, "RCPConstPyMap")
+        .def(py::init(&createRCPPyMapEmpty))
+        .def(py::init(&createRCPPyMap))
+        .def(py::init(&createRCPPyMapFromView))
+        .def("isOneToOne", [](RCP_ConstPyMap &m) {
+            return m->isOneToOne();
+        })
+        .def("getIndexBase", [](RCP_ConstPyMap &m) {
+            return m->getIndexBase();
+        })
+        .def("getMinLocalIndex", [](RCP_ConstPyMap &m) {
+            return m->getMinLocalIndex();
+        })
+        .def("getMaxLocalIndex", [](RCP_ConstPyMap &m) {
+            return m->getMaxLocalIndex();
+        })
+        .def("getMinGlobalIndex", [](RCP_ConstPyMap &m) {
+            return m->getMinGlobalIndex();
+        })
+        .def("getMaxGlobalIndex", [](RCP_ConstPyMap &m) {
+            return m->getMaxGlobalIndex();
+        })
+        .def("getMinAllGlobalIndex", [](RCP_ConstPyMap &m) {
+            return m->getMinAllGlobalIndex();
+        })
+        .def("getMaxAllGlobalIndex", [](RCP_ConstPyMap &m) {
+            return m->getMaxAllGlobalIndex();
+        })
+        .def("getLocalNumElements", [](RCP_ConstPyMap &m) {
+            return m->getLocalNumElements();
+        })
+        .def("getGlobalNumElements", [](RCP_ConstPyMap &m) {
+            return m->getGlobalNumElements();
+        })
+        .def("getLocalElement", [](RCP_ConstPyMap &m, const Tpetra_GO i) {
+            return m->getLocalElement(i);
+        })
+        .def("getGlobalElement", [](RCP_ConstPyMap &m, const Tpetra_LO i) {
+            return m->getGlobalElement(i);
+        })
+        .def("isNodeGlobalElement", [](RCP_ConstPyMap &m, const Tpetra_GO i) {
+            return m->isNodeGlobalElement(i);
+        })
+        .def("isNodeLocalElement", [](RCP_ConstPyMap &m, const Tpetra_LO i) {
+            return m->isNodeLocalElement(i);
+        })
+        .def("isUniform", [](RCP_ConstPyMap &m) {
+            return m->isUniform();
+        })
+        .def("isContiguous", [](RCP_ConstPyMap &m) {
+            return m->isContiguous();
+        })
+        .def("isDistributed", [](RCP_ConstPyMap &m) {
+            return m->isDistributed();
+        })
+        .def("isCompatible", [](RCP_ConstPyMap &m, RCP_ConstPyMap &m2) {
+            return m->isCompatible(*m2);
+        })
+        .def("isSameAs", [](RCP_ConstPyMap &m, RCP_ConstPyMap &m2) {
+            return m->isSameAs(*m2);
+        })
+        .def("locallySameAs", [](RCP_ConstPyMap &m, RCP_ConstPyMap &m2) {
+            return m->locallySameAs(*m2);
+        })
+        .def("getComm", [](RCP_ConstPyMap &m) {
+            return m->getComm();
+        });
+
     py::class_<RCP_PyVector>(m, "RCPPyVector")
         .def(py::init(&createRCPPyVectorEmpty))
         .def(py::init(&createRCPPyVector))
@@ -199,7 +267,20 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def(py::init<Teuchos::RCP<Teuchos::ParameterList>, Teuchos::RCP<PyParallelEnv>>())
         .def("performSolve", &PyAlbany::PyProblem::performSolve)
         .def("performAnalysis", &PyAlbany::PyProblem::performAnalysis)
+        .def("getResponseMap", &PyAlbany::PyProblem::getResponseMap)
+        .def("getStateMap", &PyAlbany::PyProblem::getStateMap)
+        .def("getParameterMap", &PyAlbany::PyProblem::getParameterMap)
         .def("setDirections", &PyAlbany::PyProblem::setDirections)
         .def("setParameter", &PyAlbany::PyProblem::setParameter)
-        .def("getParameter", &PyAlbany::PyProblem::getParameter);
+        .def("getParameter", &PyAlbany::PyProblem::getParameter)
+        .def("getResponse", &PyAlbany::PyProblem::getResponse)
+        .def("getState", &PyAlbany::PyProblem::getState)
+        .def("getSensitivity", &PyAlbany::PyProblem::getSensitivity)
+        .def("getReducedHessian", &PyAlbany::PyProblem::getReducedHessian)
+        .def("reportTimers", &PyAlbany::PyProblem::reportTimers)
+        .def("getCumulativeResponseContribution", &PyAlbany::PyProblem::getCumulativeResponseContribution)
+        .def("updateCumulativeResponseContributionWeigth", &PyAlbany::PyProblem::updateCumulativeResponseContributionWeigth)
+        .def("updateCumulativeResponseContributionTargetAndExponent", &PyAlbany::PyProblem::updateCumulativeResponseContributionTargetAndExponent)
+        .def("getCovarianceMatrix", &PyAlbany::PyProblem::getCovarianceMatrix)
+        .def("setCovarianceMatrix", &PyAlbany::PyProblem::setCovarianceMatrix);
 }
