@@ -170,6 +170,12 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def(py::init(&createRCPPyVector))
         .def("putScalar",[](RCP_PyVector &m, ST val) {
             m->putScalar(val);
+        })
+        .def("getLocalViewHost",[](RCP_PyVector &m){
+            return getLocalViewHost(m);
+        })
+        .def("setLocalViewHost",[](RCP_PyVector &m, py::array_t<double> input){
+            return setLocalViewHost(m, input);
         });
 
     py::class_<RCP_PyMultiVector>(m, "RCPPyMultiVector")
@@ -177,5 +183,11 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def(py::init(&createRCPPyMultiVector))
         .def("getVector", [](RCP_PyMultiVector &m, int i) {
             return m->getVectorNonConst(i);
+        })
+        .def("getLocalViewHost",[](RCP_PyMultiVector &m){
+            return getLocalViewHost(m);
+        })
+        .def("setLocalViewHost",[](RCP_PyMultiVector &m, py::array_t<double> input){
+            return setLocalViewHost(m, input);
         });
 }
