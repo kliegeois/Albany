@@ -46,13 +46,15 @@ def innerMVectorMat(distributedMVector, array):
             C[i, :] += array[k, i] * distributedMVector[k, :]
     return C 
 
-def createDefaultComm():
-    comm = wpa.getDefaultComm(sys.argv)
-    import atexit
-    atexit.register(wpa.finalize)
+def getDefaultComm():
+    init = wpa.inializeMPI(sys.argv)
+    comm = wpa.getDefaultComm()
+    if init:
+        import atexit
+        atexit.register(wpa.finalize)
     return comm
 
-def createDefaultParallelEnv(comm = createDefaultComm(), n_threads=-1,n_numa=-1,device_id=-1):
+def createDefaultParallelEnv(comm = getDefaultComm(), n_threads=-1,n_numa=-1,device_id=-1):
     """@brief Creates a default parallel environment.
     
     This function initializes Kokkos; Kokkos will be finalized when the destructor of the returned ParallelEnv 

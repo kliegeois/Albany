@@ -49,18 +49,27 @@ namespace pybind11 { namespace detail {
   };
 }} // namespace pybind11::detail
 
-RCP_Teuchos_Comm_PyAlbany
-getDefaultComm (std::vector<std::string> stdvec_args) {
+bool
+inializeMPI (std::vector<std::string> stdvec_args) {
+    int ierr = 0;
+    MPI_Initialized(&ierr);
+    if (!ierr) {
+      int argc = (int)stdvec_args.size();
+      char **argv = new char*[argc+1];
+      for (int i = 0; i < argc; ++i) {
+          argv[i] = (char*)stdvec_args[i].data();
+      }
+      argv[argc] = nullptr;
 
-    int argc = (int)stdvec_args.size();
-    char **argv = new char*[argc+1];
-    for (int i = 0; i < argc; ++i) {
-        argv[i] = (char*)stdvec_args[i].data();
+      MPI_Init(&argc, &argv);
+      return true;
     }
-    argv[argc] = nullptr;
 
-    MPI_Init(&argc, &argv);
+    return false;
+}
 
+RCP_Teuchos_Comm_PyAlbany
+getDefaultComm () {
     return Teuchos::DefaultComm<int>::getComm();
 }
 

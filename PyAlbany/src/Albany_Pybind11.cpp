@@ -61,6 +61,7 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
             return reduceAll(m, reductOp, sendObj);
         });
 
+    m.def("inializeMPI", &inializeMPI, "A function which multiplies two numbers");
     m.def("getDefaultComm", &getDefaultComm, "A function which multiplies two numbers");
     m.def("getTeuchosComm", &getTeuchosComm, "A function which multiplies two numbers");
     m.def("finalize", &finalize, "A function which multiplies two numbers");
