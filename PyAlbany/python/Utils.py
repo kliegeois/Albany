@@ -14,8 +14,8 @@ import sys
 def createMultiVector(map, n):
     return wpa.RCPPyMultiVector(map, n, True)
 
-def createVector(map, n):
-    return wpa.RCPPyVector(map, n, True)
+def createVector(map):
+    return wpa.RCPPyVector(map, True)
 
 def norm(distributedVector):
     """@brief Computes the norm-2 of a distributed vector using Python and Teuchos MPI communicator."""
