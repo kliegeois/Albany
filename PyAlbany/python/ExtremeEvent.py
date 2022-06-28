@@ -747,8 +747,12 @@ class HessianOperator(slinalg.LinearOperator):
                 self.problem.setParameter(k, parameter)
     def _matvec(self, x):
         parameter_map = self.problem.getParameterMap(self.parameter_id)
-        direction = Utils.createMultiVector(parameter_map, 1, dtype="d")
-        direction[0,:] = x
+        direction = Utils.createMultiVector(parameter_map, 1)
+
+        direction_view = direction.getLocalViewHost()
+        direction_view[:,0] = x
+        direction.setLocalViewHost(direction_view)
+
         self.problem.setDirections(self.parameter_id, direction)
         self.problem.performSolve()
         hessian = self.problem.getReducedHessian(self.response_id, self.parameter_id)
@@ -776,28 +780,35 @@ class RotatedHessianOperator(slinalg.LinearOperator):
         if self.params_in_vector:
             parameter_map = self.problem.getParameterMap(0)
             parameter = Utils.createVector(parameter_map)
+            para_view = parameter.getLocalViewHost()
             for k in range(0, self.n_params):
-                parameter[k] = theta_star[k]
+                para_view[k,0] = theta_star[k]
+            parameter.setLocalViewHost(para_view)
             self.problem.setParameter(0, parameter)
         else:
             for k in range(0, self.n_params):
                 parameter_map = self.problem.getParameterMap(k)
                 parameter = Utils.createVector(parameter_map)
-                parameter[0] = theta_star[k]
+                para_view = parameter.getLocalViewHost()
+                para_view[0,0] = theta_star[k]
+                parameter.setLocalViewHost(para_view)
                 self.problem.setParameter(k, parameter)
         self.compute_rotation_matrix()
     def _matvec(self, x):
         tmp1 = self.C_sqr.dot(self.R.dot(self.P.transpose().dot(x)))
 
         parameter_map = self.problem.getParameterMap(self.parameter_id)
-        direction = Utils.createMultiVector(parameter_map, 1, dtype="d")
+        direction = Utils.createMultiVector(parameter_map, 1)
 
-        direction[0,:] = tmp1
+        direction_view = direction.getLocalViewHost()
+        direction_view[:,0] = tmp1
+        direction.setLocalViewHost(direction_view)
+
         self.problem.setDirections(self.parameter_id, direction)
         self.problem.performSolve()
         hessian = self.problem.getReducedHessian(self.response_id, self.parameter_id)
 
-        tmp2 = hessian[0,:]
+        tmp2 = hessian.getLocalViewHost()[:,0]
         tmp3 = self.P.dot(self.R.transpose().dot(self.C_sqr.transpose().dot(tmp2)))
         return tmp3
 
