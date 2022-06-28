@@ -24,13 +24,9 @@ class TestSteadyHeat(unittest.TestCase):
 
         n_directions = 4
         parameter_map = problem.getParameterMap(0)
-        print('hi')
-        print(parameter_map.getGlobalNumElements())
         directions = Utils.createMultiVector(parameter_map, n_directions)
 
         directions_view = directions.getLocalViewHost()
-
-        print(directions_view.shape)
 
         directions_view[:,0] = 1.
         directions_view[:,1] = -1.

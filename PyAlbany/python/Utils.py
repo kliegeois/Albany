@@ -37,13 +37,16 @@ def innerMVector(distributedMVector1, distributedMVector2):
 
 def innerMVectorMat(distributedMVector, array):
     """@brief computes C = A B, where A is an n x r1 MultiVector, B is a nondistributed r1 x r2 array and C is a n x r2 MultiVector"""
-    r1, nloc = distributedMVector.shape
-    r2       = array.shape[1]
-    dtype    = distributedMVector.dtype 
-    C = createMultiVector(distributedMVector.getMap(), r2) 
+    r1 = distributedMVector.getNumVectors()
+    r2 = array.shape[1]
+    C = createMultiVector(distributedMVector.getMap(), r2)
+    C_view = C.getLocalViewHost()
+    distributedMVector_view = distributedMVector.getLocalViewHost()
+
     for k in range(r1):
         for i in range(r2):
-            C[i, :] += array[k, i] * distributedMVector[k, :]
+            C_view[:,i] += array[k, i] * distributedMVector_view[:,k]
+    C.setLocalViewHost(C_view)
     return C 
 
 def getDefaultComm():
@@ -97,18 +100,23 @@ def loadMVector(filename, n_cols, map, distributedFile = True, useBinary = True,
         else:
             mVectorNP = np.loadtxt(filename+'.txt')
 
+        mvector_view = mvector.getLocalViewHost()
         if(mVectorNP.ndim == 1 and n_cols == 1):
-            mvector[0,:] = mVectorNP
+            mvector_view[:,0] = mVectorNP
         else: 
             for i in range(0, n_cols):
-                mvector[i,:] = mVectorNP[i,:]        
+                mvector_view[:,i] = mVectorNP[i,:]
+        mvector.setLocalViewHost(mvector_view)
+
     elif distributedFile:
         if useBinary:
             mVectorNP = np.load(filename+'_'+str(rank)+'.npy')
         else:
             mVectorNP = np.loadtxt(filename+'_'+str(rank)+'.txt')
+        mvector_view = mvector.getLocalViewHost()
         for i in range(0, n_cols):
-            mvector[i,:] = mVectorNP[i,:]
+            mvector_view[:,i] = mVectorNP[i,:]
+        mvector.setLocalViewHost(mvector_view)
     else:
         if readOnRankZero:
             map0 = wpa.getRankZeroMap(map)
@@ -118,21 +126,25 @@ def loadMVector(filename, n_cols, map, distributedFile = True, useBinary = True,
                     mVectorNP = np.load(filename+'.npy')
                 else:
                     mVectorNP = np.loadtxt(filename+'.txt')
-                
+
+                mvector0_view = mvector0.getLocalViewHost()
                 if(mVectorNP.ndim == 1 and n_cols == 1):
-                    mvector0[0,:] = mVectorNP
+                    mvector0_view[:,0] = mVectorNP
                 else: 
                     for i in range(0, n_cols):
-                        mvector0[i,:] = mVectorNP[i,:]
+                        mvector0_view[:,i] = mVectorNP[i,:]
+                mvector0.setLocalViewHost(mvector0_view)
             mvector = wpa.scatterMVector(mvector0, map)
         else:
             if useBinary:
                 mVectorNP = np.load(filename+'.npy')
             else:
                 mVectorNP = np.loadtxt(filename+'.txt')
+            mvector_view = mvector.getLocalViewHost()
             for lid in range(0, map.getLocalNumElements()):
                 gid = map.getGlobalElement(lid)
-                mvector[:,lid] = mVectorNP[:,gid]
+                mvector_view[lid,:] = mVectorNP[:,gid]
+            mvector.setLocalViewHost(mvector_view)
     return mvector
 
 def writeMVector(filename, mvector, distributedFile = True, useBinary = True):
@@ -148,27 +160,29 @@ def writeMVector(filename, mvector, distributedFile = True, useBinary = True):
     """    
     rank = mvector.getMap().getComm().getRank()
     nproc = mvector.getMap().getComm().getSize()
+    mvector_view = mvector.getLocalViewHost()
     if distributedFile:
         if useBinary:
             if nproc > 1:
-                np.save(filename+'_'+str(rank)+'.npy', mvector[:,:])
+                np.save(filename+'_'+str(rank)+'.npy', mvector_view.transpose())
             else:
-                np.save(filename+'.npy', mvector[:,:])
+                np.save(filename+'.npy', mvector_view.transpose())
         else:
             if nproc > 1:
-                np.savetxt(filename+'_'+str(rank)+'.txt', mvector[:,:])
+                np.savetxt(filename+'_'+str(rank)+'.txt', mvector_view.transpose())
             else:
-                np.savetxt(filename+'.txt', mvector[:,:])
+                np.savetxt(filename+'.txt', mvector_view.transpose())
     else:
         if nproc > 1:
             mvectorRank0 = wpa.gatherMVector(mvector, mvector.getMap())
         else:
             mvectorRank0 = mvector
+        mvectorRank0_view = mvectorRank0.getLocalViewHost()
         if rank == 0:
             if useBinary:
-                np.save(filename+'.npy', mvectorRank0[:,:])
+                np.save(filename+'.npy', mvectorRank0_view.transpose())
             else:
-                np.savetxt(filename+'.txt', mvectorRank0[:,:])
+                np.savetxt(filename+'.txt', mvectorRank0_view.transpose())
 
 def createTimers(names):
     """@brief Creates Teuchos timers."""

@@ -329,4 +329,9 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def("getCovarianceMatrix", &PyAlbany::PyProblem::getCovarianceMatrix)
         .def("setCovarianceMatrix", &PyAlbany::PyProblem::setCovarianceMatrix)
         .def("getStackedTimer", &PyAlbany::PyProblem::getStackedTimer);
+
+    m.def("getRankZeroMap", &PyAlbany::getRankZeroMap, "A function which multiplies two numbers");
+    m.def("scatterMVector", &PyAlbany::scatterMVector, "A function which multiplies two numbers");
+    m.def("gatherMVector", &PyAlbany::gatherMVector, "A function which multiplies two numbers");
+    m.def("orthogTpMVecs", &PyAlbany::orthogTpMVecs, "A function which multiplies two numbers");
 }
