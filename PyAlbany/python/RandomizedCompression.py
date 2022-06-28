@@ -47,7 +47,7 @@ import sys
           \Lambda, eigenvalues,  a nondistributed numpy array with k entries
           U,       eigenvectors, a distributed Tpetra MultiVector with k columns
 """
-def singlePass(Op, k, comm=wpa.getDefaultComm(sys.argv)):
+def singlePass(Op, k, comm=utils.createDefaultComm()):
     rank       = comm.getRank()
     nprocs     = comm.getSize()
     nElems     = Op.Map.getLocalNumElements()
@@ -85,7 +85,7 @@ def singlePass(Op, k, comm=wpa.getDefaultComm(sys.argv)):
     u      = utils.innerMVectorMat(q, utilde)
     return lam, u
 
-def doublePass(Op, k, comm = wpa.getDefaultComm(sys.argv), symmetric=False):
+def doublePass(Op, k, comm = utils.createDefaultComm(), symmetric=False):
     if symmetric:
         return doublePassSymmetric(Op, k, comm=comm)
     else:
@@ -102,7 +102,7 @@ def doublePass(Op, k, comm = wpa.getDefaultComm(sys.argv), symmetric=False):
           \Sigma,  singular values,       a nondistributed numpy array with k entries
           V,       right singular vectors, a distributed Tpetra MultiVector with k columns
 """
-def doublePassNonSymmetric(Op, k, comm = wpa.getDefaultComm(sys.argv)):
+def doublePassNonSymmetric(Op, k, comm = utils.createDefaultComm()):
     rank       = comm.getRank()
     nprocs     = comm.getSize()
     nElems     = Op.Map.getLocalNumElements()
@@ -145,7 +145,7 @@ def doublePassNonSymmetric(Op, k, comm = wpa.getDefaultComm(sys.argv)):
           \Lambda, eigenvalues, a nondistributed numpy array with k entries
           U,       eigenvectors, a distributed Tpetra MultiVector with k columns
 """
-def doublePassSymmetric(Op, k, comm = wpa.getDefaultComm(sys.argv)):
+def doublePassSymmetric(Op, k, comm = utils.createDefaultComm()):
     rank       = comm.getRank()
     nprocs     = comm.getSize()
     nElems     = Op.Map.getLocalNumElements()
@@ -192,7 +192,7 @@ def doublePassSymmetric(Op, k, comm = wpa.getDefaultComm(sys.argv)):
           V,       array of right singular vectors, each element of which is a distributed Tpetra MultiVector with k columns
 """
 
-def HODLR(Op, L, k, comm = wpa.getDefaultComm(sys.argv)):
+def HODLR(Op, L, k, comm = utils.createDefaultComm()):
     rank   = comm.getRank()
     nprocs = comm.getSize()
     nElem  = Op.Map.getLocalNumElements()
