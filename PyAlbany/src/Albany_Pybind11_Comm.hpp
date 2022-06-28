@@ -1,3 +1,6 @@
+#ifndef PYALBANY_COMM_H
+#define PYALBANY_COMM_H
+
 #include <mpi.h>
 #include <mpi4py/mpi4py.h>
 
@@ -70,3 +73,10 @@ getTeuchosComm (mpi4py_comm comm) {
 void finalize() {
     MPI_Finalize();
 }
+
+PyObject * reduceAll(RCP_Teuchos_Comm_PyAlbany comm, Teuchos::EReductionType reductOp, PyObject * sendObj)
+{
+    return NULL;
+}
+
+#endif

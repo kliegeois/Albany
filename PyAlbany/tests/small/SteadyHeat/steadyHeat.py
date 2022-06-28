@@ -32,10 +32,10 @@ class TestSteadyHeat(unittest.TestCase):
 
         print(directions_view.shape)
 
-        directions_view[0,:] = 1.
-        directions_view[1,:] = -1.
-        directions_view[2,:] = 3.
-        directions_view[3,:] = -3.
+        directions_view[:,0] = 1.
+        directions_view[:,1] = -1.
+        directions_view[:,2] = 3.
+        directions_view[:,3] = -3.
 
         directions.setLocalViewHost(directions_view)
 
@@ -51,15 +51,16 @@ class TestSteadyHeat(unittest.TestCase):
         setup_time = stackedTimer.accumulatedTime("PyAlbany: Setup Time")
         print("setup_time = " + str(setup_time))
 
-        setup_time_2 = stackedTimer.findBaseTimer("PyAlbany Total Time@PyAlbany: Setup Time").accumulatedTime()
-        setup_time_fix_node_sharing = stackedTimer.findBaseTimer("PyAlbany Total Time@PyAlbany: Setup Time@Albany Setup: fix_node_sharing").accumulatedTime()
+        setup_time_2 = stackedTimer.baseTimerAccumulatedTime("PyAlbany Total Time@PyAlbany: Setup Time")
+        setup_time_fix_node_sharing = stackedTimer.baseTimerAccumulatedTime("PyAlbany Total Time@PyAlbany: Setup Time@Albany Setup: fix_node_sharing")
 
         g_target = 3.23754626955999991e-01
         norm_target = 8.94463776843999921e-03
         h_target = np.array([0.009195356672103817, 0.009195356672103817, 0.027586070971800013, 0.027586070971800013])
-
+        
         g_data = response.getLocalViewHost()
-        norm = Utils.norm(sensitivity.getData(0), cls.comm)
+         
+        norm = Utils.norm(sensitivity.getVector(0))
 
         print("g_target = " + str(g_target))
         print("g_data[0] = " + str(g_data[0]))
@@ -68,7 +69,7 @@ class TestSteadyHeat(unittest.TestCase):
 
         hessian_norms = np.zeros((n_directions,))
         for i in range(0,n_directions):
-            hessian_norms[i] = Utils.norm(hessian.getData(i), cls.comm)
+            hessian_norms[i] = Utils.norm(hessian.getVector(i))
 
         tol = 1e-8
         if rank == 0:

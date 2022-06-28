@@ -181,8 +181,8 @@ class Op_Nystrom(slinalg.LinearOperator):
     def dot(self, x):
         n_vec = np.shape(x)[0]
 
-        scaled_x = Tpetra.MultiVector(self.Map, n_vec, dtype="d")
-        y = Tpetra.MultiVector(self.Map, n_vec, dtype="d")
+        scaled_x = Utils.createMultiVector(self.Map, n_vec)
+        y = Utils.createMultiVector(self.Map, n_vec)
         for i in range(0, self.n_coordinates):
             scaled_x[:,i] = self.sqrt_W[i] * x[:,i]
 
@@ -336,7 +336,7 @@ def update_parameter_list(parameter, n_modes, max_abs=5.e+04, sufix='', max_n_mo
     n_params = n_vectors
     if useDistributed:
         n_params += n_modes
-    parameterlist = Teuchos.ParameterList()
+    parameterlist = Utils.createParameterList()
     parameterlist.set('Number Of Parameters', n_params)
     for i in range(0, n_vectors):
         parameterlist.set('Parameter '+str(i), {'Type':'Vector'})
@@ -365,7 +365,7 @@ def update_parameter_list(parameter, n_modes, max_abs=5.e+04, sufix='', max_n_mo
         rfi.set('Number Of Fields', n_field)
 
         for i in range(0, n_modes):
-            parameterlist = Teuchos.ParameterList()
+            parameterlist = Utils.createParameterList()
             parameterlist.set('Field Name', 'Mode '+str(i))
             parameterlist.set('Field Type', 'Node Scalar')
             parameterlist.set('Field Origin', 'File')
@@ -465,14 +465,14 @@ def getDistributionParameters(problem, parameter):
 def setInitialGuess(problem, p, n_params, params_in_vector=True):
     if params_in_vector:
         parameter_map = problem.getParameterMap(0)
-        parameter = Tpetra.Vector(parameter_map, dtype="d")
+        parameter = Utils.createVector(parameter_map)
         for j in range(0, n_params):
             parameter[j] = p[j]
         problem.setParameter(0, parameter)
     else:
         for j in range(0, n_params):
             parameter_map = problem.getParameterMap(j)
-            parameter = Tpetra.Vector(parameter_map, dtype="d")
+            parameter = Utils.createVector(parameter_map)
             parameter[0] = p[j]
             problem.setParameter(j, parameter)
 
@@ -574,14 +574,14 @@ def importanceSamplingEstimator(theta_0, C, theta_star, F_star, P_star, samples_
 
                 if params_in_vector:
                     parameter_map = problem.getParameterMap(0)
-                    parameter = Tpetra.Vector(parameter_map, dtype="d")
+                    parameter = Utils.createVector(parameter_map)
                     for j_param in range(0, n_params):
                         parameter[j_param] = sample[j_param]
                     problem.setParameter(0, parameter)
                 else:
                     for k in range(0, n_params):
                         parameter_map = problem.getParameterMap(k)
-                        parameter = Tpetra.Vector(parameter_map, dtype="d")
+                        parameter = Utils.createVector(parameter_map)
                         parameter[0] = sample[k]
                         problem.setParameter(k, parameter)
                 problem.performSolve()
@@ -615,14 +615,14 @@ def mixedImportanceSamplingEstimator(theta_0, C, theta_star, F_star, P_star, sam
 
             if params_in_vector:
                 parameter_map = problem.getParameter(0)
-                parameter = Tpetra.Vector(parameter_map, dtype="d")
+                parameter = Utils.createVector(parameter_map)
                 for j in range(0, n_params):
                     parameter[j] = theta_star[i,j]
                 problem.setParameter(0, parameter)
             else:
                 for k in range(0, n_params):
                     parameter_map = problem.getParameterMap(k)
-                    parameter = Tpetra.Vector(parameter_map, dtype="d")
+                    parameter = Utils.createVector(parameter_map)
                     parameter[0] = theta_star[i,k]
                     problem.setParameter(k, parameter)
 
@@ -653,14 +653,14 @@ def mixedImportanceSamplingEstimator(theta_0, C, theta_star, F_star, P_star, sam
 
                     if params_in_vector:
                         parameter_map = problem.getParameter(0)
-                        parameter = Tpetra.Vector(parameter_map, dtype="d")
+                        parameter = Utils.createVector(parameter_map)
                         for j in range(0, n_params):
                             parameter[j] = sample[j]
                         problem.setParameter(0, parameter)
                     else:
                         for k in range(0, n_params):
                             parameter_map = problem.getParameterMap(k)
-                            parameter = Tpetra.Vector(parameter_map, dtype="d")
+                            parameter = Utils.createVector(parameter_map)
                             parameter[0] = sample[k]
                             problem.setParameter(k, parameter)
                     problem.performSolve()
@@ -715,19 +715,19 @@ class HessianOperator(slinalg.LinearOperator):
         self.theta_star = theta_star
         if self.params_in_vector:
             parameter_map = self.problem.getParameterMap(0)
-            parameter = Tpetra.Vector(parameter_map, dtype="d")
+            parameter = Utils.createVector(parameter_map)
             for k in range(0, self.n_params):
                 parameter[k] = theta_star[k]
             self.problem.setParameter(0, parameter)
         else:
             for k in range(0, self.n_params):
                 parameter_map = self.problem.getParameterMap(k)
-                parameter = Tpetra.Vector(parameter_map, dtype="d")
+                parameter = Utils.createVector(parameter_map)
                 parameter[0] = theta_star[k]
                 self.problem.setParameter(k, parameter)
     def _matvec(self, x):
         parameter_map = self.problem.getParameterMap(self.parameter_id)
-        direction = Tpetra.MultiVector(parameter_map, 1, dtype="d")
+        direction = Utils.createMultiVector(parameter_map, 1, dtype="d")
         direction[0,:] = x
         self.problem.setDirections(self.parameter_id, direction)
         self.problem.performSolve()
@@ -755,14 +755,14 @@ class RotatedHessianOperator(slinalg.LinearOperator):
         self.theta_star = theta_star
         if self.params_in_vector:
             parameter_map = self.problem.getParameterMap(0)
-            parameter = Tpetra.Vector(parameter_map, dtype="d")
+            parameter = Utils.createVector(parameter_map)
             for k in range(0, self.n_params):
                 parameter[k] = theta_star[k]
             self.problem.setParameter(0, parameter)
         else:
             for k in range(0, self.n_params):
                 parameter_map = self.problem.getParameterMap(k)
-                parameter = Tpetra.Vector(parameter_map, dtype="d")
+                parameter = Utils.createVector(parameter_map)
                 parameter[0] = theta_star[k]
                 self.problem.setParameter(k, parameter)
         self.compute_rotation_matrix()
@@ -770,7 +770,7 @@ class RotatedHessianOperator(slinalg.LinearOperator):
         tmp1 = self.C_sqr.dot(self.R.dot(self.P.transpose().dot(x)))
 
         parameter_map = self.problem.getParameterMap(self.parameter_id)
-        direction = Tpetra.MultiVector(parameter_map, 1, dtype="d")
+        direction = Utils.createMultiVector(parameter_map, 1, dtype="d")
 
         direction[0,:] = tmp1
         self.problem.setDirections(self.parameter_id, direction)

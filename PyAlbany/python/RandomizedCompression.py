@@ -34,6 +34,7 @@ except:
 
 import numpy as np
 import scipy.linalg as spla
+import sys
 
 
 """
@@ -46,7 +47,7 @@ import scipy.linalg as spla
           \Lambda, eigenvalues,  a nondistributed numpy array with k entries
           U,       eigenvectors, a distributed Tpetra MultiVector with k columns
 """
-def singlePass(Op, k, comm=Teuchos.DefaultComm.getComm()):
+def singlePass(Op, k, comm=wpa.getDefaultComm(sys.argv)):
     rank       = comm.getRank()
     nprocs     = comm.getSize()
     nElems     = Op.Map.getLocalNumElements()
@@ -54,8 +55,8 @@ def singlePass(Op, k, comm=Teuchos.DefaultComm.getComm()):
     # orthogonalize no more than 50 vectors at a time
     nMaxOrthog = min(50, k)
 
-    omega = Tpetra.MultiVector(Op.Map, k, dtype="d")
-    q     = Tpetra.MultiVector(Op.Map, k, dtype="d")
+    omega = utils.createMultiVector(Op.Map, k)
+    q     = utils.createMultiVector(Op.Map, k)
     
     for i in range(k):
         omega[i, :] = np.random.randn(nElems)
@@ -84,7 +85,7 @@ def singlePass(Op, k, comm=Teuchos.DefaultComm.getComm()):
     u      = utils.innerMVectorMat(q, utilde)
     return lam, u
 
-def doublePass(Op, k, comm = Teuchos.DefaultComm.getComm(), symmetric=False):
+def doublePass(Op, k, comm = wpa.getDefaultComm(sys.argv), symmetric=False):
     if symmetric:
         return doublePassSymmetric(Op, k, comm=comm)
     else:
@@ -101,7 +102,7 @@ def doublePass(Op, k, comm = Teuchos.DefaultComm.getComm(), symmetric=False):
           \Sigma,  singular values,       a nondistributed numpy array with k entries
           V,       right singular vectors, a distributed Tpetra MultiVector with k columns
 """
-def doublePassNonSymmetric(Op, k, comm = Teuchos.DefaultComm.getComm()):
+def doublePassNonSymmetric(Op, k, comm = wpa.getDefaultComm(sys.argv)):
     rank       = comm.getRank()
     nprocs     = comm.getSize()
     nElems     = Op.Map.getLocalNumElements()
@@ -109,9 +110,9 @@ def doublePassNonSymmetric(Op, k, comm = Teuchos.DefaultComm.getComm()):
     # orthogonalize no more than 50 vectors at a time
     nMaxOrthog = min(50, k)
 
-    omega = Tpetra.MultiVector(Op.Map, k, dtype="d")
-    qy    = Tpetra.MultiVector(Op.Map, k, dtype="d")
-    qz    = Tpetra.MultiVector(Op.Map, k, dtype="d")
+    omega = utils.createMultiVector(Op.Map, k)
+    qy    = utils.createMultiVector(Op.Map, k)
+    qz    = utils.createMultiVector(Op.Map, k)
     
     for i in range(k):
         omega[i, :] = np.random.randn(nElems)
@@ -144,7 +145,7 @@ def doublePassNonSymmetric(Op, k, comm = Teuchos.DefaultComm.getComm()):
           \Lambda, eigenvalues, a nondistributed numpy array with k entries
           U,       eigenvectors, a distributed Tpetra MultiVector with k columns
 """
-def doublePassSymmetric(Op, k, comm = Teuchos.DefaultComm.getComm()):
+def doublePassSymmetric(Op, k, comm = wpa.getDefaultComm(sys.argv)):
     rank       = comm.getRank()
     nprocs     = comm.getSize()
     nElems     = Op.Map.getLocalNumElements()
@@ -152,8 +153,8 @@ def doublePassSymmetric(Op, k, comm = Teuchos.DefaultComm.getComm()):
     # orthogonalize no more than 50 vectors at a time
     nMaxOrthog = min(50, k)
 
-    omega = Tpetra.MultiVector(Op.Map, k, dtype="d")
-    q    = Tpetra.MultiVector(Op.Map, k, dtype="d")
+    omega = utils.createMultiVector(Op.Map, k)
+    q    = utils.createMultiVector(Op.Map, k)
      
     
     for i in range(k):
@@ -191,7 +192,7 @@ def doublePassSymmetric(Op, k, comm = Teuchos.DefaultComm.getComm()):
           V,       array of right singular vectors, each element of which is a distributed Tpetra MultiVector with k columns
 """
 
-def HODLR(Op, L, k, comm = Teuchos.DefaultComm().getComm()):
+def HODLR(Op, L, k, comm = wpa.getDefaultComm(sys.argv)):
     rank   = comm.getRank()
     nprocs = comm.getSize()
     nElem  = Op.Map.getLocalNumElements()
@@ -208,13 +209,13 @@ def HODLR(Op, L, k, comm = Teuchos.DefaultComm().getComm()):
     Hidxsetloc = [[HidxMPIproc(Op.Map, Hidxset[l][j], MPIidxset) \
                       for j in range(2**(l+1))] for l in range(L)]
 
-    Us   = [[Tpetra.MultiVector(Op.Map, k, dtype="d") for j in range(2**l)] for l in range(L)]
-    Vs   = [[Tpetra.MultiVector(Op.Map, k, dtype="d") for j in range(2**l)] for l in range(L)]
+    Us   = [[utils.createMultiVector(Op.Map, k) for j in range(2**l)] for l in range(L)]
+    Vs   = [[utils.createMultiVector(Op.Map, k) for j in range(2**l)] for l in range(L)]
     Sigs = [[None for j in range(2**l)] for l in range(L)]
 
-    omega = Tpetra.MultiVector(Op.Map, k, dtype="d")
-    x     = Tpetra.MultiVector(Op.Map, k, dtype="d")
-    qy    = Tpetra.MultiVector(Op.Map, k, dtype="d")
+    omega = utils.createMultiVector(Op.Map, k)
+    x     = utils.createMultiVector(Op.Map, k)
+    qy    = utils.createMultiVector(Op.Map, k)
     for l in range(L):
          """
            Construct structured random off-diagonal block sampling vectors
@@ -244,7 +245,7 @@ def HODLR(Op, L, k, comm = Teuchos.DefaultComm().getComm()):
            orthogonalize column samples and store data in one MultiVector
          """
          qy[:, :] *= 0.
-         qys = [Tpetra.MultiVector(Op.Map, k, dtype="d") for j in range(2**l)]
+         qys = [utils.createMultiVector(Op.Map, k) for j in range(2**l)]
          for j in range(0, numPartitions, 2):
              idx = int(j/2)
              qys[idx][:, Hidxsetloc[l][j]] = y[:, Hidxsetloc[l][j]]
@@ -268,8 +269,8 @@ def HODLR(Op, L, k, comm = Teuchos.DefaultComm().getComm()):
          for j in range(0, numPartitions, 2):
              z[:, Hidxsetloc[l][j]] *= 0.
 
-         zs  = [Tpetra.MultiVector(Op.Map, k, dtype="d") for j in range(2**l)]
-         qzs = [Tpetra.MultiVector(Op.Map, k, dtype="d") for j in range(2**l)]
+         zs  = [utils.createMultiVector(Op.Map, k) for j in range(2**l)]
+         qzs = [utils.createMultiVector(Op.Map, k) for j in range(2**l)]
 
          for j in range(1, numPartitions, 2):
              idx = int((j-1)/2)

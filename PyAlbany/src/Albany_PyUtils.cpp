@@ -149,11 +149,7 @@ namespace PyAlbany
   Teuchos::RCP<const Tpetra_Map> getPyTrilinosMap(Teuchos::RCP<const Tpetra_Map> t_map, bool correctGIDs)
   {
     if (!correctGIDs)
-    {
-#ifdef PYALBANY_DOES_NOT_USE_DEEP_COPY
       return t_map;
-#endif
-    }
     Tpetra_Map::global_ordinal_type globalNumElements = t_map->getGlobalNumElements();
     auto indexBase = t_map->getIndexBase();
     auto comm = t_map->getComm();

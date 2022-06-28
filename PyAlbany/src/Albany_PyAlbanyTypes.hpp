@@ -14,9 +14,6 @@
 #include "Tpetra_Vector.hpp"
 #include "Tpetra_MultiVector.hpp"
 
-#if defined(HAVE_TPETRA_INST_INT_LONG_LONG)
-#define PYALBANY_DOES_NOT_USE_DEEP_COPY
-#endif
 
 namespace PyAlbany
 {

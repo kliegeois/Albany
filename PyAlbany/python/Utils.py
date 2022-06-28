@@ -16,23 +16,18 @@ def norm(distributedVector, comm):
     norm = np.sqrt(inner(distributedVector, distributedVector, comm))
     return norm
 
-def inner(distributedVector1, distributedVector2, comm):
+def inner(distributedVector1, distributedVector2):
     """@brief Computes the l2 inner product of two distributed vectors using Python and Teuchos MPI communicator."""
-    localInnerProduct = np.inner(distributedVector1, distributedVector2)
-    innerProduct = comm.reduceAll(Teuchos.REDUCE_SUM, localInnerProduct)
-    return innerProduct
+    return distributedVector1.dot(distributedVector2)
 
-def innerMVector(distributedMVector1, distributedMVector2, comm):
+def innerMVector(distributedMVector1, distributedMVector2):
     """@brief computes C = A^T B, where A is a n x r1 MultiVector and B is a n x r2 MultiVector using Python and Teuchos MPI communicator."""
-    r1 = distributedMVector1.shape[0]
-    r2 = distributedMVector2.shape[0]
-    dtype = distributedMVector1.dtype
-    Cloc = np.zeros((r1, r2), dtype=dtype)
-    C    = np.zeros((r1, r2), dtype=dtype)
+    r1 = distributedMVector1.getNumVectors()
+    r2 = distributedMVector2.getNumVectors()
+    C    = np.zeros((r1, r2))
     for i in range(r1):
         for j in range(r2):
-            Cloc[i, j] = np.inner(distributedMVector1[i, :], distributedMVector2[j, :])
-    C[:, :] = comm.reduceAll(Teuchos.REDUCE_SUM, Cloc[:,:])
+            C[i, j] = inner(distributedMVector1.getVector(i), distributedMVector2.getVector(j))
     return C
 
 def innerMVectorMat(distributedMVector, array):

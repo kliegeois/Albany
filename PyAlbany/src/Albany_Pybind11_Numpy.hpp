@@ -1,3 +1,6 @@
+#ifndef PYALBANY_NUMPY_H
+#define PYALBANY_NUMPY_H
+
 #define NO_IMPORT_ARRAY
 #include "numpy_include.hpp"
 
@@ -117,3 +120,5 @@ int NumPy_TypeCode< std::string >()
 {
   return NPY_STRING;
 }
+
+#endif

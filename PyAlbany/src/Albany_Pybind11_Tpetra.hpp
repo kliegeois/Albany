@@ -1,3 +1,6 @@
+#ifndef PYALBANY_TPETRA_H
+#define PYALBANY_TPETRA_H
+
 #include "Albany_TpetraTypes.hpp"
 
 using RCP_PyMap = Teuchos::RCP<Tpetra_Map>;
@@ -173,3 +176,5 @@ void setLocalViewHost(RCP_PyMultiVector &mvector, py::array_t<double> input) {
     auto view = mvector->getLocalViewDevice(Tpetra::Access::ReadWrite);
     convert_np_to_kokkos_2d(input, view);
 }
+
+#endif

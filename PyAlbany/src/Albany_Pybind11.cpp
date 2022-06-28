@@ -32,6 +32,7 @@
 #include "Albany_Pybind11_ParallelEnv.hpp"
 #include "Albany_Pybind11_ParameterList.hpp"
 #include "Albany_Pybind11_Tpetra.hpp"
+#include "Albany_Pybind11_Timer.hpp"
 
 #include "Albany_Interface.hpp"
 
@@ -40,6 +41,14 @@ namespace py = pybind11;
 PYBIND11_MODULE(Albany_Pybind11, m) {
     m.doc() = "PyAlbany with Pybind11";
 
+    py::enum_<Teuchos::EReductionType>(m, "EReductionType")
+        .value("REDUCE_SUM", Teuchos::REDUCE_SUM)
+        .value("REDUCE_MIN", Teuchos::REDUCE_MIN)
+        .value("REDUCE_MAX", Teuchos::REDUCE_MAX)
+        .value("REDUCE_AND", Teuchos::REDUCE_AND)
+        .value("REDUCE_BOR", Teuchos::REDUCE_BOR)
+        .export_values();
+
     py::class_<RCP_Teuchos_Comm_PyAlbany>(m, "PyComm")
         .def(py::init<>())
         .def("getRank", [](RCP_Teuchos_Comm_PyAlbany &m) {
@@ -47,6 +56,9 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         })
         .def("getSize", [](RCP_Teuchos_Comm_PyAlbany &m) {
             return m->getSize();
+        })
+        .def("reduceAll", [](RCP_Teuchos_Comm_PyAlbany &m, Teuchos::EReductionType reductOp, PyObject * sendObj) {
+            return reduceAll(m, reductOp, sendObj);
         });
 
     m.def("getDefaultComm", &getDefaultComm, "A function which multiplies two numbers");
@@ -248,6 +260,12 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         })
         .def("setLocalViewHost",[](RCP_PyVector &m, py::array_t<ST> input){
             return setLocalViewHost(m, input);
+        })
+        .def("getMap",[](RCP_PyVector &m){
+            return m->getMap();
+        })
+        .def("dot",[](RCP_PyVector &m, RCP_PyVector &m2){
+            return m->dot(*m2);
         });
 
     py::class_<RCP_PyMultiVector>(m, "RCPPyMultiVector")
@@ -262,6 +280,21 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         })
         .def("setLocalViewHost",[](RCP_PyMultiVector &m, py::array_t<ST> input){
             return setLocalViewHost(m, input);
+        })
+        .def("getMap",[](RCP_PyMultiVector &m){
+            return m->getMap();
+        })
+        .def("getNumVectors",[](RCP_PyMultiVector &m){
+            return m->getNumVectors();
+        });
+
+    py::class_<RCP_StackedTimer>(m, "RCPStackedTimer")
+        .def(py::init())
+        .def("accumulatedTime",[](RCP_StackedTimer &m, const std::string name){
+            return m->accumulatedTime(name);
+        })
+        .def("baseTimerAccumulatedTime",[](RCP_StackedTimer &m, const std::string name){
+            return m->findBaseTimer(name)->accumulatedTime();
         });
 
     py::class_<PyAlbany::PyProblem>(m, "PyProblem")
@@ -284,5 +317,6 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def("updateCumulativeResponseContributionWeigth", &PyAlbany::PyProblem::updateCumulativeResponseContributionWeigth)
         .def("updateCumulativeResponseContributionTargetAndExponent", &PyAlbany::PyProblem::updateCumulativeResponseContributionTargetAndExponent)
         .def("getCovarianceMatrix", &PyAlbany::PyProblem::getCovarianceMatrix)
-        .def("setCovarianceMatrix", &PyAlbany::PyProblem::setCovarianceMatrix);
+        .def("setCovarianceMatrix", &PyAlbany::PyProblem::setCovarianceMatrix)
+        .def("getStackedTimer", &PyAlbany::PyProblem::getStackedTimer);
 }

@@ -1,3 +1,6 @@
+#ifndef PYALBANY_PARAMETERLIST_H
+#define PYALBANY_PARAMETERLIST_H
+
 #include "Albany_Utils.hpp"
 #include "Teuchos_XMLParameterListHelpers.hpp"
 #include "Teuchos_YamlParameterListHelpers.hpp"
@@ -322,3 +325,5 @@ py::object getPythonParameter(const Teuchos::ParameterList & plist,
 RCP_PyParameterList createRCPPyParameterList() {
     return Teuchos::rcp<PyParameterList>(new PyParameterList());
 }
+
+#endif
