@@ -288,6 +288,15 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
             return m->getNumVectors();
         });
 
+    py::class_<RCP_Time>(m, "Time")
+        .def(py::init(&createRCPTime))
+        .def("totalElapsedTime",[](RCP_Time &m){
+            return m->totalElapsedTime();
+        })
+        .def("name",[](RCP_Time &m){
+            return m->name();
+        });
+
     py::class_<RCP_StackedTimer>(m, "RCPStackedTimer")
         .def(py::init())
         .def("accumulatedTime",[](RCP_StackedTimer &m, const std::string name){

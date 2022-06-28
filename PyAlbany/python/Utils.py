@@ -11,10 +11,15 @@ except:
 import numpy as np
 import sys
 
-def norm(distributedVector, comm):
+def createMultiVector(map, n):
+    return wpa.RCPPyMultiVector(map, n, True)
+
+def createVector(map, n):
+    return wpa.RCPPyVector(map, n, True)
+
+def norm(distributedVector):
     """@brief Computes the norm-2 of a distributed vector using Python and Teuchos MPI communicator."""
-    norm = np.sqrt(inner(distributedVector, distributedVector, comm))
-    return norm
+    return np.sqrt(inner(distributedVector, distributedVector))
 
 def inner(distributedVector1, distributedVector2):
     """@brief Computes the l2 inner product of two distributed vectors using Python and Teuchos MPI communicator."""
@@ -35,18 +40,11 @@ def innerMVectorMat(distributedMVector, array):
     r1, nloc = distributedMVector.shape
     r2       = array.shape[1]
     dtype    = distributedMVector.dtype 
-    C = Tpetra.MultiVector(distributedMVector.getMap(), r2, dtype=dtype) 
+    C = createMultiVector(distributedMVector.getMap(), r2) 
     for k in range(r1):
         for i in range(r2):
             C[i, :] += array[k, i] * distributedMVector[k, :]
     return C 
-
-
-def createMultiVector(map, n):
-    return wpa.RCPPyMultiVector(map, n, True)
-
-def createVector(map, n):
-    return wpa.RCPPyVector(map, n, True)
 
 def createDefaultParallelEnv(comm = wpa.getDefaultComm(sys.argv), n_threads=-1,n_numa=-1,device_id=-1):
     """@brief Creates a default parallel environment.
@@ -84,7 +82,7 @@ def loadMVector(filename, n_cols, map, distributedFile = True, useBinary = True,
     """
     rank = map.getComm().getRank()
     nproc = map.getComm().getSize()
-    mvector = Tpetra.MultiVector(map, n_cols, dtype=dtype)
+    mvector = createMultiVector(map, n_cols)
     if nproc==1:
         if useBinary:
             mVectorNP = np.load(filename+'.npy')
@@ -106,7 +104,7 @@ def loadMVector(filename, n_cols, map, distributedFile = True, useBinary = True,
     else:
         if readOnRankZero:
             map0 = wpa.getRankZeroMap(map)
-            mvector0 = Tpetra.MultiVector(map0, n_cols, dtype=dtype)
+            mvector0 = createMultiVector(map0, n_cols)
             if rank == 0:
                 if useBinary:
                     mVectorNP = np.load(filename+'.npy')
@@ -168,7 +166,7 @@ def createTimers(names):
     """@brief Creates Teuchos timers."""
     timers_list = []
     for name in names:
-        timers_list.append(Teuchos.Time(name))
+        timers_list.append(wpa.Time(name))
     return timers_list
 
 def printTimers(timers_list, filename=None, verbose=True):
