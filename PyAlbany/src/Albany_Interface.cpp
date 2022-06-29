@@ -61,6 +61,16 @@ using namespace PyAlbany;
 using Teuchos::RCP;
 using Teuchos::rcp;
 
+PyParallelEnv::PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads, int _num_numa, int _device_id) : comm(_comm), num_threads(_num_threads), num_numa(_num_numa), device_id(_device_id)
+{
+    Kokkos::InitArguments args;
+    args.num_threads = this->num_threads;
+    args.num_numa = this->num_numa;
+    args.device_id = this->device_id;
+
+    Kokkos::initialize(args);
+}
+
 PyProblem::PyProblem(std::string filename, Teuchos::RCP<PyParallelEnv> _pyParallelEnv) : pyParallelEnv(_pyParallelEnv)
 {
 
