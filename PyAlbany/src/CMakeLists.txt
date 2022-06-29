@@ -35,6 +35,14 @@ set(PyAlbany_HDRS
   PyAlbany_Stokhos.hpp
 )
 
+set(PybindAlbany_SRCS
+  Albany_Pybind11.cpp
+  Albany_Pybind11_Comm.cpp
+)
+set(PybindAlbany_HDRS
+  Albany_Pybind11_Comm.hpp
+)
+
 set(AI_SRCS
   Albany_Interface.cpp
 )
@@ -145,7 +153,7 @@ IF(NOT Mpi4Py_VERSION_ERROR)
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
-  pybind11_add_module(Albany_Pybind11 Albany_Pybind11.cpp)
+  pybind11_add_module(Albany_Pybind11 ${PybindAlbany_SRCS})
   target_include_directories(Albany_Pybind11 PUBLIC ${Trilinos_INCLUDE_DIRS} ${Mpi4Py_INCLUDE_DIR})
   target_compile_features(Albany_Pybind11 PUBLIC cxx_std_11)
   #target_link_libraries(Albany_Pybind11 PRIVATE ${ALBANY_LIBRARIES} ${TPL_LIBRARIES})

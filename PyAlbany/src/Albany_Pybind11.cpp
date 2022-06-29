@@ -36,36 +36,8 @@
 
 #include "Albany_Interface.hpp"
 
-namespace py = pybind11;
 
-PYBIND11_MODULE(Albany_Pybind11, m) {
-    m.doc() = "PyAlbany with Pybind11";
-
-    py::enum_<Teuchos::EReductionType>(m, "EReductionType")
-        .value("REDUCE_SUM", Teuchos::REDUCE_SUM)
-        .value("REDUCE_MIN", Teuchos::REDUCE_MIN)
-        .value("REDUCE_MAX", Teuchos::REDUCE_MAX)
-        .value("REDUCE_AND", Teuchos::REDUCE_AND)
-        .value("REDUCE_BOR", Teuchos::REDUCE_BOR)
-        .export_values();
-
-    py::class_<RCP_Teuchos_Comm_PyAlbany>(m, "PyComm")
-        .def(py::init<>())
-        .def("getRank", [](RCP_Teuchos_Comm_PyAlbany &m) {
-            return m->getRank();
-        })
-        .def("getSize", [](RCP_Teuchos_Comm_PyAlbany &m) {
-            return m->getSize();
-        })
-        .def("reduceAll", [](RCP_Teuchos_Comm_PyAlbany &m, Teuchos::EReductionType reductOp, PyObject * sendObj) {
-            return reduceAll(m, reductOp, sendObj);
-        });
-
-    m.def("inializeMPI", &inializeMPI, "A function which multiplies two numbers");
-    m.def("getDefaultComm", &getDefaultComm, "A function which multiplies two numbers");
-    m.def("getTeuchosComm", &getTeuchosComm, "A function which multiplies two numbers");
-    m.def("finalize", &finalize, "A function which multiplies two numbers");
-
+void pyalbany_parallelenv(py::module &m) {
     py::class_<RCP_PyParallelEnv>(m, "PyParallelEnv")
         .def(py::init(&createPyParallelEnv))
         .def(py::init(&createDefaultKokkosPyParallelEnv))
@@ -84,7 +56,9 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def("setComm", [](RCP_PyParallelEnv &m, RCP_Teuchos_Comm_PyAlbany &comm) {
             m->comm = comm;
         });
+}
 
+void pyalbany_parameterlist(py::module &m) {
     py::class_<RCP_PyParameterList>(m, "RCPPyParameterList")
         .def(py::init(&createRCPPyParameterList))
         .def("sublist", [](RCP_PyParameterList &m, const std::string &name) {
@@ -112,6 +86,14 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
                 PyErr_SetString(PyExc_TypeError, "ParameterList value type not supported");
         });
     m.def("getParameterList", &getParameterList, "A function which multiplies two numbers");
+}
+
+PYBIND11_MODULE(Albany_Pybind11, m) {
+    m.doc() = "PyAlbany with Pybind11";
+
+    pyalbany_comm(m);
+    pyalbany_parallelenv(m);
+    pyalbany_parameterlist(m);
 
     py::class_<RCP_PyMap>(m, "RCPPyMap")
         .def(py::init(&createRCPPyMapEmpty))
