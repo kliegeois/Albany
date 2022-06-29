@@ -6,6 +6,10 @@
 
 #include "Albany_Pybind11_Tpetra.hpp"
 
+// The implementation of the conversion from numpy array to Kokkos view 
+// in both directions is based on:
+// https://github.com/sandialabs/compadre/blob/master/pycompadre/pycompadre.cpp
+
 namespace py = pybind11;
 
 template< bool B, class T = void >

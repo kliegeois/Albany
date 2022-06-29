@@ -8,7 +8,10 @@
 
 namespace py = pybind11;
 
-// Implementation based on https://stackoverflow.com/questions/70423477/pybind11-send-mpi-communicator-from-python-to-cpp
+// The implementation of the conversion from a Mpi4Py communicator 
+// to a Teuchos one is based on:
+// https://stackoverflow.com/questions/70423477/pybind11-send-mpi-communicator-from-python-to-cpp
+
 struct mpi4py_comm {
   mpi4py_comm() = default;
   mpi4py_comm(MPI_Comm value) : value(value) {}

@@ -7,6 +7,9 @@
 #include "Albany_Pybind11_ParameterList.hpp"
 #include "Albany_Interface.hpp"
 
+// Implementation based on:
+//   https://github.com/trilinos/Trilinos/tree/master/packages/PyTrilinos/src/PyTrilinos_Teuchos_Util.cpp
+
 #if PY_VERSION_HEX >= 0x03000000
 
 #define PyClass_Check(obj) PyObject_IsInstance(obj, (PyObject *)&PyType_Type)
