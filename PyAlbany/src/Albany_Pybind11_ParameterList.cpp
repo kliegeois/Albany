@@ -8,7 +8,7 @@
 #include "Albany_Interface.hpp"
 
 // Implementation based on:
-//   https://github.com/trilinos/Trilinos/tree/master/packages/PyTrilinos/src/PyTrilinos_Teuchos_Util.cpp
+// https://github.com/trilinos/Trilinos/tree/master/packages/PyTrilinos/src/PyTrilinos_Teuchos_Util.cpp
 
 #if PY_VERSION_HEX >= 0x03000000
 
