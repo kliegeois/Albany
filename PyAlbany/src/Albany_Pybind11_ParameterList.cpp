@@ -1,6 +1,5 @@
 #include "Albany_Pybind11_ParameterList.hpp"
 #include "Albany_Interface.hpp"
-#include "Albany_Pybind11_Numpy.hpp"
 
 #if PY_VERSION_HEX >= 0x03000000
 
@@ -27,26 +26,34 @@
 
 namespace py = pybind11;
 
-template< typename T >
-void copyNumPyToTeuchosArray(PyObject * pyArray,
-                             Teuchos::Array< T > & tArray)
-{
-  typedef typename Teuchos::Array< T >::size_type size_type;
-  size_type length = PyArray_DIM((PyArrayObject*) pyArray, 0);
-  tArray.resize(length);
-  T * data = (T*) PyArray_DATA((PyArrayObject*) pyArray);
-  for (typename Teuchos::Array< T >::iterator it = tArray.begin();
-       it != tArray.end(); ++it)
-    *it = *(data++);
+template<typename T>
+Teuchos::Array< T > copyNumPyToTeuchosArray(pybind11::array_t<T> array) {
+
+    auto np_array = array.template mutable_unchecked<1>();
+    int size = array.shape(0);
+    Teuchos::Array< T > av(size);
+    for (int i=0; i < size; ++i)
+      av[i] = np_array(i);
+    return av;
 }
 
-// ****************************************************************** //
+template<typename T>
+pybind11::array_t<T> copyTeuchosArrayToNumPy(Teuchos::Array< T > & tArray) {
+
+    pybind11::array_t<T> array(tArray.size());
+    auto data = array.template mutable_unchecked<1>();
+    for (int i=0; i < tArray.size(); ++i)
+      data(i) = tArray[i];
+    return array;
+}
 
 bool setPythonParameter(Teuchos::ParameterList & plist,
 			const std::string      & name,
 			py::object             value)
 {
   py::handle h = value;
+
+  auto &npy_api = py::detail::npy_api::get();
 
   // Boolean values
   if (PyBool_Check(value.ptr ()))
@@ -101,63 +108,6 @@ bool setPythonParameter(Teuchos::ParameterList & plist,
     return false;
   }
 
-  // NumPy arrays and non-dictionary Python sequences
-  else if (PyArray_Check(value.ptr ()) || PySequence_Check(value.ptr ()))
-  {
-    PyObject * pyArray =
-      PyArray_CheckFromAny(value.ptr (),
-                           NULL,
-                           1,
-                           1,
-                           NPY_ARRAY_DEFAULT | NPY_ARRAY_NOTSWAPPED,
-                           NULL);
-    if (!pyArray) return false;
-    // if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_BOOL)
-    // {
-    //   Teuchos::Array< bool > tArray;
-    //   copyNumPyToTeuchosArray(pyArray, tArray);
-    //   plist.set(name, tArray);
-    // }
-    // else if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_INT)
-    if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_INT)
-    {
-      Teuchos::Array< int > tArray;
-      copyNumPyToTeuchosArray(pyArray, tArray);
-      plist.set(name, tArray);
-    }
-    else if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_LONG)
-    {
-      Teuchos::Array< long > tArray;
-      copyNumPyToTeuchosArray(pyArray, tArray);
-      plist.set(name, tArray);
-    }
-    else if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_FLOAT)
-    {
-      Teuchos::Array< float > tArray;
-      copyNumPyToTeuchosArray(pyArray, tArray);
-      plist.set(name, tArray);
-    }
-    else if (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_DOUBLE)
-    {
-      Teuchos::Array< double > tArray;
-      copyNumPyToTeuchosArray(pyArray, tArray);
-      plist.set(name, tArray);
-    }
-    else if ((PyArray_TYPE((PyArrayObject*) pyArray) == NPY_STRING) ||
-             (PyArray_TYPE((PyArrayObject*) pyArray) == NPY_UNICODE))
-    {
-      Teuchos::Array< std::string > tArray;
-      copyNumPyToTeuchosArray(pyArray, tArray);
-      plist.set(name, tArray);
-    }
-    else
-    {
-      // Unsupported data type
-      if (pyArray != value.ptr ()) Py_DECREF(pyArray);
-      return false;
-    }
-  }
-
   // All other value types are unsupported
   else
   {
@@ -168,44 +118,15 @@ bool setPythonParameter(Teuchos::ParameterList & plist,
   return true;
 }    // setPythonParameter
 
-// **************************************************************** //
 
-template< typename T >
-py::object copyTeuchosArrayToNumPy(Teuchos::Array< T > & tArray)
+template <typename T>
+bool setPythonParameterArray(Teuchos::ParameterList & plist,
+			const std::string      & name,
+			pybind11::array_t< T >   value)
 {
-  int typecode = NumPy_TypeCode< T >();
-  npy_intp dims[] = { tArray.size() };
-  PyObject *pyArray = PyArray_SimpleNew(1, dims, typecode);
-  T * data = (T*) PyArray_DATA((PyArrayObject*) pyArray);
-  for (typename Teuchos::Array< T >::iterator it = tArray.begin();
-       it != tArray.end(); ++it)
-    *(data++) = *it;
-  return py::object(py::handle(pyArray), py::object::stolen_t{});
-}
-
-template<>
-py::object copyTeuchosArrayToNumPy(Teuchos::Array< std::string > & tArray)
-{
-  int typecode = NumPy_TypeCode< std::string >();
-  npy_intp dims[] = { tArray.size() };
-  int strlen = 1;
-  for (typename Teuchos::Array< std::string >::iterator it = tArray.begin();
-       it != tArray.end(); ++it)
-  {
-    int itlen = it->size();
-    if (itlen > strlen) strlen = itlen;
-  }
-  py::object pyArray;
-  pyArray.ptr() =
-    PyArray_New(&PyArray_Type, 1, dims, typecode, NULL, NULL, strlen, 0, NULL);
-  char* data = (char*) PyArray_DATA((PyArrayObject*) pyArray.ptr());
-  for (typename Teuchos::Array< std::string >::iterator it = tArray.begin();
-       it != tArray.end(); ++it)
-  {
-    strncpy(data, it->c_str(), strlen);
-    data += strlen;
-  }
-  return pyArray;
+  auto tArray = copyNumPyToTeuchosArray(value);
+  plist.set(name, tArray);
+  return true;
 }
 
 // **************************************************************** //
@@ -293,18 +214,9 @@ py::object getPythonParameter(const Teuchos::ParameterList & plist,
             }
             catch(Teuchos::bad_any_cast &e)
             {
-              try
-              {
-                Teuchos::Array< std::string > tArray =
-                  Teuchos::any_cast< Teuchos::Array< std::string > >(entry->getAny(false));
-                return copyTeuchosArrayToNumPy(tArray);
-              }
-              catch(Teuchos::bad_any_cast &e)
-              {
-                // Teuchos::Arrays of type other than int or double are
-                // currently unsupported
-                //return NULL;
-              }
+              // Teuchos::Arrays of type other than int or double are
+              // currently unsupported
+              //return NULL;
             }
           }
         }
@@ -348,6 +260,18 @@ void pyalbany_parameterlist(py::module &m) {
         .def("set", [](RCP_PyParameterList &m, const std::string &name, py::object value) {
             if (!setPythonParameter(*m,name,value))
                 PyErr_SetString(PyExc_TypeError, "ParameterList value type not supported");
+        })
+        .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<int> value) {
+            setPythonParameterArray(*m,name,value);
+        })
+        .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<long> value) {
+            setPythonParameterArray(*m,name,value);
+        })
+        .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<float> value) {
+            setPythonParameterArray(*m,name,value);
+        })
+        .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<double> value) {
+            setPythonParameterArray(*m,name,value);
         });
     m.def("getParameterList", &PyAlbany::getParameterList, "A function which multiplies two numbers");
 }

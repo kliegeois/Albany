@@ -28,11 +28,9 @@ set (ALBANY_INCLUDE_DIRS
 
 set(PyAlbany_SRCS
   Albany_PyUtils.cpp
-  PyAlbany_Stokhos.cpp
 )
 set(PyAlbany_HDRS
   Albany_PyUtils.hpp
-  PyAlbany_Stokhos.hpp
 )
 
 set(PybindAlbany_SRCS
