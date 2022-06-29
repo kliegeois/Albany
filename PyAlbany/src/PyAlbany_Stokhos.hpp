@@ -13,7 +13,7 @@
 #ifdef ALBANY_STOKHOS
 #include "Stokhos_KL_ExponentialRandomField.hpp"
 #endif
-#include "Albany_PyAlbanyTypes.hpp"
+#include "Albany_TpetraTypes.hpp"
 
 namespace PyAlbany
 {

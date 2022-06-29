@@ -19,8 +19,6 @@
 #include "Albany_TpetraTypes.hpp"
 #include "Teuchos_RCP.hpp"
 
-#include "Albany_PyAlbanyTypes.hpp"
-
 namespace PyAlbany
 {
 

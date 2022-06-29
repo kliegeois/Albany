@@ -58,7 +58,7 @@ void KLExpansion::createModes() {
 
 void KLExpansion::getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x) {
 #ifdef ALBANY_STOKHOS 
-    Kokkos::View<double *, Kokkos::LayoutLeft, PyTrilinosVector::node_type::device_type> weights("w", n_modes);
+    Kokkos::View<double *, Kokkos::LayoutLeft, Tpetra_Vector::node_type::device_type> weights("w", n_modes);
     for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
         weights(i_mode) = 0;
     }
@@ -76,7 +76,7 @@ void KLExpansion::getModes(double* phi, int n_nodes, int n_modes, double* x, int
 
 void KLExpansion::getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x, double* y, int n_nodes_y) {
 #ifdef ALBANY_STOKHOS 
-    Kokkos::View<double *, Kokkos::LayoutLeft, PyTrilinosVector::node_type::device_type> weights("w", n_modes);
+    Kokkos::View<double *, Kokkos::LayoutLeft, Tpetra_Vector::node_type::device_type> weights("w", n_modes);
     for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
         weights(i_mode) = 0;
     }
@@ -94,7 +94,7 @@ void KLExpansion::getModes(double* phi, int n_nodes, int n_modes, double* x, int
 
 void KLExpansion::getModes(double* phi, int n_nodes, int n_modes, double* x, int n_nodes_x, double* y, int n_nodes_y, double* z, int n_nodes_z) {
 #ifdef ALBANY_STOKHOS 
-    Kokkos::View<double *, Kokkos::LayoutLeft, PyTrilinosVector::node_type::device_type> weights("w", n_modes);
+    Kokkos::View<double *, Kokkos::LayoutLeft, Tpetra_Vector::node_type::device_type> weights("w", n_modes);
     for (std::size_t i_mode = 0; i_mode<n_modes; ++ i_mode) {
         weights(i_mode) = 0;
     }

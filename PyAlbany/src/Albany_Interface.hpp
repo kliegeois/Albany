@@ -16,7 +16,6 @@
 
 #include "Kokkos_Core.hpp"
 
-#include "Albany_PyAlbanyTypes.hpp"
 #include "Albany_PyUtils.hpp"
 
 #include "Albany_Utils.hpp"
@@ -378,7 +377,7 @@ Teuchos::RCP<Tpetra_MultiVector> PyAlbany::scatterMVector(Teuchos::RCP<Tpetra_Mu
 {
     int myRank = distributedMap->getComm()->getRank();
     auto rankZeroMap = getRankZeroMap(distributedMap);
-    Teuchos::RCP<PyAlbany::PyTrilinosExport> exportZero = rcp(new PyAlbany::PyTrilinosExport(distributedMap, rankZeroMap));
+    Teuchos::RCP<Tpetra_Export> exportZero = rcp(new Tpetra_Export(distributedMap, rankZeroMap));
     Teuchos::RCP<Tpetra_MultiVector> outVector = rcp(new Tpetra_MultiVector(distributedMap, inVector->getNumVectors()));
     outVector->doImport(*inVector, *exportZero, Tpetra::INSERT);
     return outVector;
@@ -388,7 +387,7 @@ Teuchos::RCP<Tpetra_MultiVector> PyAlbany::gatherMVector(Teuchos::RCP<Tpetra_Mul
 {
     int myRank = distributedMap->getComm()->getRank();
     auto rankZeroMap = getRankZeroMap(distributedMap);
-    Teuchos::RCP<PyAlbany::PyTrilinosExport> exportZero = rcp(new PyAlbany::PyTrilinosExport(distributedMap, rankZeroMap));
+    Teuchos::RCP<Tpetra_Export> exportZero = rcp(new Tpetra_Export(distributedMap, rankZeroMap));
     Teuchos::RCP<Tpetra_MultiVector> outVector = rcp(new Tpetra_MultiVector(rankZeroMap, inVector->getNumVectors()));
     outVector->doExport(*inVector, *exportZero, Tpetra::ADD);
     return outVector;
