@@ -1,16 +1,13 @@
-from PyTrilinos import Tpetra
-from PyTrilinos import Teuchos
-
 import unittest
 import numpy as np
 import os
 try:
     from PyAlbany import Utils
-    from PyAlbany import wpyalbany as wpa
+    from PyAlbany import Albany_Pybind11 as wpa
     from PyAlbany.RandomizedCompression import HODLR, Hpartition
 except:
     import Utils
-    import wpyalbany as wpa
+    import Albany_Pybind11 as wpa
     from RandomizedCompression import HODLR, Hpartition
 
 
@@ -28,8 +25,8 @@ class Hessian:
 class TestHODLR(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.comm = Teuchos.DefaultComm.getComm()
-        cls.parallelEnv = Utils.createDefaultParallelEnv(cls.comm)
+        cls.parallelEnv = Utils.createDefaultParallelEnv()
+        cls.comm = cls.parallelEnv.getComm()
 
     def test_all(self):
         cls = self.__class__

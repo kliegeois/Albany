@@ -58,11 +58,16 @@ def singlePass(Op, k, comm=utils.getDefaultComm()):
     omega = utils.createMultiVector(Op.Map, k)
     q     = utils.createMultiVector(Op.Map, k)
     
+    omega_view = omega.getLocalViewHost()
     for i in range(k):
-        omega[i, :] = np.random.randn(nElems)
+        omega_view[:,i] = np.random.randn(nElems)
+    omega.setLocalViewHost(omega_view)
     y = Op.dot(omega)
     
-    q[:, :] = y[:, :]
+    y_view = y.getLocalViewHost()
+    q_view = q.getLocalViewHost()
+    q_view[:, :] = y_view[:, :]
+    q.setLocalViewHost(q_view)
     wpa.orthogTpMVecs(q, nMaxOrthog)
 
     C = utils.innerMVector(q, omega, comm)
@@ -114,20 +119,30 @@ def doublePassNonSymmetric(Op, k, comm = utils.getDefaultComm()):
     qy    = utils.createMultiVector(Op.Map, k)
     qz    = utils.createMultiVector(Op.Map, k)
     
+    omega_view = omega.getLocalViewHost()
     for i in range(k):
-        omega[i, :] = np.random.randn(nElems)
-    
+        omega_view[:, i] = np.random.randn(nElems)
+    omega.setLocalViewHost(omega_view)
+
     y = Op.dot(omega)
     
-    qy[:, :] = y[:, :]
+    qy_view = qy.getLocalViewHost()
+    y_view = y.getLocalViewHost()
+
+    qy_view[:, :] = y_view[:, :]
+    qy.setLocalViewHost(qy_view)
     wpa.orthogTpMVecs(qy, nMaxOrthog)
 
     z = Op.dot(qy)
+
+    qz_view = qz.getLocalViewHost()
+    z_view = z.getLocalViewHost()
     
-    qz[:, :] = z[:, :]
+    qz_view[:, :] = z_view[:, :]
+    qz.setLocalViewHost(qz_view)
     wpa.orthogTpMVecs(qz, nMaxOrthog)
 
-    R = utils.innerMVector(qz, z, comm)
+    R = utils.innerMVector(qz, z)
     vhat, sig, uhat = np.linalg.svd(R, full_matrices=False)
     uhat[:, :] = (uhat.T)[:, :]
     u          = utils.innerMVectorMat(qy, uhat)
@@ -156,17 +171,21 @@ def doublePassSymmetric(Op, k, comm = utils.getDefaultComm()):
     omega = utils.createMultiVector(Op.Map, k)
     q    = utils.createMultiVector(Op.Map, k)
      
-    
+    omega_view = omega.getLocalViewHost()
     for i in range(k):
-        omega[i, :] = np.random.randn(nElems)
-    
+        omega_view[:,i] = np.random.randn(nElems)
+    omega.setLocalViewHost(omega_view)
+
     y = Op.dot(omega)
+    y_view = y.getLocalViewHost()
+    q_view = q.getLocalViewHost()
     
-    q[:, :] = y[:, :]
+    q_view[:, :] = y_view[:, :]
+    q.setLocalViewHost(q_view)
     wpa.orthogTpMVecs(q, nMaxOrthog)
 
     z = Op.dot(q)
-    B = utils.innerMVector(q, z, comm)
+    B = utils.innerMVector(q, z)
     
     lam, utilde = np.linalg.eigh(B)
    
