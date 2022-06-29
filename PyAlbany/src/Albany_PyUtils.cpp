@@ -146,7 +146,7 @@ namespace PyAlbany
     }
   }
 
-  Teuchos::RCP<const Tpetra_Map> getPyTrilinosMap(Teuchos::RCP<const Tpetra_Map> t_map, bool correctGIDs)
+  Teuchos::RCP<const Tpetra_Map> getCorrectedMap(Teuchos::RCP<const Tpetra_Map> t_map, bool correctGIDs)
   {
     if (!correctGIDs)
       return t_map;

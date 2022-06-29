@@ -8,6 +8,7 @@
 
 namespace py = pybind11;
 
+// Implementation based on https://stackoverflow.com/questions/70423477/pybind11-send-mpi-communicator-from-python-to-cpp
 struct mpi4py_comm {
   mpi4py_comm() = default;
   mpi4py_comm(MPI_Comm value) : value(value) {}
@@ -51,7 +52,7 @@ namespace pybind11 { namespace detail {
 }}
 
 bool
-inializeMPI (std::vector<std::string> stdvec_args) {
+initializeMPI (std::vector<std::string> stdvec_args) {
     int ierr = 0;
     MPI_Initialized(&ierr);
     if (!ierr) {
@@ -110,8 +111,8 @@ void pyalbany_comm(py::module &m) {
             return reduceAll(m, reductOp, sendObj);
         });
 
-    m.def("inializeMPI", &inializeMPI, "A function which multiplies two numbers");
-    m.def("getDefaultComm", &getDefaultComm, "A function which multiplies two numbers");
-    m.def("getTeuchosComm", &getTeuchosComm, "A function which multiplies two numbers");
-    m.def("finalize", &finalize, "A function which multiplies two numbers");
+    m.def("initializeMPI", &initializeMPI, "A function which initializes MPI if not yet iniatialized");
+    m.def("getDefaultComm", &getDefaultComm, "A function which returns the default Teuchos communicator");
+    m.def("getTeuchosComm", &getTeuchosComm, "A function which returns a Teuchos communicator corresponding to a Mpi4Py communicator");
+    m.def("finalize", &finalize, "A function which finalizes MPI (called once at the end if initializeMPI is called)");
 }

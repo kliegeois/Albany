@@ -20,7 +20,7 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(Albany_Pybind11, m) {
-    m.doc() = "PyAlbany with Pybind11";
+    m.doc() = "PyAlbany module";
 
     pyalbany_comm(m);
     pyalbany_parallelenv(m);
@@ -53,8 +53,8 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         .def("setCovarianceMatrix", &PyAlbany::PyProblem::setCovarianceMatrix)
         .def("getStackedTimer", &PyAlbany::PyProblem::getStackedTimer);
 
-    m.def("getRankZeroMap", &PyAlbany::getRankZeroMap, "A function which multiplies two numbers");
-    m.def("scatterMVector", &PyAlbany::scatterMVector, "A function which multiplies two numbers");
-    m.def("gatherMVector", &PyAlbany::gatherMVector, "A function which multiplies two numbers");
-    m.def("orthogTpMVecs", &PyAlbany::orthogTpMVecs, "A function which multiplies two numbers");
+    m.def("getRankZeroMap", &PyAlbany::getRankZeroMap, "A function which return a map where all the entries are owned by the rank 0");
+    m.def("scatterMVector", &PyAlbany::scatterMVector, "A function which scatters a multivector");
+    m.def("gatherMVector", &PyAlbany::gatherMVector, "A function which gathers a multivector");
+    m.def("orthogTpMVecs", &PyAlbany::orthogTpMVecs, "A function which orthogonalizes multivectors");
 }

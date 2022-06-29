@@ -186,7 +186,7 @@ namespace PyAlbany
          * 
          * \param g_index [in] Index of the response for which the map is requested.
          * 
-         * The function returns an RCP to a map supported by PyTrilinos.
+         * The function returns an RCP to a map.
          * 
          * This function should ne be called before calling performSolve().
          */
@@ -197,7 +197,7 @@ namespace PyAlbany
          * 
          * This function is used to communicate the map of the state to Python.
          * 
-         * The function returns an RCP to a map supported by PyTrilinos.
+         * The function returns an RCP to a map.
          * 
          * This function should ne be called before calling performSolve().
          */
@@ -210,7 +210,7 @@ namespace PyAlbany
          * 
          * \param p_index [in] Index of the parameter for which the map is requested.
          * 
-         * The function returns an RCP to a map supported by PyTrilinos.
+         * The function returns an RCP to a map.
          */
         Teuchos::RCP<const Tpetra_Map> getParameterMap(const int p_index);
 

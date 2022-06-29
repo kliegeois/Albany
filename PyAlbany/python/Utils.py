@@ -50,7 +50,7 @@ def innerMVectorMat(distributedMVector, array):
     return C 
 
 def getDefaultComm():
-    init = wpa.inializeMPI(sys.argv)
+    init = wpa.initializeMPI(sys.argv)
     comm = wpa.getDefaultComm()
     if init:
         import atexit

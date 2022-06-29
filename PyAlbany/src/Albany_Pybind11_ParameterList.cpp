@@ -279,5 +279,5 @@ void pyalbany_parameterlist(py::module &m) {
         .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<double> value) {
             setPythonParameterArray(*m,name,value);
         });
-    m.def("getParameterList", &PyAlbany::getParameterList, "A function which multiplies two numbers");
+    m.def("getParameterList", &PyAlbany::getParameterList, "A function which returns an RCP to a parameter list read from file");
 }

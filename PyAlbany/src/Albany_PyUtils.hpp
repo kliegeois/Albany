@@ -44,7 +44,7 @@ namespace PyAlbany
              int indexbase);
 
   /**
-   * \brief getPyTrilinosMap function
+   * \brief getCorrectedMap function
    * 
    * This function is used to communicate the Tpetra map used in Albany to Python.
    * 
@@ -52,9 +52,9 @@ namespace PyAlbany
    * 
    * \param correctGIDs [in] Boolean used to specify if a correction on the GID is performed.
    * 
-   * The function returns an RCP to a map supported by PyTrilinos.
+   * The function returns an RCP to a map.
    */
-  Teuchos::RCP<const Tpetra_Map> getPyTrilinosMap(Teuchos::RCP<const Tpetra_Map> t_map, bool correctGIDs);
+  Teuchos::RCP<const Tpetra_Map> getCorrectedMap(Teuchos::RCP<const Tpetra_Map> t_map, bool correctGIDs);
 } // namespace PyAlbany
 
 #endif // ALBANY_PYUTILS_H
