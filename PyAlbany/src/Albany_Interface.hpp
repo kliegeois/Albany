@@ -81,12 +81,13 @@ namespace PyAlbany
     public:
         RCP_Teuchos_Comm_PyAlbany comm;
         const int num_threads, num_numa, device_id;
+        int rank;
 
         PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads = -1, int _num_numa = -1, int _device_id = -1);
         ~PyParallelEnv()
         {
             Kokkos::finalize_all();
-            if (comm->getRank() == 0)
+            if (rank == 0)
                 std::cout << "~PyParallelEnv()\n";
         }
     };

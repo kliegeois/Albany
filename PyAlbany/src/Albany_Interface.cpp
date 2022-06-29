@@ -69,6 +69,8 @@ PyParallelEnv::PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads, 
     args.device_id = this->device_id;
 
     Kokkos::initialize(args);
+
+    rank = comm->getRank();
 }
 
 PyProblem::PyProblem(std::string filename, Teuchos::RCP<PyParallelEnv> _pyParallelEnv) : pyParallelEnv(_pyParallelEnv)
