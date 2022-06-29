@@ -36,28 +36,6 @@
 
 #include "Albany_Interface.hpp"
 
-
-void pyalbany_parallelenv(py::module &m) {
-    py::class_<RCP_PyParallelEnv>(m, "PyParallelEnv")
-        .def(py::init(&createPyParallelEnv))
-        .def(py::init(&createDefaultKokkosPyParallelEnv))
-        .def("getNumThreads", [](RCP_PyParallelEnv &m) {
-            return m->num_threads;
-        })
-        .def("getNumNuma", [](RCP_PyParallelEnv &m) {
-            return m->num_numa;
-        })
-        .def("getDeviceID", [](RCP_PyParallelEnv &m) {
-            return m->device_id;
-        })
-        .def("getComm", [](RCP_PyParallelEnv &m) {
-            return m->comm;
-        })
-        .def("setComm", [](RCP_PyParallelEnv &m, RCP_Teuchos_Comm_PyAlbany &comm) {
-            m->comm = comm;
-        });
-}
-
 void pyalbany_parameterlist(py::module &m) {
     py::class_<RCP_PyParameterList>(m, "RCPPyParameterList")
         .def(py::init(&createRCPPyParameterList))
@@ -85,7 +63,7 @@ void pyalbany_parameterlist(py::module &m) {
             if (!setPythonParameter(*m,name,value))
                 PyErr_SetString(PyExc_TypeError, "ParameterList value type not supported");
         });
-    m.def("getParameterList", &getParameterList, "A function which multiplies two numbers");
+    m.def("getParameterList", &PyAlbany::getParameterList, "A function which multiplies two numbers");
 }
 
 PYBIND11_MODULE(Albany_Pybind11, m) {
@@ -296,8 +274,8 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         });
 
     py::class_<PyAlbany::PyProblem>(m, "PyProblem")
-        .def(py::init<std::string, Teuchos::RCP<PyParallelEnv>>())
-        .def(py::init<Teuchos::RCP<Teuchos::ParameterList>, Teuchos::RCP<PyParallelEnv>>())
+        .def(py::init<std::string, Teuchos::RCP<PyAlbany::PyParallelEnv>>())
+        .def(py::init<Teuchos::RCP<Teuchos::ParameterList>, Teuchos::RCP<PyAlbany::PyParallelEnv>>())
         .def("performSolve", &PyAlbany::PyProblem::performSolve)
         .def("performAnalysis", &PyAlbany::PyProblem::performAnalysis)
         .def("getResponseMap", &PyAlbany::PyProblem::getResponseMap)

@@ -4,6 +4,9 @@
 //    in the file "license.txt" in the top-level Albany directory  //
 //*****************************************************************//
 
+#ifndef ALBANY_PYINTERFACE_H
+#define ALBANY_PYINTERFACE_H
+
 #include <iostream>
 #include <string>
 #include <mpi.h>
@@ -35,9 +38,32 @@
 
 using Teuchos_Comm_PyAlbany = Teuchos::Comm<int>;
 using RCP_Teuchos_Comm_PyAlbany = Teuchos::RCP<const Teuchos_Comm_PyAlbany >;
-#include "Albany_Pybind11_ParallelEnv.hpp"
+
 namespace PyAlbany
 {
+    class PyParallelEnv
+    {
+    public:
+        RCP_Teuchos_Comm_PyAlbany comm;
+        const int num_threads, num_numa, device_id;
+
+        PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads = -1, int _num_numa = -1, int _device_id = -1) : comm(_comm), num_threads(_num_threads), num_numa(_num_numa), device_id(_device_id)
+        {
+            Kokkos::InitArguments args;
+            args.num_threads = this->num_threads;
+            args.num_numa = this->num_numa;
+            args.device_id = this->device_id;
+
+            Kokkos::initialize(args);
+        }
+        ~PyParallelEnv()
+        {
+            Kokkos::finalize_all();
+            if (comm->getRank() == 0)
+                std::cout << "~PyParallelEnv()\n";
+        }
+    };
+
     /**
    * \brief scatterMVector function
    * 
@@ -350,127 +376,4 @@ namespace PyAlbany
     };
 } // namespace PyAlbany
 
-Teuchos::RCP<const Tpetra_Map> PyAlbany::getRankZeroMap(Teuchos::RCP<const Tpetra_Map> distributedMap)
-{
-    int numGlobalElements = distributedMap->getGlobalNumElements();
-    int numLocalElements = distributedMap->getLocalNumElements();
-
-    // GO and Tpetra_Map::global_ordinal_type can be different
-    auto nodes_gids_view = distributedMap->getMyGlobalIndices();
-    Teuchos::Array<GO> nodes_gids(numLocalElements);
-    for (int i=0; i<numLocalElements; ++i)
-        nodes_gids[i] = nodes_gids_view(i);
-    Teuchos::Array<GO> all_nodes_gids;
-    Albany::gatherV(distributedMap->getComm(),nodes_gids(),all_nodes_gids,0);
-    std::sort(all_nodes_gids.begin(),all_nodes_gids.end());
-    auto it = std::unique(all_nodes_gids.begin(),all_nodes_gids.end());
-    all_nodes_gids.erase(it,all_nodes_gids.end());
-
-    Teuchos::Array<Tpetra_Map::global_ordinal_type> all_nodes_py_gids(all_nodes_gids.size());
-    for (int i=0; i<all_nodes_gids.size(); ++i)
-        all_nodes_py_gids[i] = all_nodes_gids[i];
-
-    return rcp(new Tpetra_Map(numGlobalElements, all_nodes_py_gids, distributedMap->getIndexBase(), distributedMap->getComm()));
-}
-
-Teuchos::RCP<Tpetra_MultiVector> PyAlbany::scatterMVector(Teuchos::RCP<Tpetra_MultiVector> inVector, Teuchos::RCP<const Tpetra_Map> distributedMap)
-{
-    int myRank = distributedMap->getComm()->getRank();
-    auto rankZeroMap = getRankZeroMap(distributedMap);
-    Teuchos::RCP<Tpetra_Export> exportZero = rcp(new Tpetra_Export(distributedMap, rankZeroMap));
-    Teuchos::RCP<Tpetra_MultiVector> outVector = rcp(new Tpetra_MultiVector(distributedMap, inVector->getNumVectors()));
-    outVector->doImport(*inVector, *exportZero, Tpetra::INSERT);
-    return outVector;
-}
-
-Teuchos::RCP<Tpetra_MultiVector> PyAlbany::gatherMVector(Teuchos::RCP<Tpetra_MultiVector> inVector, Teuchos::RCP<const Tpetra_Map> distributedMap)
-{
-    int myRank = distributedMap->getComm()->getRank();
-    auto rankZeroMap = getRankZeroMap(distributedMap);
-    Teuchos::RCP<Tpetra_Export> exportZero = rcp(new Tpetra_Export(distributedMap, rankZeroMap));
-    Teuchos::RCP<Tpetra_MultiVector> outVector = rcp(new Tpetra_MultiVector(rankZeroMap, inVector->getNumVectors()));
-    outVector->doExport(*inVector, *exportZero, Tpetra::ADD);
-    return outVector;
-}
-
-Teuchos::RCP<Teuchos::ParameterList> PyAlbany::getParameterList(std::string inputFile, Teuchos::RCP<PyParallelEnv> pyParallelEnv)
-{
-    Teuchos::RCP<Teuchos::ParameterList> params = Teuchos::createParameterList("Albany Parameters");
-
-    std::string const input_extension = Albany::getFileExtension(inputFile);
-
-    if (input_extension == "yaml" || input_extension == "yml")
-    {
-        Teuchos::updateParametersFromYamlFileAndBroadcast(
-            inputFile, params.ptr(), *(pyParallelEnv->comm));
-    }
-    else
-    {
-        Teuchos::updateParametersFromXmlFileAndBroadcast(
-            inputFile, params.ptr(), *(pyParallelEnv->comm));
-    }
-
-    return params;
-}
-
-void PyAlbany::writeParameterList(std::string outputFile, Teuchos::RCP<Teuchos::ParameterList> parameterList)
-{
-    std::string const output_extension = Albany::getFileExtension(outputFile);
-
-    if (output_extension == "yaml" || output_extension == "yml")
-    {
-        Teuchos::writeParameterListToYamlFile(*parameterList, outputFile);
-    }
-    else
-    {
-        Teuchos::writeParameterListToXmlFile(*parameterList, outputFile);
-    }    
-}
-
-void PyAlbany::orthogTpMVecs(Teuchos::RCP<Tpetra_MultiVector> inputVecs, int blkSize)
-{
-  typedef double                            ScalarType;
-  typedef int                               OT;
-  typedef typename Teuchos::SerialDenseMatrix<OT,ScalarType> MAT;
-  typedef Tpetra::MultiVector<ScalarType>   MV;
-  typedef Kokkos::DefaultExecutionSpace     EXSP;
-  typedef Tpetra::Operator<ScalarType>             OP;
-  typedef Belos::OperatorTraits<ScalarType,MV,OP> OPT;
-  int numVecs = inputVecs->getNumVectors();
-  int numRows = inputVecs->getGlobalLength();
-  std::string orthogType("ICGS");
-
-  Teuchos::RCP<MAT> B = Teuchos::rcp(new MAT(blkSize, blkSize)); //Matrix for coeffs of X
-  Teuchos::Array<Teuchos::RCP<MAT>> C; 
-
-  Belos::OrthoManagerFactory<ScalarType, MV, OP> factory;
-  Teuchos::RCP<Teuchos::ParameterList> paramsOrtho;   // can be null
-
-  //Default OutputManager is std::cout.
-  Teuchos::RCP<Belos::OutputManager<ScalarType> > myOutputMgr = Teuchos::rcp( new Belos::OutputManager<ScalarType>() );
-  const Teuchos::RCP<Belos::OrthoManager<ScalarType,MV>> orthoMgr = factory.makeOrthoManager (orthogType, Teuchos::null, myOutputMgr, "Tpetra OrthoMgr", paramsOrtho); 
-  
-  int numLoops = numVecs/blkSize;
-  int remainder = numVecs % blkSize;
-
-  Teuchos::RCP<MV> vecBlock = inputVecs->subViewNonConst(Teuchos::Range1D(0,blkSize-1));
-  orthoMgr->normalize(*vecBlock, B);
-  std::vector<Teuchos::RCP<const MV>> pastVecArray;
-  pastVecArray.push_back(vecBlock);
-  Teuchos::ArrayView<Teuchos::RCP<const MV>> pastVecArrayView; 
-
-  for(int k=1; k<numLoops; k++){
-    pastVecArrayView = arrayViewFromVector(pastVecArray);
-    vecBlock = inputVecs->subViewNonConst(Teuchos::Range1D(k*blkSize,k*blkSize + blkSize - 1));
-    C.append(rcp(new MAT(blkSize, blkSize)));
-    int rank = orthoMgr->projectAndNormalize(*vecBlock, C, B, pastVecArrayView);
-    pastVecArray.push_back(vecBlock);
-  }
-  if( remainder > 0){
-    pastVecArrayView = arrayViewFromVector(pastVecArray);
-    vecBlock = inputVecs->subViewNonConst(Teuchos::Range1D(numVecs-remainder, numVecs-1));
-    B = Teuchos::rcp(new MAT(remainder, remainder));
-    C.append(Teuchos::rcp(new MAT(remainder, remainder)));
-    int rank = orthoMgr->projectAndNormalize(*vecBlock, C, B, pastVecArrayView);
-  }
-}
+#endif

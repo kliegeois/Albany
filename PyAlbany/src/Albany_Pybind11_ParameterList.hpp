@@ -10,7 +10,7 @@ using PyParameterList = Teuchos::ParameterList;
 using RCP_PyParameterList = Teuchos::RCP<PyParameterList>;
 
 namespace py = pybind11;
-
+/*
 RCP_PyParameterList getParameterList(std::string inputFile, RCP_PyParallelEnv pyParallelEnv)
 {
     RCP_PyParameterList params = Teuchos::createParameterList("Albany Parameters");
@@ -30,6 +30,7 @@ RCP_PyParameterList getParameterList(std::string inputFile, RCP_PyParallelEnv py
 
     return params;
 }
+*/
 
 template< typename T >
 void copyNumPyToTeuchosArray(PyObject * pyArray,
