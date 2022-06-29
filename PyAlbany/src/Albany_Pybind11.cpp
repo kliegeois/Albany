@@ -179,6 +179,9 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         })
         .def("getComm", [](RCP_PyMap &m) {
             return m->getComm();
+        })
+        .def("getRemoteIndexList", [](RCP_PyMap &m, py::array_t<Tpetra_GO> globalIndexes) {
+            return getRemoteIndexList(m, globalIndexes);
         });
 
     py::class_<RCP_ConstPyMap>(m, "RCPConstPyMap")
@@ -247,6 +250,9 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
         })
         .def("getComm", [](RCP_ConstPyMap &m) {
             return m->getComm();
+        })
+        .def("getRemoteIndexList", [](RCP_ConstPyMap &m, py::array_t<Tpetra_GO> globalIndexes) {
+            return getRemoteIndexList(m, globalIndexes);
         });
 
     py::class_<RCP_PyVector>(m, "RCPPyVector")

@@ -2,6 +2,7 @@
 #define PYALBANY_TPETRA_H
 
 #include "Albany_TpetraTypes.hpp"
+#include "Albany_Pybind11_Numpy.hpp"
 
 using RCP_PyMap = Teuchos::RCP<Tpetra_Map>;
 using RCP_ConstPyMap = Teuchos::RCP<const Tpetra_Map>;
@@ -10,6 +11,16 @@ using RCP_PyMultiVector = Teuchos::RCP<Tpetra_MultiVector>;
 
 template< bool B, class T = void >
 using enable_if_t = typename std::enable_if<B,T>::type;
+
+template<typename T>
+Teuchos::ArrayView< T > convert_np_to_ArrayView(py::array_t<T> array) {
+
+    auto np_array = array.template mutable_unchecked<1>();
+    int size = array.shape(0);
+    Teuchos::ArrayView< T > av(array.mutable_data(0), size);
+
+    return av;
+}
 
 // conversion of numpy arrays to kokkos arrays
 
@@ -175,6 +186,27 @@ void setLocalViewHost(RCP_PyVector &vector, py::array_t<double> input) {
 void setLocalViewHost(RCP_PyMultiVector &mvector, py::array_t<double> input) {
     auto view = mvector->getLocalViewDevice(Tpetra::Access::ReadWrite);
     convert_np_to_kokkos_2d(input, view);
+}
+
+py::tuple getRemoteIndexList(RCP_ConstPyMap map, py::array_t<Tpetra_GO> globalIndexes)
+{
+    auto globalIndexes_av = convert_np_to_ArrayView(globalIndexes);
+
+    Tpetra::LookupStatus result;
+    Teuchos::ArrayView< const Tpetra_GO > globalList(globalIndexes_av);
+
+    py::array_t<int> nodeList_np(globalList.size());
+    py::array_t<Tpetra_LO> localList_np(globalList.size());
+
+    Teuchos::ArrayView< int >             nodeList(nodeList_np.mutable_data(0), globalList.size());
+    Teuchos::ArrayView< Tpetra_LO >       localList(localList_np.mutable_data(0), globalList.size());
+
+    // Call the method
+    result = map->getRemoteIndexList(globalList,
+                                      nodeList,
+                                      localList);
+    
+    return py::make_tuple(nodeList_np, localList_np, static_cast< long >(result));
 }
 
 #endif
