@@ -33,8 +33,6 @@ EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c
 
 MESSAGE("  -- PYTHON_VERSION = ${PYTHON_VERSION}")
 
-# The CMAKE install logic of PyAlbany is based on the one of PyTrilinos.
-
 # Determine the PyAlbany default installation directory prefix.  If
 # CMAKE_INSTALL_PREFIX is set by the user, then use it.  Else the
 # prefix is set to the value of python's sys.prefix.
