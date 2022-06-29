@@ -41,29 +41,6 @@ using RCP_Teuchos_Comm_PyAlbany = Teuchos::RCP<const Teuchos_Comm_PyAlbany >;
 
 namespace PyAlbany
 {
-    class PyParallelEnv
-    {
-    public:
-        RCP_Teuchos_Comm_PyAlbany comm;
-        const int num_threads, num_numa, device_id;
-
-        PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads = -1, int _num_numa = -1, int _device_id = -1) : comm(_comm), num_threads(_num_threads), num_numa(_num_numa), device_id(_device_id)
-        {
-            Kokkos::InitArguments args;
-            args.num_threads = this->num_threads;
-            args.num_numa = this->num_numa;
-            args.device_id = this->device_id;
-
-            Kokkos::initialize(args);
-        }
-        ~PyParallelEnv()
-        {
-            Kokkos::finalize_all();
-            if (comm->getRank() == 0)
-                std::cout << "~PyParallelEnv()\n";
-        }
-    };
-
     /**
    * \brief scatterMVector function
    * 
@@ -89,6 +66,38 @@ namespace PyAlbany
    * The function returns an RCP to the gathered multivector.
    */
     Teuchos::RCP<Tpetra_MultiVector> gatherMVector(Teuchos::RCP<Tpetra_MultiVector> inVector, Teuchos::RCP<const Tpetra_Map> distributedMap);
+
+    /**
+   * \brief PyParallelEnv class
+   * 
+   * This class is used to communicate from Python to c++ the parallel environment information such as
+   * a Teuchos communicator and the Kokkos arguments.
+   * 
+   * The constructor of this object calls Kokkos::initialize and its destructors calls finalize_all.
+    
+   */
+    class PyParallelEnv
+    {
+    public:
+        RCP_Teuchos_Comm_PyAlbany comm;
+        const int num_threads, num_numa, device_id;
+
+        PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads = -1, int _num_numa = -1, int _device_id = -1) : comm(_comm), num_threads(_num_threads), num_numa(_num_numa), device_id(_device_id)
+        {
+            Kokkos::InitArguments args;
+            args.num_threads = this->num_threads;
+            args.num_numa = this->num_numa;
+            args.device_id = this->device_id;
+
+            Kokkos::initialize(args);
+        }
+        ~PyParallelEnv()
+        {
+            Kokkos::finalize_all();
+            if (comm->getRank() == 0)
+                std::cout << "~PyParallelEnv()\n";
+        }
+    };
 
     /**
     * \brief orthogTpMVecs function

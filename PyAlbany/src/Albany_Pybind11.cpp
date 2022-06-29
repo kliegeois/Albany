@@ -1,6 +1,10 @@
+//*****************************************************************//
+//    Albany 3.0:  Copyright 2016 Sandia Corporation               //
+//    This Software is released under the BSD license detailed     //
+//    in the file "license.txt" in the top-level Albany directory  //
+//*****************************************************************//
+
 #include "Teuchos_RCP.hpp"
-#include "Teuchos_CommHelpers.hpp"
-#include "Teuchos_DefaultComm.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
