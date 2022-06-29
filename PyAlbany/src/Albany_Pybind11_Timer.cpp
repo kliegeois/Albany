@@ -20,6 +20,12 @@ void pyalbany_time(pybind11::module &m) {
         })
         .def("name",[](RCP_Time &m){
             return m->name();
+        })
+        .def("start",[](RCP_Time &m){
+            return m->start();
+        })
+        .def("stop",[](RCP_Time &m){
+            return m->stop();
         });
 
     py::class_<RCP_StackedTimer>(m, "RCPStackedTimer")
