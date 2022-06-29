@@ -70,8 +70,8 @@ def singlePass(Op, k, comm=utils.getDefaultComm()):
     q.setLocalViewHost(q_view)
     wpa.orthogTpMVecs(q, nMaxOrthog)
 
-    C = utils.innerMVector(q, omega, comm)
-    D = utils.innerMVector(q, y, comm)
+    C = utils.innerMVector(q, omega)
+    D = utils.innerMVector(q, y)
 
     A = C.dot(C.T)
     F = D.dot(C.T) + C.dot(D.T)
