@@ -44,28 +44,10 @@ PYBIND11_MODULE(Albany_Pybind11, m) {
     pyalbany_comm(m);
     pyalbany_parallelenv(m);
     pyalbany_parameterlist(m);
-
     pyalbany_map(m);
     pyalbany_vector(m);
     pyalbany_mvector(m);
-
-    py::class_<RCP_Time>(m, "Time")
-        .def(py::init(&createRCPTime))
-        .def("totalElapsedTime",[](RCP_Time &m){
-            return m->totalElapsedTime();
-        })
-        .def("name",[](RCP_Time &m){
-            return m->name();
-        });
-
-    py::class_<RCP_StackedTimer>(m, "RCPStackedTimer")
-        .def(py::init())
-        .def("accumulatedTime",[](RCP_StackedTimer &m, const std::string name){
-            return m->accumulatedTime(name);
-        })
-        .def("baseTimerAccumulatedTime",[](RCP_StackedTimer &m, const std::string name){
-            return m->findBaseTimer(name)->accumulatedTime();
-        });
+    pyalbany_time(m);
 
     py::class_<PyAlbany::PyProblem>(m, "PyProblem")
         .def(py::init<std::string, Teuchos::RCP<PyAlbany::PyParallelEnv>>())
