@@ -39,6 +39,7 @@ set(PybindAlbany_SRCS
   Albany_Pybind11.cpp
   Albany_Pybind11_Comm.cpp
   Albany_Pybind11_ParallelEnv.cpp
+  Albany_Pybind11_ParameterList.cpp
 )
 set(PybindAlbany_HDRS
   Albany_Pybind11_Comm.hpp
