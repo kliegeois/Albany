@@ -37,26 +37,63 @@ def plot_fem_mesh(nodes_x, nodes_y, elements):
         plt.fill(x, y, edgecolor='black', fill=False)
 
 
-def readExodus(filename, solnames=[]):
+def readExodus(filename, solnames=[], nProcs=1):
     n_sol = len(solnames)
-    model = exomerge.import_model(filename)
-    positions = np.array(model.nodes)
-    x = np.ascontiguousarray(positions[:,0])
-    y = np.ascontiguousarray(positions[:,1])
-    for element_block_id in model.get_element_block_ids():
-        connectivity = model.get_connectivity(element_block_id)
-        nodes_per_element = model.get_nodes_per_element(element_block_id)
-        element_count = int(len(connectivity) / nodes_per_element)
-        elements = np.zeros((element_count, nodes_per_element), dtype=int)
-        for element_index in range(element_count):        
-            elements[element_index, :] = connectivity[element_index * nodes_per_element: (element_index + 1) * nodes_per_element]
+    if nProcs == 1:
+        model = exomerge.import_model(filename)
+        positions = np.array(model.nodes)
+        x = np.ascontiguousarray(positions[:,0])
+        y = np.ascontiguousarray(positions[:,1])
+        for element_block_id in model.get_element_block_ids():
+            connectivity = model.get_connectivity(element_block_id)
+            nodes_per_element = model.get_nodes_per_element(element_block_id)
+            element_count = int(len(connectivity) / nodes_per_element)
+            elements = np.zeros((element_count, nodes_per_element), dtype=int)
+            for element_index in range(element_count):        
+                elements[element_index, :] = connectivity[element_index * nodes_per_element: (element_index + 1) * nodes_per_element]
+    else:
+        x = np.array([])
+        y = np.array([])
+
+        current_index = 0
+
+        for i_proc in range(0, nProcs):
+            model = exomerge.import_model(filename+'.'+str(nProcs)+'.'+str(i_proc))
+            positions = np.array(model.nodes)
+            x = np.append(x, np.ascontiguousarray(positions[:,0]))
+            y = np.append(y, np.ascontiguousarray(positions[:,1]))
+
+            next_index = current_index + len(np.ascontiguousarray(positions[:,0]))
+            for element_block_id in model.get_element_block_ids():
+                connectivity = model.get_connectivity(element_block_id)
+                nodes_per_element = model.get_nodes_per_element(element_block_id)
+                element_count = int(len(connectivity) / nodes_per_element)
+                current_elements = np.zeros((element_count, nodes_per_element), dtype=int)
+                for element_index in range(element_count):        
+                    current_elements[element_index, :] = connectivity[element_index * nodes_per_element: (element_index + 1) * nodes_per_element]
+                current_elements += current_index
+                if i_proc == 0:
+                    elements = current_elements
+                else:
+                    elements = np.append(elements, current_elements, axis=0)
+            current_index = next_index
+
     if n_sol == 0:
         return x, y, elements
 
     if n_sol != 0:
         sol = np.zeros((n_sol, len(x)))
-        for i in range(0, n_sol):
-            sol[i,:] = np.ascontiguousarray(model.node_fields[solnames[i]])[0,:]
+        if nProcs == 1:
+            for i in range(0, n_sol):
+                sol[i,:] = np.ascontiguousarray(model.node_fields[solnames[i]])[0,:]
+        else:
+            current_index = 0
+            for i_proc in range(0, nProcs):
+                model = exomerge.import_model(filename+'.'+str(nProcs)+'.'+str(i_proc))
+                current_length = len(np.ascontiguousarray(model.node_fields[solnames[0]])[0,:])
+                for i in range(0, n_sol):
+                    sol[i,current_index:(current_index+current_length)] = np.ascontiguousarray(model.node_fields[solnames[i]])[0,:]
+                current_index += current_length
 
         if elements.shape[1] == 3:
             triangulation = tri.Triangulation(x, y, elements)
