@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import numpy as np
 from PyAlbany import Utils
+from PyAlbany import Albany_Pybind11 as wpa
 import os
 import sys
 
@@ -9,7 +10,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-def main(parallelEnv):
+def main(parallelEnv, group_ID, n_groups):
     comm = MPI.COMM_WORLD
     myGlobalRank = comm.rank
 
@@ -19,6 +20,8 @@ def main(parallelEnv):
         filename, parallelEnv
     )
 
+    parameter.sublist("Discretization").set("Exodus Output File Name", "steady2d_color_"+str(group_ID)+".exo")
+
     problem = Utils.createAlbanyProblem(parameter, parallelEnv)
 
     parameter_map_0 = problem.getParameterMap(0)
@@ -26,7 +29,7 @@ def main(parallelEnv):
 
     parameter_0_view = parameter_0.getLocalViewHost()
 
-    N = 200
+    N = int(np.ceil(200/n_groups))
     p_min = -1.
     p_max = 1.
 
@@ -45,26 +48,17 @@ def main(parallelEnv):
         response = problem.getResponse(0)
         QoI[i] = response.getLocalViewHost()[0]
 
-    if myGlobalRank == 0:
-        f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16,6))
-
-        n_bins = 15
-
-        ax1.hist(p, n_bins)
-        ax1.set_ylabel('Counts')
-        ax1.set_xlabel('Random parameter')
-
-        ax2.scatter(p, QoI)
-        ax2.set_ylabel('Quantity of interest')
-        ax2.set_xlabel('Random parameter')
-
-        ax3.hist(QoI, n_bins)
-        ax3.set_ylabel('Counts')
-        ax3.set_xlabel('Quantity of interest')
-
-        plt.savefig('UQ.jpeg', dpi=800)
-        plt.close()
 
 if __name__ == "__main__":
-    parallelEnv = Utils.createDefaultParallelEnv()
-    main(parallelEnv)
+    group_size = 2
+
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    rank = comm.Get_rank()
+    group_ID = np.floor(rank*1./group_size)
+    n_groups = np.ceil(size*1./group_size)
+
+    nComm = comm.Split(group_ID)
+
+    parallelEnv = Utils.createDefaultParallelEnv(wpa.getTeuchosComm(nComm))
+    main(parallelEnv, group_ID, n_groups)

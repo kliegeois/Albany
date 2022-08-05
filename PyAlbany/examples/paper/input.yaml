@@ -6,23 +6,23 @@ ANONYMOUS:
     Name: Heat 2D
     Compute Sensitivities: true
     Dirichlet BCs: 
-      SDBC on NS NodeSet0 for DOF T: 1.00000000000000000e+00
-      SDBC on NS NodeSet1 for DOF T: 0.00000000000000000e+00
-      SDBC on NS NodeSet2 for DOF T: -1.00000000000000000e+00
-      SDBC on NS NodeSet3 for DOF T: 0.00000000000000000e+00
+      SDBC on NS NodeSet0 for DOF T: 1.
+      SDBC on NS NodeSet1 for DOF T: 0.
+      SDBC on NS NodeSet2 for DOF T: -1.
+      SDBC on NS NodeSet3 for DOF T: 0.
     Parameters:
       Number Of Parameters: 2
       Parameter 0:
         Type: Scalar
         Name: SDBC on NS NodeSet2 for DOF T
-        Lower Bound: -2.00000000000000000e+00
-        Upper Bound: 2.00000000000000000e+00
+        Lower Bound: -2.
+        Upper Bound: 2.
       Parameter 1:
         Type: Distributed
         Name: thermal_conductivity
-        Lower Bound: 4.00000000000000022e-01
-        Upper Bound: 5.00000000000000000e+00
-        Initial Uniform Value: 1.00000000000000000e+00
+        Lower Bound: 0.4
+        Upper Bound: 5.
+        Initial Uniform Value: 1.
         Mesh Part: ''
     Response Functions:
       Number Of Responses: 1
@@ -37,7 +37,7 @@ ANONYMOUS:
         Response 1:
           Name: Squared L2 Difference Source ST Target PST
           Field Rank: Scalar
-          Scaling: 1.49999999999999994e-01
+          Scaling: 0.15
           Source Field Name: ThermalConductivity
           Target Value: 0.0
   Discretization: 
@@ -46,6 +46,12 @@ ANONYMOUS:
     Method: STK2D
     Exodus Output File Name: steady2d.exo
     Cubature Degree: 9
+    Required Fields Info: 
+      Number Of Fields: 1
+      Field 0: 
+        Field Name: thermal_conductivity
+        Field Type: Node Scalar
+        Field Usage: Output
   Regression For Response 0:
     Test Value: 3.23754626955999991e-01
     Relative Tolerance: 1.00000000000000002e-03
@@ -56,7 +62,7 @@ ANONYMOUS:
     Analysis: 
       Analysis Package: ROL
       ROL: 
-        Number Of Parameters: 1
+        Number Of Parameters: 2
         Check Gradient: true
         Gradient Tolerance: 1.0e-04
         Step Tolerance: 1.0e-04

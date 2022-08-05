@@ -32,9 +32,7 @@ def quads_to_tris(quads):
 def plot_fem_mesh(nodes_x, nodes_y, elements):
     # credits: https://stackoverflow.com/questions/52202014/how-can-i-plot-2d-fem-results-using-matplotlib
     for element in elements:
-        x = [nodes_x[element[i]] for i in range(len(element))]
-        y = [nodes_y[element[i]] for i in range(len(element))]
-        plt.fill(x, y, edgecolor='black', fill=False)
+        plt.fill(nodes_x[element], nodes_y[element], edgecolor='black', fill=False)
 
 
 def readExodus(filename, solnames=[], nProcs=1):
