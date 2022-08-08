@@ -52,6 +52,7 @@ ANONYMOUS:
         Field Name: thermal_conductivity
         Field Type: Node Scalar
         Field Usage: Output
+        Field Origin: Mesh
   Regression For Response 0:
     Test Value: 3.23754626955999991e-01
     Relative Tolerance: 1.00000000000000002e-03
@@ -263,11 +264,10 @@ ANONYMOUS:
               Preconditioner Type: Ifpack2
               Preconditioner Types: 
                 Ifpack2: 
-                  Overlap: 1
-                  Prec Type: RILUK
+                  Prec Type: RELAXATION
                   Ifpack2 Settings: 
-                    'fact: drop tolerance': 0.00000000000000000e+00
-                    'fact: iluk level-of-fill': 0
+                    'relaxation: type': 'MT Gauss-Seidel'
+                    'relaxation: sweeps': 5
       Line Search: 
         Full Step: 
           Full Step: 1.00000000000000000e+00

@@ -35,10 +35,10 @@ def plot_fem_mesh(nodes_x, nodes_y, elements):
         plt.fill(nodes_x[element], nodes_y[element], edgecolor='black', fill=False)
 
 
-def readExodus(filename, solnames=[], nProcs=1):
+def readExodus(filename, solnames=[], nProcs=1, timesteps='last'):
     n_sol = len(solnames)
     if nProcs == 1:
-        model = exomerge.import_model(filename)
+        model = exomerge.import_model(filename, timesteps=timesteps)
         positions = np.array(model.nodes)
         x = np.ascontiguousarray(positions[:,0])
         y = np.ascontiguousarray(positions[:,1])
@@ -56,7 +56,7 @@ def readExodus(filename, solnames=[], nProcs=1):
         current_index = 0
 
         for i_proc in range(0, nProcs):
-            model = exomerge.import_model(filename+'.'+str(nProcs)+'.'+str(i_proc))
+            model = exomerge.import_model(filename+'.'+str(nProcs)+'.'+str(i_proc), timesteps=timesteps)
             positions = np.array(model.nodes)
             x = np.append(x, np.ascontiguousarray(positions[:,0]))
             y = np.append(y, np.ascontiguousarray(positions[:,1]))
@@ -87,7 +87,7 @@ def readExodus(filename, solnames=[], nProcs=1):
         else:
             current_index = 0
             for i_proc in range(0, nProcs):
-                model = exomerge.import_model(filename+'.'+str(nProcs)+'.'+str(i_proc))
+                model = exomerge.import_model(filename+'.'+str(nProcs)+'.'+str(i_proc), timesteps=timesteps)
                 current_length = len(np.ascontiguousarray(model.node_fields[solnames[0]])[0,:])
                 for i in range(0, n_sol):
                     sol[i,current_index:(current_index+current_length)] = np.ascontiguousarray(model.node_fields[solnames[i]])[0,:]
@@ -100,11 +100,17 @@ def readExodus(filename, solnames=[], nProcs=1):
 
         return x, y, sol, elements, triangulation
 
-def tricontourf(x, y, z, elements, triangulation, output_file_name, figsize=(6, 4), zlabel='', dpi=800, show_mesh=True, cmap='coolwarm'):
+def tricontourf(x, y, z, elements, triangulation, output_file_name, figsize=(6, 4), zlabel='', dpi=800, show_mesh=True, cmap='coolwarm', nlevels=9):
     plt.figure(figsize=figsize)
     if show_mesh:
         plot_fem_mesh(x, y, elements)
-    plt.tricontourf(triangulation, z, cmap=cmap)
+    zmax = np.amax(z)
+    zmin = np.amin(z)
+    if zmax != zmin:
+        levels = np.linspace(zmin, zmax, nlevels)
+    else:
+        levels = np.linspace(zmin-0.001*zmin, zmin+0.001*zmin, 3)
+    plt.tricontourf(triangulation, z, cmap=cmap, levels=levels)
     cbar = plt.colorbar()
     plt.axis([np.amin(x), np.amax(x), np.amin(y), np.amax(y)])
     plt.gca().set_aspect('equal', adjustable='box')
