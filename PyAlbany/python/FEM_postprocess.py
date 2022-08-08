@@ -99,3 +99,16 @@ def readExodus(filename, solnames=[], nProcs=1):
             triangulation = tri.Triangulation(x, y, quads_to_tris(elements))
 
         return x, y, sol, elements, triangulation
+
+def tricontourf(x, y, z, elements, triangulation, output_file_name, figsize=(6, 4), zlabel='', dpi=800, show_mesh=True, cmap='coolwarm'):
+    plt.figure(figsize=figsize)
+    if show_mesh:
+        plot_fem_mesh(x, y, elements)
+    plt.tricontourf(triangulation, z, cmap=cmap)
+    cbar = plt.colorbar()
+    plt.axis([np.amin(x), np.amax(x), np.amin(y), np.amax(y)])
+    plt.gca().set_aspect('equal', adjustable='box')
+    if zlabel != '':
+        cbar.ax.set_ylabel(zlabel)
+    plt.savefig(output_file_name, dpi=dpi, bbox_inches='tight',pad_inches = 0)
+    plt.close()

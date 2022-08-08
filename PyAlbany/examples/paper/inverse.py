@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import numpy as np
 from PyAlbany import Utils
-from PyAlbany import FEM_postprocess
+from PyAlbany import FEM_postprocess as fp
 import os
 import sys
 
@@ -33,28 +33,11 @@ def main(parallelEnv):
     print(para_1_view)
 
     if myGlobalRank==0:
-        x, y, sol, elements, triangulation = FEM_postprocess.readExodus("steady2d.exo", ['solution', 'thermal_conductivity', 'thermal_conductivity_sensitivity'], MPI.COMM_WORLD.Get_size())
+        x, y, sol, elements, triangulation = fp.readExodus("steady2d.exo", ['solution', 'thermal_conductivity', 'thermal_conductivity_sensitivity'], MPI.COMM_WORLD.Get_size())
 
-        plt.figure()
-        FEM_postprocess.plot_fem_mesh(x, y, elements)
-        plt.tricontourf(triangulation, sol[0,:])
-        plt.colorbar()
-        plt.axis('equal')
-        plt.savefig('sol.jpeg', dpi=800)
-
-        plt.figure()
-        FEM_postprocess.plot_fem_mesh(x, y, elements)
-        plt.tricontourf(triangulation, sol[1,:])
-        plt.colorbar()
-        plt.axis('equal')
-        plt.savefig('thermal_conductivity.jpeg', dpi=800)
-
-        plt.figure()
-        FEM_postprocess.plot_fem_mesh(x, y, elements)
-        plt.tricontourf(triangulation, sol[2,:])
-        plt.colorbar()
-        plt.axis('equal')
-        plt.savefig('thermal_conductivity_sensitivity.jpeg', dpi=800)
+        fp.tricontourf(x, y, sol[0,:], elements, triangulation, 'sol_inverse.jpeg', zlabel='Temperature', show_mesh=False)
+        fp.tricontourf(x, y, sol[1,:], elements, triangulation, 'thermal_conductivity_inverse.jpeg', show_mesh=False)
+        fp.tricontourf(x, y, sol[2,:], elements, triangulation, 'thermal_conductivity_sensitivity_inverse.jpeg', show_mesh=False)
 
 if __name__ == "__main__":
     parallelEnv = Utils.createDefaultParallelEnv()
