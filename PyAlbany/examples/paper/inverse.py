@@ -36,7 +36,7 @@ def main(parallelEnv):
         x, y, sol, elements, triangulation = fp.readExodus("steady2d.exo", ['solution', 'thermal_conductivity', 'thermal_conductivity_sensitivity'], MPI.COMM_WORLD.Get_size())
 
         fp.tricontourf(x, y, sol[0,:], elements, triangulation, 'sol_inverse.jpeg', zlabel='Temperature', show_mesh=False)
-        fp.tricontourf(x, y, sol[1,:], elements, triangulation, 'thermal_conductivity_inverse.jpeg', show_mesh=False)
+        fp.tricontourf(x, y, sol[1,:], elements, triangulation, 'thermal_conductivity_inverse.jpeg', zlabel='Thermal conductivity', show_mesh=False)
         fp.tricontourf(x, y, sol[2,:], elements, triangulation, 'thermal_conductivity_sensitivity_inverse.jpeg', show_mesh=False)
 
 if __name__ == "__main__":

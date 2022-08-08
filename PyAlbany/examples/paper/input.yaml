@@ -267,6 +267,7 @@ ANONYMOUS:
                   Prec Type: RELAXATION
                   Ifpack2 Settings: 
                     'relaxation: type': 'MT Gauss-Seidel'
+                    'relaxation: damping factor': 0.9
                     'relaxation: sweeps': 5
       Line Search: 
         Full Step: 

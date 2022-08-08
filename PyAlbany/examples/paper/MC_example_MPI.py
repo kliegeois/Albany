@@ -30,8 +30,8 @@ def main(parallelEnv, group_ID, n_groups):
     parameter_0_view = parameter_0.getLocalViewHost()
 
     N = int(np.ceil(200/n_groups))
-    p_min = -1.
-    p_max = 1.
+    p_min = -2.
+    p_max = 2.
 
     # Generate N samples randomly chosen in [p_min, p_max]:
     p = np.random.uniform(p_min, p_max, N)

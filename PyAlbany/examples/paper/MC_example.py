@@ -27,8 +27,8 @@ def main(parallelEnv):
     parameter_0_view = parameter_0.getLocalViewHost()
 
     N = 200
-    p_min = -1.
-    p_max = 1.
+    p_min = -2.
+    p_max = 2.
 
     # Generate N samples randomly chosen in [p_min, p_max]:
     p = np.random.uniform(p_min, p_max, N)
@@ -46,7 +46,7 @@ def main(parallelEnv):
         QoI[i] = response.getLocalViewHost()[0]
 
     if myGlobalRank == 0:
-        f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16,6))
+        f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8,4))
 
         n_bins = 15
 
@@ -61,6 +61,8 @@ def main(parallelEnv):
         ax3.hist(QoI, n_bins)
         ax3.set_ylabel('Counts')
         ax3.set_xlabel('Quantity of interest')
+
+        f.tight_layout()
 
         plt.savefig('UQ.jpeg', dpi=800)
         plt.close()
