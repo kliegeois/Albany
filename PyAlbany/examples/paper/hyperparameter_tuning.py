@@ -11,27 +11,20 @@ import matplotlib.pyplot as plt
 
 
 def run_forward(nSweeps, damping, parallelEnv):
-    timerNames = ["PyAlbany: Perform Solve"]
-
-    nTimers = len(timerNames)
-
+    timerName = "PyAlbany Total Time@PyAlbany: performSolve@Piro::NOXSolver::evalModelImpl::solve@Thyra::NOXNonlinearSolver::solve@NOX Total Linear Solve"
     filename = "input.yaml"
 
     parameter = Utils.createParameterList(
         filename, parallelEnv
     )
     ifpack2 = parameter.sublist('Piro').sublist('NOX').sublist('Direction').sublist('Newton').sublist('Stratimikos Linear Solver').sublist('Stratimikos').sublist('Preconditioner Types').sublist('Ifpack2').sublist('Ifpack2 Settings')
-
     ifpack2.set('relaxation: sweeps', int(nSweeps))
     ifpack2.set('relaxation: damping factor', damping)
 
-    timers = Utils.createTimers(timerNames)
     problem = Utils.createAlbanyProblem(parameter, parallelEnv)
-    timers[0].start()
     problem.performSolve()
-    timers[0].stop()
 
-    return timers[0].totalElapsedTime()
+    return problem.getStackedTimer().baseTimerAccumulatedTime(timerName)
 
 
 def main(parallelEnv):
@@ -39,12 +32,12 @@ def main(parallelEnv):
 
     nMaxSweeps = 300
 
-    sweeps = np.arange(1, 11)
-    dampings = np.linspace(0.8, 1.2, 5)
+    sweeps = np.arange(1, 6)
+    dampings = np.linspace(0.8, 1.2, 21)
 
     N_sweeps = len(sweeps)
     N_dampings = len(dampings)
-    N_measures = 10
+    N_measures = 100
 
     timers_sec = np.zeros((N_sweeps, N_dampings, N_measures))
     timers_mean_sec = np.zeros((N_sweeps, N_dampings))
@@ -53,17 +46,29 @@ def main(parallelEnv):
         for i_dampings in range(0, N_dampings):
             for i_measures in range(0, N_measures):
                 timers_sec[i_sweeps, i_dampings, i_measures] = run_forward(sweeps[i_sweeps], dampings[i_dampings], parallelEnv)
-            timers_mean_sec[i_sweeps, i_dampings] = np.mean(timers_sec[i_sweeps, i_dampings, :])
+            timers_mean_sec[i_sweeps, i_dampings] = np.median(timers_sec[i_sweeps, i_dampings, :])
 
     if myGlobalRank==0:
-        fig = plt.figure(figsize=(10,6))
+        np.savetxt('timers_sec.txt', timers_mean_sec)
+        fig = plt.figure(figsize=(6,4))
         for i_dampings in range(0, N_dampings):
             plt.plot(sweeps, timers_mean_sec[:,i_dampings], 'o--', label='damping factor = ' + str(dampings[i_dampings]))
-        plt.ylabel('wall-clock time [sec]')
-        plt.xlabel('number of sweeps of the Gauss-Seidel preconditioner')
+        plt.ylabel('Wall-clock time [sec]')
+        plt.xlabel('Number of sweeps of the Gauss-Seidel preconditioner')
         plt.grid(True)
+        plt.gca().set_xlim([np.amin(sweeps), np.amax(sweeps)])
         plt.legend()
         plt.savefig('nsweeps.jpeg', dpi=800)
+
+        fig = plt.figure(figsize=(6,4))
+        for i_sweeps in range(0, N_sweeps):
+            plt.semilogy(dampings, timers_mean_sec[i_sweeps,:], 'o-', label='number of sweeps = ' + str(sweeps[i_sweeps]))
+        plt.ylabel('Wall-clock time [sec]')
+        plt.xlabel('Damping factor')
+        plt.grid(True)
+        plt.gca().set_xlim([np.amin(dampings), np.amax(dampings)])
+        plt.legend()
+        plt.savefig('damping.jpeg', dpi=800)
 
 if __name__ == "__main__":
     parallelEnv = Utils.createDefaultParallelEnv()

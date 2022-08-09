@@ -7,6 +7,7 @@ import sys
 
 import matplotlib as mpl
 mpl.use('Agg')
+mpl.rcParams.update(mpl.rcParamsDefault)
 import matplotlib.pyplot as plt
 
 
@@ -21,6 +22,15 @@ def main(parallelEnv):
 
     problem = Utils.createAlbanyProblem(parameter, parallelEnv)
     problem.performSolve()
+
+    problem.reportTimers()
+    stackedTimer = problem.getStackedTimer()
+
+    total_time = stackedTimer.baseTimerAccumulatedTime("PyAlbany Total Time")
+    setup_time = stackedTimer.baseTimerAccumulatedTime("PyAlbany Total Time@PyAlbany: Setup Time")
+    perform_solve = stackedTimer.baseTimerAccumulatedTime("PyAlbany Total Time@PyAlbany: performSolve")
+    linear_solve = stackedTimer.baseTimerAccumulatedTime("PyAlbany Total Time@PyAlbany: performSolve@Piro::NOXSolver::evalModelImpl::solve@Thyra::NOXNonlinearSolver::solve@NOX Total Linear Solve")
+    print(linear_solve)
 
     if myGlobalRank==0:
         x, y, sol, elements, triangulation = fp.readExodus("steady2d.exo", ['solution', 'thermal_conductivity', 'thermal_conductivity_sensitivity'], MPI.COMM_WORLD.Get_size())
@@ -37,6 +47,16 @@ def main(parallelEnv):
         plt.plot([0,0],[0,1],'g', linewidth=5)
         plt.plot([0,1,1],[1,1,0],'r', linewidth=5)
         plt.plot([0,1],[0,0],'b', linewidth=5)
+
+        plt.rcParams['text.usetex'] = True
+
+        plt.text(1.1, 0.5, r'$T=0$', fontsize=14, color='r')
+        plt.text(-0.2, 0.5, r'$T=1$', fontsize=14, color='g')
+        plt.text(0.45, 1.1, r'$T=0$', fontsize=14, color='r')
+        plt.text(0.45, -0.2, r'$T=p$', fontsize=14, color='b')
+
+        
+
         plt.savefig('mesh.jpeg', dpi=800, bbox_inches='tight',pad_inches = 0)
 
 
