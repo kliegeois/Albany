@@ -67,7 +67,9 @@ def main(parallelEnv):
         plt.xlabel('Damping factor')
         plt.grid(True)
         plt.gca().set_xlim([np.amin(dampings), np.amax(dampings)])
+        plt.gca().set_ylim([5e-3, 2e-2])
         plt.legend()
+        fig.tight_layout()
         plt.savefig('damping.jpeg', dpi=800)
 
 if __name__ == "__main__":
