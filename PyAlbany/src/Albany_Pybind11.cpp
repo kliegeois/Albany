@@ -19,7 +19,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(Albany_Pybind11, m) {
+PYBIND11_MODULE(AlbanyInterface, m) {
     m.doc() = "PyAlbany module";
 
     pyalbany_comm(m);

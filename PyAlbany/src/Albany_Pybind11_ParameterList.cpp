@@ -228,7 +228,7 @@ RCP_PyParameterList createRCPPyParameterList() {
 }
 
 void pyalbany_parameterlist(py::module &m) {
-    py::class_<RCP_PyParameterList>(m, "RCPPyParameterList")
+    py::class_<RCP_PyParameterList>(m, "PyParameterList")
         .def(py::init(&createRCPPyParameterList))
         .def("sublist", [](RCP_PyParameterList &m, const std::string &name) {
             if (m->isSublist(name))

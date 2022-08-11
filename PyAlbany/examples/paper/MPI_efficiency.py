@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import numpy as np
 from PyAlbany import Utils
-from PyAlbany import Albany_Pybind11 as wpa
+from PyAlbany import AlbanyInterface as pa
 import os
 import sys
 import argparse
@@ -37,7 +37,7 @@ def main(parallelEnv):
         newComm = comm.Create_group(newGroup)
 
         if myGlobalRank < nProcs:
-            parallelEnv.setComm(wpa.getTeuchosComm(newComm))
+            parallelEnv.setComm(pa.getTeuchosComm(newComm))
 
             timers = Utils.createTimers(timerNames)
             timers[2].start()

@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import numpy as np
 from PyAlbany import Utils
-from PyAlbany import Albany_Pybind11 as wpa
+from PyAlbany import AlbanyInterface as pa
 import os
 import sys
 
@@ -60,5 +60,5 @@ if __name__ == "__main__":
 
     nComm = comm.Split(group_ID)
 
-    parallelEnv = Utils.createDefaultParallelEnv(wpa.getTeuchosComm(nComm))
+    parallelEnv = Utils.createDefaultParallelEnv(pa.getTeuchosComm(nComm))
     main(parallelEnv, group_ID, n_groups)

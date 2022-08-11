@@ -212,7 +212,7 @@ pybind11::tuple getRemoteIndexList(RCP_ConstPyMap map, pybind11::array_t<Tpetra_
 }
 
 void pyalbany_map(pybind11::module &m) {
-    py::class_<RCP_PyMap>(m, "RCPPyMap")
+    py::class_<RCP_PyMap>(m, "PyMap")
         .def(py::init(&createRCPPyMapEmpty))
         .def(py::init(&createRCPPyMap))
         .def(py::init(&createRCPPyMapFromView))
@@ -283,7 +283,7 @@ void pyalbany_map(pybind11::module &m) {
             return getRemoteIndexList(m, globalIndexes);
         });
 
-    py::class_<RCP_ConstPyMap>(m, "RCPConstPyMap")
+    py::class_<RCP_ConstPyMap>(m, "ConstPyMap")
         .def(py::init(&createRCPPyMapEmpty))
         .def(py::init(&createRCPPyMap))
         .def(py::init(&createRCPPyMapFromView))
@@ -356,7 +356,7 @@ void pyalbany_map(pybind11::module &m) {
 }
 
 void pyalbany_vector(pybind11::module &m){
-    py::class_<RCP_PyVector>(m, "RCPPyVector")
+    py::class_<RCP_PyVector>(m, "PyVector")
         .def(py::init(&createRCPPyVector1))
         .def(py::init(&createRCPPyVector2))
         .def(py::init(&createRCPPyVectorEmpty))
@@ -378,7 +378,7 @@ void pyalbany_vector(pybind11::module &m){
 }
 
 void pyalbany_mvector(pybind11::module &m){
-    py::class_<RCP_PyMultiVector>(m, "RCPPyMultiVector")
+    py::class_<RCP_PyMultiVector>(m, "PyMultiVector")
         .def(py::init(&createRCPPyMultiVector1))
         .def(py::init(&createRCPPyMultiVector2))
         .def(py::init(&createRCPPyMultiVectorEmpty))
