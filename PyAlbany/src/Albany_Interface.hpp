@@ -78,11 +78,12 @@ namespace PyAlbany
    */
     class PyParallelEnv
     {
-    public:
+    private:
         RCP_Teuchos_Comm_PyAlbany comm;
         const int num_threads, num_numa, device_id;
         int rank;
 
+    public:
         PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads = -1, int _num_numa = -1, int _device_id = -1);
         ~PyParallelEnv()
         {
@@ -90,6 +91,11 @@ namespace PyAlbany
             if (rank == 0)
                 std::cout << "~PyParallelEnv()\n";
         }
+        int getNumThreads() const { return num_threads; }
+        int getNumNuma() const { return num_numa; }
+        int getDeviceID() const { return device_id; }
+        RCP_Teuchos_Comm_PyAlbany getComm() const { return comm; }
+        void setComm(RCP_Teuchos_Comm_PyAlbany _comm) {comm = _comm;}
     };
 
     /**
@@ -132,7 +138,6 @@ namespace PyAlbany
     class PyProblem
     {
     private:
-#ifndef SWIG
         bool forwardHasBeenSolved;
         bool inverseHasBeenSolved;
         Teuchos::RCP<PyParallelEnv> pyParallelEnv;
@@ -150,7 +155,6 @@ namespace PyAlbany
         Teuchos::Array<Teuchos::RCP<Thyra_MultiVector>> thyraDirections;
 
         Teuchos::Array<Teuchos::RCP<Thyra_Vector>> thyraParameter;
-#endif
     public:
         PyProblem(std::string filename, Teuchos::RCP<PyParallelEnv> _pyParallelEnv);
 

@@ -87,7 +87,7 @@ PyProblem::PyProblem(std::string filename, Teuchos::RCP<PyParallelEnv> _pyParall
 
     stackedTimer->start("PyAlbany: Setup Time");
 
-    comm = this->pyParallelEnv->comm;
+    comm = this->pyParallelEnv->getComm();
 
     slvrfctry = rcp(new Albany::SolverFactory(filename, comm));
 
@@ -138,7 +138,7 @@ PyProblem::PyProblem(Teuchos::RCP<Teuchos::ParameterList> params, Teuchos::RCP<P
 
     stackedTimer->start("PyAlbany: Setup Time");
 
-    comm = this->pyParallelEnv->comm;
+    comm = this->pyParallelEnv->getComm();
 
     slvrfctry = rcp(new Albany::SolverFactory(params, comm));
 
@@ -496,12 +496,12 @@ Teuchos::RCP<Teuchos::ParameterList> PyAlbany::getParameterList(std::string inpu
     if (input_extension == "yaml" || input_extension == "yml")
     {
         Teuchos::updateParametersFromYamlFileAndBroadcast(
-            inputFile, params.ptr(), *(pyParallelEnv->comm));
+            inputFile, params.ptr(), *(pyParallelEnv->getComm()));
     }
     else
     {
         Teuchos::updateParametersFromXmlFileAndBroadcast(
-            inputFile, params.ptr(), *(pyParallelEnv->comm));
+            inputFile, params.ptr(), *(pyParallelEnv->getComm()));
     }
 
     return params;

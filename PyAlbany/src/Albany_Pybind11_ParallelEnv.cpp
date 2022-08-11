@@ -22,18 +22,18 @@ void pyalbany_parallelenv(py::module &m) {
         .def(py::init(&createPyParallelEnv))
         .def(py::init(&createDefaultKokkosPyParallelEnv))
         .def("getNumThreads", [](RCP_PyParallelEnv &m) {
-            return m->num_threads;
+            return m->getNumThreads();
         })
         .def("getNumNuma", [](RCP_PyParallelEnv &m) {
-            return m->num_numa;
+            return m->getNumNuma();
         })
         .def("getDeviceID", [](RCP_PyParallelEnv &m) {
-            return m->device_id;
+            return m->getDeviceID();
         })
         .def("getComm", [](RCP_PyParallelEnv &m) {
-            return m->comm;
+            return m->getComm();
         })
         .def("setComm", [](RCP_PyParallelEnv &m, RCP_Teuchos_Comm_PyAlbany &comm) {
-            m->comm = comm;
+            m->setComm(comm);
         });
 }
