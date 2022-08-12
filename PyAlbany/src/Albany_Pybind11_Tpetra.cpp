@@ -277,7 +277,7 @@ void pyalbany_map(pybind11::module &m) {
             return m->locallySameAs(*m2);
         })
         .def("getComm", [](RCP_PyMap &m) {
-            return m->getComm();
+            return Teuchos::rcp_dynamic_cast<const Teuchos_Comm_PyAlbany>(m->getComm());
         })
         .def("getRemoteIndexList", [](RCP_PyMap &m, py::array_t<Tpetra_GO> globalIndexes) {
             return getRemoteIndexList(m, globalIndexes);
@@ -348,7 +348,7 @@ void pyalbany_map(pybind11::module &m) {
             return m->locallySameAs(*m2);
         })
         .def("getComm", [](RCP_ConstPyMap &m) {
-            return m->getComm();
+            return Teuchos::rcp_dynamic_cast<const Teuchos_Comm_PyAlbany>(m->getComm());
         })
         .def("getRemoteIndexList", [](RCP_ConstPyMap &m, py::array_t<Tpetra_GO> globalIndexes) {
             return getRemoteIndexList(m, globalIndexes);

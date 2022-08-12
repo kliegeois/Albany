@@ -13,7 +13,7 @@
 
 #include "Albany_Pybind11_Include.hpp"
 
-using Teuchos_Comm_PyAlbany = Teuchos::Comm<int>;
+using Teuchos_Comm_PyAlbany = Teuchos::MpiComm<int>;
 using RCP_Teuchos_Comm_PyAlbany = Teuchos::RCP<const Teuchos_Comm_PyAlbany >;
 
 void pyalbany_comm(pybind11::module &m);

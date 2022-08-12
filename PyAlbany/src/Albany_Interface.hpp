@@ -36,7 +36,7 @@
 
 #include <Teuchos_TwoDArray.hpp>
 
-using Teuchos_Comm_PyAlbany = Teuchos::Comm<int>;
+using Teuchos_Comm_PyAlbany = Teuchos::MpiComm<int>;
 using RCP_Teuchos_Comm_PyAlbany = Teuchos::RCP<const Teuchos_Comm_PyAlbany >;
 
 namespace PyAlbany
