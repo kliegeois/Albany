@@ -11,8 +11,7 @@
 #include "Teuchos_CommHelpers.hpp"
 #include "Teuchos_DefaultComm.hpp"
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include "Albany_Pybind11_Include.hpp"
 
 using Teuchos_Comm_PyAlbany = Teuchos::Comm<int>;
 using RCP_Teuchos_Comm_PyAlbany = Teuchos::RCP<const Teuchos_Comm_PyAlbany >;

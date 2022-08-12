@@ -10,9 +10,7 @@
 #include "Albany_TpetraTypes.hpp"
 #include "Albany_Pybind11_Comm.hpp"
 
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
-#include <pybind11/stl.h>
+#include "Albany_Pybind11_Include.hpp"
 
 using RCP_PyMap = Teuchos::RCP<Tpetra_Map>;
 using RCP_ConstPyMap = Teuchos::RCP<const Tpetra_Map>;

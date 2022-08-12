@@ -9,8 +9,7 @@
 
 #include "Teuchos_StackedTimer.hpp"
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include "Albany_Pybind11_Include.hpp"
 
 using RCP_StackedTimer = Teuchos::RCP<Teuchos::StackedTimer>;
 using RCP_Time = Teuchos::RCP<Teuchos::Time>;

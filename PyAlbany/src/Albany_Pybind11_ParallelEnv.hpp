@@ -10,6 +10,8 @@
 #include "Albany_Pybind11_Comm.hpp"
 #include "Albany_Interface.hpp"
 
+#include "Albany_Pybind11_Include.hpp"
+
 using RCP_PyParallelEnv = Teuchos::RCP<PyAlbany::PyParallelEnv>;
 
 /**
