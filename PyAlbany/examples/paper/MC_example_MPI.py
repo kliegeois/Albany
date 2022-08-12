@@ -10,55 +10,51 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-def main(parallelEnv, group_ID, n_groups):
-    comm = MPI.COMM_WORLD
-    myGlobalRank = comm.rank
+group_size = 2
 
-    # Create an Albany problem:
-    filename = "input.yaml"
-    parameter = Utils.createParameterList(
-        filename, parallelEnv
-    )
+comm = MPI.COMM_WORLD
+size = comm.Get_size()
+rank = comm.Get_rank()
+group_ID = np.floor(rank*1./group_size)
+n_groups = np.ceil(size*1./group_size)
 
-    parameter.sublist("Discretization").set("Exodus Output File Name", "steady2d_color_"+str(group_ID)+".exo")
+nComm = comm.Split(group_ID)
 
-    problem = Utils.createAlbanyProblem(parameter, parallelEnv)
+parallelEnv = Utils.createDefaultParallelEnv(pa.getTeuchosComm(nComm))
 
-    parameter_map_0 = problem.getParameterMap(0)
-    parameter_0 = Utils.createVector(parameter_map_0)
+comm = MPI.COMM_WORLD
+myGlobalRank = comm.rank
 
-    parameter_0_view = parameter_0.getLocalViewHost()
+# Create an Albany problem:
+filename = "input.yaml"
+parameter = Utils.createParameterList(
+    filename, parallelEnv
+)
 
-    N = int(np.ceil(200/n_groups))
-    p_min = -2.
-    p_max = 2.
+parameter.sublist("Discretization").set("Exodus Output File Name", "steady2d_color_"+str(group_ID)+".exo")
 
-    # Generate N samples randomly chosen in [p_min, p_max]:
-    p = np.random.uniform(p_min, p_max, N)
-    QoI = np.zeros((N,))
+problem = Utils.createAlbanyProblem(parameter, parallelEnv)
 
-    # Loop over the N samples and evaluate the quantity of interest:
-    for i in range(0, N):
-        parameter_0_view[0] = p[i]
-        parameter_0.setLocalViewHost(parameter_0_view)
-        problem.setParameter(0, parameter_0)
+parameter_map_0 = problem.getParameterMap(0)
+parameter_0 = Utils.createVector(parameter_map_0)
 
-        problem.performSolve()
+parameter_0_view = parameter_0.getLocalViewHost()
 
-        response = problem.getResponse(0)
-        QoI[i] = response.getLocalViewHost()[0]
+N = int(np.ceil(200/n_groups))
+p_min = -2.
+p_max = 2.
 
+# Generate N samples randomly chosen in [p_min, p_max]:
+p = np.random.uniform(p_min, p_max, N)
+QoI = np.zeros((N,))
 
-if __name__ == "__main__":
-    group_size = 2
+# Loop over the N samples and evaluate the quantity of interest:
+for i in range(0, N):
+    parameter_0_view[0] = p[i]
+    parameter_0.setLocalViewHost(parameter_0_view)
+    problem.setParameter(0, parameter_0)
 
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
-    rank = comm.Get_rank()
-    group_ID = np.floor(rank*1./group_size)
-    n_groups = np.ceil(size*1./group_size)
+    problem.performSolve()
 
-    nComm = comm.Split(group_ID)
-
-    parallelEnv = Utils.createDefaultParallelEnv(pa.getTeuchosComm(nComm))
-    main(parallelEnv, group_ID, n_groups)
+    response = problem.getResponse(0)
+    QoI[i] = response.getLocalViewHost()[0]

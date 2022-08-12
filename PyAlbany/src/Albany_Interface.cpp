@@ -68,7 +68,8 @@ PyParallelEnv::PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads, 
     args.num_numa = this->num_numa;
     args.device_id = this->device_id;
 
-    Kokkos::initialize(args);
+    if(!Kokkos::is_initialized())
+        Kokkos::initialize(args);
 
     rank = comm->getRank();
 }
@@ -566,6 +567,12 @@ void PyAlbany::orthogTpMVecs(Teuchos::RCP<Tpetra_MultiVector> inputVecs, int blk
     C.append(Teuchos::rcp(new MAT(remainder, remainder)));
     orthoMgr->projectAndNormalize(*vecBlock, C, B, pastVecArrayView);
   }
+}
+
+void PyAlbany::finalizeKokkos()
+{
+    if(Kokkos::is_initialized())
+        Kokkos::finalize_all();
 }
 
 Teuchos::RCP<const Tpetra_Map> PyAlbany::getRankZeroMap(Teuchos::RCP<const Tpetra_Map> distributedMap)

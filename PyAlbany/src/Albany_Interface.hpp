@@ -87,7 +87,6 @@ namespace PyAlbany
         PyParallelEnv(RCP_Teuchos_Comm_PyAlbany _comm, int _num_threads = -1, int _num_numa = -1, int _device_id = -1);
         ~PyParallelEnv()
         {
-            Kokkos::finalize_all();
             if (rank == 0)
                 std::cout << "~PyParallelEnv()\n";
         }
@@ -119,6 +118,13 @@ namespace PyAlbany
    * The function returns an RCP to the parameter list.
    */
     void writeParameterList(std::string filename, Teuchos::RCP<Teuchos::ParameterList> parameterList);
+
+    /**
+   * \brief finalizeKokkos function
+   * 
+   * The function finalizes Kokkos if it has been previously initialized.
+   */
+    void finalizeKokkos();
 
     /**
    * \brief getRankZeroMap function

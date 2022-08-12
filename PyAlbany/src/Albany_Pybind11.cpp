@@ -57,4 +57,5 @@ PYBIND11_MODULE(AlbanyInterface, m) {
     m.def("scatterMVector", &PyAlbany::scatterMVector, "A function which scatters a multivector");
     m.def("gatherMVector", &PyAlbany::gatherMVector, "A function which gathers a multivector");
     m.def("orthogTpMVecs", &PyAlbany::orthogTpMVecs, "A function which orthogonalizes multivectors");
+    m.def("finalizeKokkos", &PyAlbany::finalizeKokkos, "A function which finalizes Kokkos if it has been previously initialized");
 }
