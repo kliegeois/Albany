@@ -16,14 +16,6 @@
 using PyParameterList = Teuchos::ParameterList;
 using RCP_PyParameterList = Teuchos::RCP<PyParameterList>;
 
-/**
- * \brief createRCPPyParameterList function
- * 
- * This function is used to create an RCP to a new
- * empty Teuchos::ParameterList.
- */
-RCP_PyParameterList createRCPPyParameterList();
-
 void pyalbany_parameterlist(pybind11::module &m);
 
 #endif

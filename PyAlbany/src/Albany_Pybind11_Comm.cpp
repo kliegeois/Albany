@@ -61,20 +61,7 @@ getTeuchosComm (mpi4py_comm comm) {
       (Teuchos::opaqueWrapper(comm.value)));
 }
 
-PyObject * reduceAll(RCP_Teuchos_Comm_PyAlbany comm, Teuchos::EReductionType reductOp, PyObject * sendObj)
-{
-    return NULL;
-}
-
 void pyalbany_comm(py::module &m) {
-    py::enum_<Teuchos::EReductionType>(m, "EReductionType")
-        .value("REDUCE_SUM", Teuchos::REDUCE_SUM)
-        .value("REDUCE_MIN", Teuchos::REDUCE_MIN)
-        .value("REDUCE_MAX", Teuchos::REDUCE_MAX)
-        .value("REDUCE_AND", Teuchos::REDUCE_AND)
-        .value("REDUCE_BOR", Teuchos::REDUCE_BOR)
-        .export_values();
-
     py::class_<Teuchos_Comm_PyAlbany, Teuchos::RCP<Teuchos_Comm_PyAlbany>>(m, "PyComm")
         .def("getRank", &Teuchos_Comm_PyAlbany::getRank)
         .def("getSize", &Teuchos_Comm_PyAlbany::getSize)
