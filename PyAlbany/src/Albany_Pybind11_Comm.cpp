@@ -75,20 +75,10 @@ void pyalbany_comm(py::module &m) {
         .value("REDUCE_BOR", Teuchos::REDUCE_BOR)
         .export_values();
 
-    py::class_<RCP_Teuchos_Comm_PyAlbany>(m, "PyComm")
-        .def(py::init<>())
-        .def("getRank", [](RCP_Teuchos_Comm_PyAlbany &m) {
-            return m->getRank();
-        })
-        .def("getSize", [](RCP_Teuchos_Comm_PyAlbany &m) {
-            return m->getSize();
-        })
-        .def("barrier", [](RCP_Teuchos_Comm_PyAlbany &m) {
-            return m->barrier();
-        })
-        .def("reduceAll", [](RCP_Teuchos_Comm_PyAlbany &m, Teuchos::EReductionType reductOp, PyObject * sendObj) {
-            return reduceAll(m, reductOp, sendObj);
-        });
+    py::class_<Teuchos_Comm_PyAlbany, Teuchos::RCP<Teuchos_Comm_PyAlbany>>(m, "PyComm")
+        .def("getRank", &Teuchos_Comm_PyAlbany::getRank)
+        .def("getSize", &Teuchos_Comm_PyAlbany::getSize)
+        .def("barrier", &Teuchos_Comm_PyAlbany::barrier);
 
     m.def("getTeuchosComm", &getTeuchosComm, "A function which returns a Teuchos communicator corresponding to a Mpi4Py communicator");
 }

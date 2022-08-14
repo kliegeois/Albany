@@ -12,7 +12,8 @@
 
 #include "Albany_Pybind11_Include.hpp"
 
-using RCP_PyMap = Teuchos::RCP<Tpetra_Map>;
+using PyMap = Tpetra_Map;
+using RCP_PyMap = Teuchos::RCP<PyMap>;
 using RCP_ConstPyMap = Teuchos::RCP<const Tpetra_Map>;
 using RCP_PyVector = Teuchos::RCP<Tpetra_Vector>;
 using RCP_PyMultiVector = Teuchos::RCP<Tpetra_MultiVector>;

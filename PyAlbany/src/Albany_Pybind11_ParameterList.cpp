@@ -228,19 +228,17 @@ RCP_PyParameterList createRCPPyParameterList() {
 }
 
 void pyalbany_parameterlist(py::module &m) {
-    py::class_<RCP_PyParameterList>(m, "PyParameterList")
-        .def(py::init(&createRCPPyParameterList))
-        .def("sublist", [](RCP_PyParameterList &m, const std::string &name) {
+    py::class_<Teuchos::ParameterList, Teuchos::RCP<Teuchos::ParameterList>>(m, "PyParameterList")
+        .def(py::init<>())
+        .def("sublist", [](Teuchos::RCP<Teuchos::ParameterList> &m, const std::string &name) {
             if (m->isSublist(name))
-                return py::cast(sublist(m,name));
+                return py::cast(sublist(m, name));
             return py::cast("Invalid sublist name");
         }, py::return_value_policy::reference)
-        .def("print", [](RCP_PyParameterList &m) {
-            m->print();
+        .def("print", [](Teuchos::ParameterList &m) {
+            m.print();
         })
-        .def("isParameter", [](RCP_PyParameterList &m, const std::string &name) {
-            return m->isParameter(name);
-        })
+        .def("isParameter", &Teuchos::ParameterList::isParameter)
         .def("get", [](RCP_PyParameterList &m, const std::string &name) {
             if (m->isParameter(name)) {
                 return getPythonParameter(*m, name);
