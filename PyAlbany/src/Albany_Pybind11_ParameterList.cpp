@@ -36,229 +36,56 @@
 namespace py = pybind11;
 
 template<typename T>
-Teuchos::Array< T > copyNumPyToTeuchosArray(pybind11::array_t<T> array) {
-
-    auto np_array = array.template mutable_unchecked<1>();
-    int size = array.shape(0);
-    Teuchos::Array< T > av(size);
-    for (int i=0; i < size; ++i)
-      av[i] = np_array(i);
-    return av;
+void pyalbany_teuchosarray(py::module &m) {
+  std::string pyName = std::string("TArray_")+std::string(typeid(T).name());
+  py::class_<Teuchos::Array<T>, Teuchos::RCP<Teuchos::Array<T>>>(m, pyName.c_str(), py::buffer_protocol())
+    .def_buffer([](Teuchos::Array<T> &a) -> py::buffer_info {
+          return py::buffer_info(
+              a.data(),
+              sizeof(T),
+              py::format_descriptor<T>::format(),
+              1,
+              { a.size() },
+              { sizeof(T) }
+          );
+      });
 }
 
-template<typename T>
-pybind11::array_t<T> copyTeuchosArrayToNumPy(Teuchos::Array< T > & tArray) {
-
-    pybind11::array_t<T> array(tArray.size());
-    auto data = array.template mutable_unchecked<1>();
-    for (int i=0; i < tArray.size(); ++i)
-      data(i) = tArray[i];
-    return array;
+template <typename T, class... T2>
+void define_templated_member_function(py::class_<T2...> &cl)
+{
+  cl.def("get", [](RCP_PyParameterList &m, const std::string &name) {
+      return m->get<T>(name);
+  });
+  cl.def("set", [](RCP_PyParameterList &m, const std::string &name, T value) {
+      return m->set<T>(name, value);
+  });  
 }
-
-bool setPythonParameter(Teuchos::ParameterList & plist,
-			const std::string      & name,
-			py::object             value)
-{
-  py::handle h = value;
-
-  // Boolean values
-  if (PyBool_Check(value.ptr ()))
-  {
-    if (value == Py_True) plist.set(name,true );
-    else                  plist.set(name,false);
-  }
-
-  // Integer values
-  else if (PyInt_Check(value.ptr ()))
-  {
-    plist.set(name, h.cast<int>());
-  }
-
-  // Floating point values
-  else if (PyFloat_Check(value.ptr ()))
-  {
-    plist.set(name, h.cast<double>());
-  }
-
-  // Unicode values
-  else if (PyUnicode_Check(value.ptr ()))
-  {
-    PyObject * pyBytes = PyUnicode_AsASCIIString(value.ptr ());
-    if (!pyBytes) return false;
-    plist.set(name, std::string(PyBytes_AsString(pyBytes)));
-    Py_DECREF(pyBytes);
-  }
-
-  // String values
-  else if (PyString_Check(value.ptr ()))
-  {
-    plist.set(name, h.cast<std::string>());
-  }
-
-/*
-  // Sublist values
-  else if (PyObject_TypeCheck(value.ptr(), PyParameterList))
-  {
-    plist.set(name, *(h.cast<RCP_PyParameterList>()));
-  }
-*/
-
-  // None object not allowed: this is a python type not usable by
-  // Trilinos solver packages, so we reserve it for the
-  // getPythonParameter() function to indicate that the requested
-  // parameter does not exist in the given Teuchos::ParameterList.
-  // For logic reasons, this check must come before the check for
-  // Teuchos::ParameterList
-  else if (value.ptr () == Py_None)
-  {
-    return false;
-  }
-
-  // All other value types are unsupported
-  else
-  {
-    return false;
-  }
-
-  // Successful type conversion
-  return true;
-}    // setPythonParameter
-
-
-template <typename T>
-bool setPythonParameterArray(Teuchos::ParameterList & plist,
-			const std::string      & name,
-			pybind11::array_t< T >   value)
-{
-  auto tArray = copyNumPyToTeuchosArray(value);
-  plist.set(name, tArray);
-  return true;
-}
-
-// **************************************************************** //
-
-py::object getPythonParameter(const Teuchos::ParameterList & plist,
-			      const std::string            & name)
-{
-  // Get the parameter entry.  I now deal with the Teuchos::ParameterEntry
-  // objects so that I can query the Teuchos::ParameterList without setting
-  // the "used" flag to true.
-  const Teuchos::ParameterEntry * entry = plist.getEntryPtr(name);
-  // Boolean parameter values
-  if (entry->isType< bool >())
-  {
-    bool value = Teuchos::any_cast< bool >(entry->getAny(false));
-    return py::cast(value);
-  }
-  // Integer parameter values
-  else if (entry->isType< int >())
-  {
-    int value = Teuchos::any_cast< int >(entry->getAny(false));
-    return py::cast(value);
-  }
-  // Double parameter values
-  else if (entry->isType< double >())
-  {
-    double value = Teuchos::any_cast< double >(entry->getAny(false));
-    return py::cast(value);
-  }
-  // String parameter values
-  else if (entry->isType< std::string >())
-  {
-    std::string value = Teuchos::any_cast< std::string >(entry->getAny(false));
-    return py::cast(value.c_str());
-  }
-  // Char * parameter values
-  else if (entry->isType< char * >())
-  {
-    char * value = Teuchos::any_cast< char * >(entry->getAny(false));
-    return py::cast(value);
-  }
-
-  else if (entry->isArray())
-  {
-    try
-    {
-      Teuchos::Array< int > tArray =
-        Teuchos::any_cast< Teuchos::Array< int > >(entry->getAny(false));
-      return copyTeuchosArrayToNumPy(tArray);
-    }
-    catch(Teuchos::bad_any_cast &e)
-    {
-      try
-      {
-        Teuchos::Array< long > tArray =
-          Teuchos::any_cast< Teuchos::Array< long > >(entry->getAny(false));
-        return copyTeuchosArrayToNumPy(tArray);
-      }
-      catch(Teuchos::bad_any_cast &e)
-      {
-        try
-        {
-          Teuchos::Array< float > tArray =
-            Teuchos::any_cast< Teuchos::Array< float > >(entry->getAny(false));
-          return copyTeuchosArrayToNumPy(tArray);
-        }
-        catch(Teuchos::bad_any_cast &e)
-        {
-          try
-          {
-            Teuchos::Array< double > tArray =
-              Teuchos::any_cast< Teuchos::Array< double > >(entry->getAny(false));
-            return copyTeuchosArrayToNumPy(tArray);
-          }
-          catch(Teuchos::bad_any_cast &e)
-          {
-            return py::none();
-          }
-        }
-      }
-    }
-  }
-
-  // All  other types are unsupported
-  return py::none();
-}    // getPythonParameter
-
-// **************************************************************** //
 
 void pyalbany_parameterlist(py::module &m) {
-    py::class_<Teuchos::ParameterList, Teuchos::RCP<Teuchos::ParameterList>>(m, "PyParameterList")
-        .def(py::init<>())
-        .def("sublist", [](Teuchos::RCP<Teuchos::ParameterList> &m, const std::string &name) {
+    pyalbany_teuchosarray<int>(m);
+    pyalbany_teuchosarray<double>(m);
+
+    py::class_<Teuchos::ParameterList, Teuchos::RCP<Teuchos::ParameterList>> cl(m, "PyParameterList");
+        cl.def(py::init<>());
+        cl.def("sublist", [](Teuchos::RCP<Teuchos::ParameterList> &m, const std::string &name) {
             if (m->isSublist(name))
                 return py::cast(sublist(m, name));
             return py::cast("Invalid sublist name");
-        }, py::return_value_policy::reference)
-        .def("print", [](Teuchos::RCP<Teuchos::ParameterList> &m) {
+        }, py::return_value_policy::reference);
+        cl.def("print", [](Teuchos::RCP<Teuchos::ParameterList> &m) {
             m->print();
-        })
-        .def("isParameter", &Teuchos::ParameterList::isParameter)
-        .def("get", [](RCP_PyParameterList &m, const std::string &name) {
-            if (m->isParameter(name)) {
-                return getPythonParameter(*m, name);
-            }
-            return py::cast("Invalid parameter name");
-        })
-        .def("set", [](RCP_PyParameterList &m, const std::string &name, RCP_PyParameterList &sub) {
-            m->set(name, *sub);
-        })
-        .def("set", [](RCP_PyParameterList &m, const std::string &name, py::object value) {
-            if (!setPythonParameter(*m,name,value))
-                PyErr_SetString(PyExc_TypeError, "ParameterList value type not supported");
-        })
-        .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<int> value) {
-            setPythonParameterArray(*m,name,value);
-        })
-        .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<long> value) {
-            setPythonParameterArray(*m,name,value);
-        })
-        .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<float> value) {
-            setPythonParameterArray(*m,name,value);
-        })
-        .def("set", [](RCP_PyParameterList &m, const std::string &name, pybind11::array_t<double> value) {
-            setPythonParameterArray(*m,name,value);
         });
+        cl.def("isParameter", &Teuchos::ParameterList::isParameter);
+
+    define_templated_member_function<bool>(cl);    
+    define_templated_member_function<Teuchos::ParameterList>(cl);
+    define_templated_member_function<std::string>(cl);
+    define_templated_member_function<char*>(cl);
+    define_templated_member_function<int>(cl);
+    define_templated_member_function<double>(cl);
+    define_templated_member_function<Teuchos::Array<int>>(cl);
+    define_templated_member_function<Teuchos::Array<double>>(cl);
+
     m.def("getParameterList", &PyAlbany::getParameterList, "A function which returns an RCP to a parameter list read from file");
 }
