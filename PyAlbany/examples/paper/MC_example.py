@@ -54,14 +54,17 @@ if myGlobalRank == 0:
     ax1.hist(p, n_bins)
     ax1.set_ylabel('Counts')
     ax1.set_xlabel('Random parameter')
+    ax1.grid()
 
     ax2.scatter(p, QoI)
     ax2.set_ylabel('Quantity of interest')
     ax2.set_xlabel('Random parameter')
+    ax2.grid()
 
     ax3.hist(QoI, n_bins)
     ax3.set_ylabel('Counts')
     ax3.set_xlabel('Quantity of interest')
+    ax3.grid()
 
     f.tight_layout()
 

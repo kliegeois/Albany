@@ -37,9 +37,9 @@ ANONYMOUS:
         Response 1:
           Name: Squared L2 Difference Source ST Target PST
           Field Rank: Scalar
-          Scaling: 0.15
+          Scaling: 1.
           Source Field Name: ThermalConductivity
-          Target Value: 0.0
+          Target Value: 1.0
   Discretization: 
     1D Elements: 40
     2D Elements: 40

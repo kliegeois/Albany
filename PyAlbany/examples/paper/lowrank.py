@@ -3,7 +3,6 @@ import numpy as np
 from PyAlbany import Utils
 from PyAlbany.RandomizedCompression import doublePass
 from PyAlbany import FEM_postprocess as fp
-from PyAlbany import Albany_Pybind11 as wpa
 import os
 import sys
 
@@ -43,11 +42,14 @@ def main(parallelEnv):
     k = 100
     eigVals, eigVecs = doublePass(Hess, k, symmetric=True)
     if myGlobalRank == 0:
-        fig = plt.figure(figsize=(10,6))
+        fig = plt.figure(figsize=(6,4))
         plt.plot(eigVals)
         plt.ylabel('Eigenvalues of the Hessian')
         plt.xlabel('Eigenvalue index')
-        plt.grid(True)
+        plt.gca().set_xlim([0, k])
+        plt.gca().set_ylim([6e-4, 1.1e-3])
+        plt.grid(True, which="both")
+        fig.tight_layout()
         plt.savefig('hessian_eigenvalues.jpeg', dpi=800)
         plt.close()
     
