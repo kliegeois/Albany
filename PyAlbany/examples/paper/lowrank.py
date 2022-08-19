@@ -50,11 +50,11 @@ def main(parallelEnv):
     if myGlobalRank == 0:        
         fig = plt.figure(figsize=(10,6))
         plt.plot(eigVals, '.--k')
-        plt.yscale('log')
         plt.ylabel('Eigenvalue magnitudes of the reduced Hessian misfit')
         plt.xlabel('Eigenvalue index')
         plt.grid(True)
-        plt.savefig('hessian_eigenvalues.jpeg', dpi=800)
+        fig.tight_layout()
+        plt.savefig('hessian_eigenvalues.jpg', dpi=800)
         plt.close()
     
 
