@@ -47,14 +47,16 @@ def main(parallelEnv):
     eigVals, eigVecs = doublePass(Hess, k, symmetric=True)
     eigVals = np.abs(eigVals)
     eigVals = eigVals[np.argsort(eigVals)[::-1]]
-    if myGlobalRank == 0:        
-        fig = plt.figure(figsize=(10,6))
-        plt.plot(eigVals, '.--k')
-        plt.ylabel('Eigenvalue magnitudes of the reduced Hessian misfit')
+    if myGlobalRank == 0:
+        fig = plt.figure(figsize=(6,4))
+        plt.plot(eigVals)
+        plt.ylabel('Eigenvalues of the Hessian')
         plt.xlabel('Eigenvalue index')
-        plt.grid(True)
+        plt.gca().set_xlim([0, k])
+        plt.gca().set_ylim([0, 6.e-4])
+        plt.grid(True, which="both")
         fig.tight_layout()
-        plt.savefig('hessian_eigenvalues.jpg', dpi=800)
+        plt.savefig('hessian_eigenvalues.jpeg', dpi=800)
         plt.close()
     
 
