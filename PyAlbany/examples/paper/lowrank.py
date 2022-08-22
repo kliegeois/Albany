@@ -2,15 +2,12 @@ from mpi4py import MPI
 import numpy as np
 from PyAlbany import Utils
 from PyAlbany.RandomizedCompression import doublePass
-from PyAlbany import FEM_postprocess as fp
 import os
 import sys
 
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-
-
 
 class Hessian:
    def __init__(me, problem, parameterIndex, responseIndex):
@@ -33,21 +30,30 @@ def main(parallelEnv):
 
     problem = Utils.createAlbanyProblem(parameter, parallelEnv)
     problem.performAnalysis()
-    problem.performSolve()
-     
+    parameterDataMisfit = Utils.createParameterList(filename, parallelEnv)
+    parameterDataMisfit.sublist("Problem").sublist("Response Functions").sublist("Response 0").sublist("Response 1").set("Scaling", 0.0)
+    
+    parameterDataMisfit.sublist("Discretization").set("Exodus Output File Name", "steady2d_DataMisfit.exo")
+    problemDataMisfit = Utils.createAlbanyProblem(parameterDataMisfit, parallelEnv)
+    for i in range(2):
+        problemDataMisfit.setParameter(i, problem.getParameter(i)) 
+    problemDataMisfit.performSolve()
+    
     parameterIndex = 1
     responseIndex  = 0
-    Hess = Hessian(problem, parameterIndex, responseIndex)
+    Hess = Hessian(problemDataMisfit, parameterIndex, responseIndex)
     
     k = 100
     eigVals, eigVecs = doublePass(Hess, k, symmetric=True)
+    eigVals = np.abs(eigVals)
+    eigVals = eigVals[np.argsort(eigVals)[::-1]]
     if myGlobalRank == 0:
         fig = plt.figure(figsize=(6,4))
         plt.plot(eigVals)
         plt.ylabel('Eigenvalues of the Hessian')
         plt.xlabel('Eigenvalue index')
         plt.gca().set_xlim([0, k])
-        plt.gca().set_ylim([6e-4, 1.1e-3])
+        plt.gca().set_ylim([0, 6.e-4])
         plt.grid(True, which="both")
         fig.tight_layout()
         plt.savefig('hessian_eigenvalues.jpeg', dpi=800)
