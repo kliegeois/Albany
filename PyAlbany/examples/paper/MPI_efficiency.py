@@ -43,7 +43,7 @@ def main(parallelEnv):
             timers[2].start()
             timers[0].start()
 
-            filename = "input.yaml"
+            filename = "input_scalar.yaml"
             parameter = Utils.createParameterList(
                 filename, parallelEnv
             )

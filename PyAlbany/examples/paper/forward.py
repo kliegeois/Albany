@@ -15,7 +15,7 @@ def main(parallelEnv):
     myGlobalRank = MPI.COMM_WORLD.rank
 
     # Create an Albany problem:
-    filename = "input.yaml"
+    filename = "input_scalar.yaml"
     parameter = Utils.createParameterList(
         filename, parallelEnv
     )
