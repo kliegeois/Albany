@@ -322,7 +322,10 @@ int main(int argc, char *argv[])
       //check sensitivities
       for (int j = 0; j < num_p; j++) {
         std::pair<int,int> sensStatus(0,0);
-        Teuchos::RCP<const Thyra_MultiVector> dgdp = thyraSensitivities[i][j];
+        Teuchos::RCP<const Thyra_ProductMultiVector> prodvec_thyraSensitivity
+          = Teuchos::rcp_dynamic_cast<const Thyra_ProductMultiVector>(thyraSensitivities[i][0]);
+
+        Teuchos::RCP<const Thyra_MultiVector> dgdp = prodvec_thyraSensitivity->getMultiVectorBlock(j);
         if (Teuchos::nonnull(dgdp)) {
           if (writeToMatrixMarketDgDp) {
             std::string name = "dgdp_" + std::to_string(i) + "_" + std::to_string(j);
