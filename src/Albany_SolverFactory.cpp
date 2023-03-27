@@ -186,17 +186,24 @@ createSolver (const Teuchos::RCP<const Teuchos_Comm>& solverComm,
   auto rolParams = analysisParams.sublist("ROL");  
   int num_parameters = rolParams.get<int>("Number Of Parameters", 1);
 
-  std::vector<int> p_indices(num_parameters);
-  int g_index = 0;
+  Teuchos::RCP<Thyra::ModelEvaluator<ST>> model, adjointModel;
 
-  for(int i=0; i<num_parameters; ++i) {
-    std::ostringstream ss; ss << "Parameter Vector Index " << i;
-    p_indices[i] = rolParams.get<int>(ss.str(), i);
+  if ( model_tmp->Np() > 1) {
+    std::vector<int> p_indices(num_parameters);
+    int g_index = 0;
+
+    for(int i=0; i<num_parameters; ++i) {
+      std::ostringstream ss; ss << "Parameter Vector Index " << i;
+      p_indices[i] = rolParams.get<int>(ss.str(), i);
+    }
+
+    model = rcp(new Piro::ProductModelEvaluator<double>(model_tmp,g_index,p_indices));
+    adjointModel = adjointModel_tmp.is_null() ? Teuchos::null : rcp(new Piro::ProductModelEvaluator<double>(adjointModel_tmp,g_index,p_indices));
   }
-
-
-  const auto model = rcp(new Piro::ProductModelEvaluator<double>(model_tmp,g_index,p_indices));
-  const Teuchos::RCP<Piro::ProductModelEvaluator<double> > adjointModel = adjointModel_tmp.is_null() ? Teuchos::null : rcp(new Piro::ProductModelEvaluator<double>(adjointModel_tmp,g_index,p_indices));
+  else {
+    model = model_tmp;
+    adjointModel = adjointModel_tmp;
+  }
 
   const Teuchos::RCP<Teuchos::ParameterList> problemParams = Teuchos::sublist(m_appParams, "Problem");
   const std::string solutionMethod = problemParams->get("Solution Method", "Steady");
