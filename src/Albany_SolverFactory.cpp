@@ -182,9 +182,16 @@ createSolver (const Teuchos::RCP<const Teuchos_Comm>& solverComm,
   const auto piroParams = Teuchos::sublist(m_appParams, "Piro");
   const auto stratList =  Piro::extractStratimikosParams(piroParams);
 
-  auto analysisParams = piroParams->sublist("Analysis");
-  auto rolParams = analysisParams.sublist("ROL");  
-  int num_parameters = rolParams.get<int>("Number Of Parameters", 1);
+
+  int num_parameters = model_tmp->Np();
+  if (piroParams->isSublist("Analysis")) {
+    auto analysisParams = piroParams->sublist("Analysis");
+    if (analysisParams.isSublist("ROL")) {
+      auto rolParams = analysisParams.sublist("ROL");
+      if (rolParams.isParameter("Number Of Parameters"))
+        num_parameters = rolParams.get<int>("Number Of Parameters");
+    }
+  }
 
   Teuchos::RCP<Thyra::ModelEvaluator<ST>> model, adjointModel;
 
@@ -194,7 +201,7 @@ createSolver (const Teuchos::RCP<const Teuchos_Comm>& solverComm,
 
     for(int i=0; i<num_parameters; ++i) {
       std::ostringstream ss; ss << "Parameter Vector Index " << i;
-      p_indices[i] = rolParams.get<int>(ss.str(), i);
+      p_indices[i] = i; //rolParams.get<int>(ss.str(), i);
     }
 
     model = rcp(new Piro::ProductModelEvaluator<double>(model_tmp,g_index,p_indices));
