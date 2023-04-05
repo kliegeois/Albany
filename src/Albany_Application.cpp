@@ -1968,8 +1968,10 @@ Application::computeGlobalTangent(
   if (Teuchos::nonnull(params)) {
     if (Teuchos::nonnull(Vp)) {
       num_cols_p = Vp->domain()->dim();
+      std::cout << "num_cols_p 1 = " << num_cols_p << std::endl;
     } else {
       num_cols_p = params->size();
+      std::cout << "num_cols_p 2 = " << num_cols_p << std::endl;
     }
   }
 
@@ -2037,6 +2039,7 @@ Application::computeGlobalTangent(
 
     workset.num_cols_x   = num_cols_x;
     workset.num_cols_p   = num_cols_p;
+    std::cout << "1 workset.num_cols_p = " << workset.num_cols_p << std::endl;
     workset.param_offset = param_offset;
 
     for (int ws = 0; ws < numWorksets; ws++) {
@@ -2075,6 +2078,7 @@ Application::computeGlobalTangent(
 
     workset.num_cols_x   = num_cols_x;
     workset.num_cols_p   = num_cols_p;
+    std::cout << "2 workset.num_cols_p = " << workset.num_cols_p << std::endl;
     workset.param_offset = param_offset;
 
     workset.f       = f;
@@ -3522,6 +3526,7 @@ Application::setupTangentWorksetInfo(
 
   RCP<ParamVec> params;
   if (parameter_index < p.size()){
+    std::cout << "parameter_index = " << parameter_index << " p.size() = " << p.size() << std::endl;
     params = Teuchos::rcp(new ParamVec(p[parameter_index]));
   }
 
@@ -3540,8 +3545,10 @@ Application::setupTangentWorksetInfo(
   if (params != Teuchos::null) {
     if (Vp != Teuchos::null) {
       num_cols_p = Vp->domain()->dim();
+      std::cout << "num_cols_p 1 = " << num_cols_p << std::endl;
     } else {
       num_cols_p = params->size();
+      std::cout << "num_cols_p 2 = " << num_cols_p << std::endl;
     }
   }
 
@@ -3564,6 +3571,7 @@ Application::setupTangentWorksetInfo(
     int        num_cols_tot = param_offset + num_cols_p;
     for (unsigned int i = 0; i < params->size(); i++) {
       p_val = TanFadType(num_cols_tot, (*params)[i].baseValue);
+      std::cout << "i = " << i << " p_val = " << p_val << std::endl;
       if (Vp != Teuchos::null) {
         auto Vp_constView = getLocalData(Vp);
         for (int k = 0; k < num_cols_p; k++) {
@@ -3582,6 +3590,7 @@ Application::setupTangentWorksetInfo(
   workset.Vp           = Vp;
   workset.num_cols_x   = num_cols_x;
   workset.num_cols_p   = num_cols_p;
+  std::cout << "3 workset.num_cols_p = " << workset.num_cols_p << std::endl;
   workset.param_offset = param_offset;
 }
 
