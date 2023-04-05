@@ -157,6 +157,7 @@ postEvaluate(typename Traits::PostEvalData workset)
 
     if (gp != Teuchos::null) {
       for (int col=0; col<workset.num_cols_p; col++) {
+        std::cout << " col = " << col << " res = " << res << " workset.num_cols_p = " << workset.num_cols_p << std::endl;
         gp_nonconst2dView[col][res] = val.dx(col+workset.param_offset);
       }
     }

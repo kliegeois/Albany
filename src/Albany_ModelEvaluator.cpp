@@ -766,7 +766,8 @@ Thyra_OutArgs ModelEvaluator::createOutArgsImpl() const
           Thyra_ModelEvaluator::OUT_ARG_DgDp,
           i,
           l1,
-          Thyra_ModelEvaluator::DERIV_MV_JACOBIAN_FORM);
+          Thyra_ModelEvaluator::DERIV_MV_GRADIENT_FORM);
+          //Thyra_ModelEvaluator::DERIV_MV_JACOBIAN_FORM);
     }
 
     if (app->getResponse(i)->isScalarResponse()) {
@@ -1440,10 +1441,34 @@ evalModelImpl(const Thyra_InArgs&  inArgs,
 
     // dg/dp
     for (int l = 0; l < num_param_vecs; ++l) {
+      std::cout << " num_param_vecs = " << num_param_vecs << " and l = " << l << std::endl;
       const Teuchos::RCP<Thyra_MultiVector> dgdp_out = outArgs.get_DgDp(j, l).getMultiVector();
 
       if (Teuchos::nonnull(dgdp_out)) {
+        Teuchos::RCP<Thyra::ProductMultiVectorBase<ST> > prodvec_dgdp =
+            Teuchos::rcp_dynamic_cast<Thyra::ProductMultiVectorBase<ST>>(dgdp_out);
+        
+        if (Teuchos::nonnull(prodvec_dgdp))
+          std::cout << "dgdp_out is a productvector!" <<std::endl;
+        else
+          std::cout << "dgdp_out is NOT a productvector!" <<std::endl;
+
+        auto range = dgdp_out->range();
+        auto domain = dgdp_out->domain();
+        int numSensTests = 1;
+        int numVecs = 1;
+        if (Teuchos::nonnull(range))
+          numSensTests = range->dim();
+        else
+          std::cout << "range is null!" <<std::endl;
+        if (Teuchos::nonnull(domain))
+          numVecs = domain->dim();
+        else
+          std::cout << "domain is null!" <<std::endl;
+
+        std::cout << "numSensTests = " << numSensTests << " numVecs = " << numVecs << std::endl;
         const Teuchos::RCP<ParamVec> p_vec = Teuchos::rcpFromRef(sacado_param_vec[l]);
+        std::cout << "p_vec->size() = " << p_vec->size() << std::endl;
 
         app->evaluateResponseTangent(
             j, l, alpha, beta, omega, curr_time, false,
