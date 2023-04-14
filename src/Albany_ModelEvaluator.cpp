@@ -766,8 +766,7 @@ Thyra_OutArgs ModelEvaluator::createOutArgsImpl() const
           Thyra_ModelEvaluator::OUT_ARG_DgDp,
           i,
           l1,
-          Thyra_ModelEvaluator::DERIV_MV_GRADIENT_FORM);
-          //Thyra_ModelEvaluator::DERIV_MV_JACOBIAN_FORM);
+          Thyra_ModelEvaluator::DERIV_MV_JACOBIAN_FORM);
     }
 
     if (app->getResponse(i)->isScalarResponse()) {
